@@ -120,8 +120,9 @@ const App: React.FC = () => {
     showLoader();
     setTimeout(() => {
       console.log('Booking confirmed:', selection);
-      alert('Itike yawe yemejwe! Reba amakuru yayo mu "Amatike Yanjye".');
-      navigate('bookings');
+      // alert('Itike yawe yemejwe! Reba amakuru yayo mu "Amatike Yanjye".');
+      // navigate('bookings');
+      // Logic is now handled in SeatSelectionPage to show a confirmation screen
       hideLoader();
     }, 2000);
   }
@@ -151,7 +152,7 @@ const App: React.FC = () => {
       case 'searchResults':
         return <SearchResultsPage onTripSelect={handleTripSelect} />;
       case 'seatSelection':
-        return <SeatSelectionPage tripData={bookingData.trip} onConfirm={handleBookingConfirm} />;
+        return <SeatSelectionPage tripData={bookingData.trip} onConfirm={handleBookingConfirm} navigate={navigate} />;
       case 'companyProfile':
         return <CompanyProfilePage company={selectedCompany} onSelectTrip={handleSearch} />;
       case 'profile':

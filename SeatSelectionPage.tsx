@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-// FIX: Import ArrowRightIcon
-import { ArrowRightIcon } from './components/icons';
+import { ArrowRightIcon, CheckCircleIcon, MapIcon, QrCodeIcon, BusIcon, XIcon } from './components/icons';
+import LiveTrackingModal from './components/LiveTrackingModal';
+import { Page } from './App';
 
 type SeatStatus = 'available' | 'occupied' | 'selected';
 
@@ -63,10 +64,68 @@ const BusLayout: React.FC<{ seats: any[], selectedSeats: string[], onSeatSelect:
     </div>
 );
 
+const TicketModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClose }) => {
+    return (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full relative">
+                <button onClick={onClose} className="absolute top-4 right-4 p-1 rounded-full text-gray-500 bg-white/50 hover:bg-white dark:bg-gray-900/50 dark:hover:bg-gray-900 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-20">
+                    <XIcon className="w-6 h-6" />
+                </button>
+                <div className="p-6 text-center">
+                    <h3 className="text-xl font-bold dark:text-white mb-2">{trip.company}</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Kigali &rarr; Rubavu</p>
+                    <div className="my-6">
+                        <QrCodeIcon className="w-40 h-40 mx-auto text-gray-800 dark:text-gray-200" />
+                    </div>
+                    <p className="font-bold">Imyanya: {trip.seats}</p>
+                    <p className="text-sm">ID y'Itike: {trip.ticketId}</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+const BookingConfirmationView: React.FC<{
+    trip: any;
+    selection: { selectedSeats: string[], totalPrice: string };
+    onTrack: () => void;
+    onViewTicket: () => void;
+    onGoToBookings: () => void;
+}> = ({ trip, selection, onTrack, onViewTicket, onGoToBookings }) => {
+    return (
+        <div className="text-center max-w-2xl mx-auto py-12 animate-fade-in">
+            <CheckCircleIcon className="w-24 h-24 text-green-500 mx-auto mb-4" />
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Byemejwe!</h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Urugendo rwawe rwo kujya i Rubavu rwakozwe neza. Urakoze kutugirira ikizere.</p>
+            
+            <div className="bg-gray-50 dark:bg-gray-800/50 border dark:border-gray-700/50 rounded-lg p-6 my-8 text-left space-y-3">
+                <p><strong className="text-gray-500 dark:text-gray-400">Ikigo:</strong> {trip.company}</p>
+                <p><strong className="text-gray-500 dark:text-gray-400">Urugendo:</strong> Kigali <ArrowRightIcon className="w-4 h-4 inline-block mx-1" /> Rubavu</p>
+                <p><strong className="text-gray-500 dark:text-gray-400">Imyanya:</strong> <span className="font-semibold">{selection.selectedSeats.join(', ')}</span></p>
+                <p className="text-lg font-bold"><strong className="text-gray-500 dark:text-gray-400">Igiciro Cyose:</strong> <span className="text-green-600 dark:text-green-400">{selection.totalPrice}</span></p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button onClick={onViewTicket} className="w-full flex items-center justify-center p-4 rounded-lg bg-blue-600 text-white font-bold text-lg hover:bg-blue-700 transition-all duration-300 shadow-lg">
+                    <QrCodeIcon className="w-6 h-6 mr-2" /> Reba Itike
+                </button>
+                <button onClick={onTrack} className="w-full flex items-center justify-center p-4 rounded-lg bg-green-600 text-white font-bold text-lg hover:bg-green-700 transition-all duration-300 shadow-lg">
+                    <MapIcon className="w-6 h-6 mr-2" /> Kurikirana Bisi
+                </button>
+                <button onClick={onGoToBookings} className="sm:col-span-2 mt-2 w-full text-center py-3 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                    Jya ku Matike Yanjye
+                </button>
+            </div>
+        </div>
+    );
+};
+
 
 interface SeatSelectionPageProps {
   tripData: any;
   onConfirm: (selection: { tripData: any; selectedSeats: string[]; totalPrice: string }) => void;
+  navigate: (page: Page) => void;
 }
 
 // Generates a more realistic 2-aisle-2 seat layout
@@ -90,8 +149,12 @@ const generateSeats = () => {
 };
 
 
-const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfirm }) => {
+const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfirm, navigate }) => {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  
   const seats = useMemo(() => generateSeats(), []);
   const pricePerSeat = parseFloat(tripData.price.replace(/[^0-9.-]+/g,""));
 
@@ -105,54 +168,80 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
 
   const totalPrice = selectedSeats.length * pricePerSeat;
   const formattedTotalPrice = new Intl.NumberFormat('fr-RW', { style: 'currency', currency: 'RWF' }).format(totalPrice);
+  
+  const handleConfirmClick = () => {
+    onConfirm({ tripData, selectedSeats, totalPrice: formattedTotalPrice });
+    // This timeout simulates the API call duration from App.tsx
+    setTimeout(() => {
+        setIsConfirmed(true);
+        window.scrollTo(0, 0);
+    }, 2000);
+  };
+
+  const finalSelection = { selectedSeats, totalPrice: formattedTotalPrice };
+
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-full py-12">
       <div className="container mx-auto px-6">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Hitamo Imyanya Yawe</h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-8">Kanda ku mwanya ushaka gufata cyangwa kuwukuramo.</p>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <BusLayout seats={seats} selectedSeats={selectedSeats} onSeatSelect={handleSeatSelect} />
-            <div className="flex items-center justify-center flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-gray-700 dark:text-gray-300">
-                <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-green-400 border border-green-600"></div><span>Ihari</span></div>
-                <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-yellow-400 border border-yellow-600"></div><span>Iyahiswemo</span></div>
-                <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-gray-400 border border-gray-600"></div><span>Yafashwe</span></div>
-            </div>
-          </div>
-          <div className="lg:col-span-1">
-             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-lg p-6 sticky top-24">
-                <h2 className="text-2xl font-bold border-b dark:border-gray-700 pb-4 mb-4">Incāmunigo y'Itike</h2>
-                <div className="space-y-3 mb-4 text-sm">
-                    <p><strong>Urugendo:</strong> Kigali <ArrowRightIcon className="w-4 h-4 inline-block mx-1" /> Rubavu</p>
-                    <p><strong>Ikigo:</strong> <span className="font-semibold text-blue-600 dark:text-blue-400">{tripData.company}</span></p>
-                    <p><strong>Itariki:</strong> 28 Ukwakira, 2024</p>
-                    <p><strong>Igihe:</strong> {tripData.departureTime} - {tripData.arrivalTime}</p>
+         {isConfirmed ? (
+            <BookingConfirmationView 
+                trip={tripData}
+                selection={finalSelection}
+                onTrack={() => setShowTrackingModal(true)}
+                onViewTicket={() => setShowTicketModal(true)}
+                onGoToBookings={() => navigate('bookings')}
+            />
+        ) : (
+            <>
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Hitamo Imyanya Yawe</h1>
+                <p className="text-gray-500 dark:text-gray-400 mb-8">Kanda ku mwanya ushaka gufata cyangwa kuwukuramo.</p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                    <BusLayout seats={seats} selectedSeats={selectedSeats} onSeatSelect={handleSeatSelect} />
+                    <div className="flex items-center justify-center flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-gray-700 dark:text-gray-300">
+                        <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-green-400 border border-green-600"></div><span>Ihari</span></div>
+                        <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-yellow-400 border border-yellow-600"></div><span>Iyahiswemo</span></div>
+                        <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-gray-400 border border-gray-600"></div><span>Yafashwe</span></div>
+                    </div>
                 </div>
-                <div className="border-t dark:border-gray-700 pt-4">
-                    <h3 className="font-semibold mb-2">Imyanya Wahisemo ({selectedSeats.length})</h3>
-                    <div className="h-24 overflow-y-auto mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border dark:border-gray-600">
-                        {selectedSeats.length > 0 ? (
-                            <div className="flex flex-wrap gap-2">
-                                {selectedSeats.map(seat => <span key={seat} className="bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full">{seat}</span>)}
+                <div className="lg:col-span-1">
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-lg p-6 sticky top-24">
+                        <h2 className="text-2xl font-bold border-b dark:border-gray-700 pb-4 mb-4">Incāmunigo y'Itike</h2>
+                        <div className="space-y-3 mb-4 text-sm">
+                            <p><strong>Urugendo:</strong> Kigali <ArrowRightIcon className="w-4 h-4 inline-block mx-1" /> Rubavu</p>
+                            <p><strong>Ikigo:</strong> <span className="font-semibold text-blue-600 dark:text-blue-400">{tripData.company}</span></p>
+                            <p><strong>Itariki:</strong> 28 Ukwakira, 2024</p>
+                            <p><strong>Igihe:</strong> {tripData.departureTime} - {tripData.arrivalTime}</p>
+                        </div>
+                        <div className="border-t dark:border-gray-700 pt-4">
+                            <h3 className="font-semibold mb-2">Imyanya Wahisemo ({selectedSeats.length})</h3>
+                            <div className="h-24 overflow-y-auto mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border dark:border-gray-600">
+                                {selectedSeats.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedSeats.map(seat => <span key={seat} className="bg-yellow-200 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full">{seat}</span>)}
+                                    </div>
+                                ) : <p className="text-gray-500 dark:text-gray-400 text-sm">Nta mwanya wahisemo</p>}
                             </div>
-                        ) : <p className="text-gray-500 dark:text-gray-400 text-sm">Nta mwanya wahisemo</p>}
-                    </div>
-                    <div className="flex justify-between items-center text-gray-800 dark:text-white mt-6">
-                        <span className="text-xl font-medium">Yose Hamwe:</span>
-                        <span className="text-3xl font-bold text-green-600 dark:text-green-400">{formattedTotalPrice}</span>
+                            <div className="flex justify-between items-center text-gray-800 dark:text-white mt-6">
+                                <span className="text-xl font-medium">Yose Hamwe:</span>
+                                <span className="text-3xl font-bold text-green-600 dark:text-green-400">{formattedTotalPrice}</span>
+                            </div>
+                        </div>
+                        <button 
+                        onClick={handleConfirmClick}
+                        disabled={selectedSeats.length === 0}
+                        className="mt-6 w-full flex items-center justify-center p-4 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold text-lg hover:from-yellow-500 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                        Emeza Itike
+                        </button>
                     </div>
                 </div>
-                <button 
-                  onClick={() => onConfirm({ tripData, selectedSeats, totalPrice: formattedTotalPrice })}
-                  disabled={selectedSeats.length === 0}
-                  className="mt-6 w-full flex items-center justify-center p-4 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold text-lg hover:from-yellow-500 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                  Emeza Itike
-                </button>
-             </div>
-          </div>
-        </div>
+                </div>
+            </>
+        )}
       </div>
+      {showTrackingModal && <LiveTrackingModal trip={{...tripData, route: 'Kigali - Rubavu'}} onClose={() => setShowTrackingModal(false)} />}
+      {showTicketModal && <TicketModal trip={{...tripData, seats: selectedSeats.join(', '), ticketId: 'VK-NEWTKT'}} onClose={() => setShowTicketModal(false)} />}
     </div>
   );
 };

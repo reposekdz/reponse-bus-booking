@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-// FIX: Add missing icon imports
 import { UserCircleIcon, CogIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon, ChartBarIcon, SearchIcon, BusIcon, BuildingOfficeIcon, MapPinIcon, BriefcaseIcon } from './components/icons';
 import StarRating from './components/StarRating';
 
@@ -94,31 +93,28 @@ const ProfilePage: React.FC = () => {
     
     // Analytics calculations
     const analytics = useMemo(() => {
-        // FIX: The generic type on `reduce` is invalid in TSX. Explicitly typing
-        // the accumulator's initial value ensures correct type inference.
-        const companyCounts = travelHistory.reduce((acc, trip) => {
+        // FIX: Use generic type argument on `reduce` for proper type inference.
+        const companyCounts = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             acc[trip.company] = (acc[trip.company] || 0) + 1;
             return acc;
-        }, {} as Record<string, number>);
+        }, {});
 
         const favoriteCompany = Object.keys(companyCounts).length > 0 ? Object.keys(companyCounts).reduce((a, b) => companyCounts[a] > companyCounts[b] ? a : b) : 'N/A';
 
-        // FIX: The generic type on `reduce` is invalid in TSX. Explicitly typing
-        // the accumulator's initial value ensures correct type inference.
-        const destinationCounts = travelHistory.reduce((acc, trip) => {
+        // FIX: Use generic type argument on `reduce` for proper type inference.
+        const destinationCounts = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             acc[trip.to] = (acc[trip.to] || 0) + 1;
             return acc;
-        }, {} as Record<string, number>);
+        }, {});
         
         const mostVisitedCity = Object.keys(destinationCounts).length > 0 ? Object.keys(destinationCounts).reduce((a, b) => destinationCounts[a] > destinationCounts[b] ? a : b) : 'N/A';
 
-        // FIX: The generic type on `reduce` is invalid in TSX. Explicitly typing
-        // the accumulator's initial value ensures correct type inference and fixes downstream errors.
-        const monthlySpending = travelHistory.reduce((acc, trip) => {
+        // FIX: Use generic type argument on `reduce` for proper type inference, which fixes downstream errors.
+        const monthlySpending = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             const month = new Date(trip.date).toLocaleString('default', { month: 'short', year: '2-digit' });
             acc[month] = (acc[month] || 0) + trip.price;
             return acc;
-        }, {} as Record<string, number>);
+        }, {});
 
         return { favoriteCompany, mostVisitedCity, monthlySpending };
     }, []);
@@ -135,7 +131,8 @@ const ProfilePage: React.FC = () => {
     }, [searchTerm]);
 
     const summaryByCompany = useMemo(() => {
-        const summary = travelHistory.reduce((acc, trip) => {
+        // FIX: Use generic type argument on `reduce` for proper type inference.
+        const summary = travelHistory.reduce<Record<string, { count: number; totalSpent: number; destinations: Set<string>, logoUrl: string | null }>>((acc, trip) => {
             if (!acc[trip.company]) {
                 acc[trip.company] = { count: 0, totalSpent: 0, destinations: new Set(), logoUrl: trip.logoUrl };
             }
@@ -143,7 +140,7 @@ const ProfilePage: React.FC = () => {
             acc[trip.company].totalSpent += trip.price;
             acc[trip.company].destinations.add(trip.to);
             return acc;
-        }, {} as Record<string, { count: number; totalSpent: number; destinations: Set<string>, logoUrl: string | null }>);
+        }, {});
 
         return Object.entries(summary).map(([name, data]) => ({
             name,
@@ -153,14 +150,15 @@ const ProfilePage: React.FC = () => {
     }, []);
 
      const summaryByDestination = useMemo(() => {
-        const summary = travelHistory.reduce((acc, trip) => {
+        // FIX: Use generic type argument on `reduce` for proper type inference.
+        const summary = travelHistory.reduce<Record<string, { count: number; companies: Set<string> }>>((acc, trip) => {
             if (!acc[trip.to]) {
                 acc[trip.to] = { count: 0, companies: new Set() };
             }
             acc[trip.to].count += 1;
             acc[trip.to].companies.add(trip.company);
             return acc;
-        }, {} as Record<string, { count: number; companies: Set<string> }>);
+        }, {});
 
         return Object.entries(summary).map(([name, data]) => ({
             name,
