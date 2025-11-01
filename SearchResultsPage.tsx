@@ -3,9 +3,9 @@ import { ArrowRightIcon, WifiIcon, AcIcon, PowerIcon } from './components/icons'
 import AdBanner from './components/AdBanner';
 
 const searchResults = [
-  { id: 1, company: 'Volcano Express', departureTime: '07:00 AM', arrivalTime: '10:30 AM', duration: '3h 30m', price: '4,500 FRW', availableSeats: 23, amenities: ['WiFi', 'AC'] },
+  { id: 1, company: 'Volcano Express', departureTime: '07:00 AM', arrivalTime: '10:30 AM', duration: '3h 30m', price: '4,500 FRW', availableSeats: 23, amenities: ['WiFi', 'AC'], tag: 'Ikunzwe Cyane' },
   { id: 2, company: 'Horizon Express', departureTime: '08:30 AM', arrivalTime: '12:15 PM', duration: '3h 45m', price: '4,800 FRW', availableSeats: 15, amenities: ['AC', 'Charging'] },
-  { id: 3, company: 'RITCO', departureTime: '09:00 AM', arrivalTime: '12:30 PM', duration: '3h 30m', price: '4,500 FRW', availableSeats: 30, amenities: ['WiFi', 'AC', 'Charging'] },
+  { id: 3, company: 'RITCO', departureTime: '09:00 AM', arrivalTime: '12:30 PM', duration: '3h 30m', price: '4,500 FRW', availableSeats: 30, amenities: ['WiFi', 'AC', 'Charging'], tag: 'Byuzuye' },
   { id: 4, company: 'Volcano Express', departureTime: '11:00 AM', arrivalTime: '02:30 PM', duration: '3h 30m', price: '4,500 FRW', availableSeats: 5, amenities: ['AC'] },
 ];
 
@@ -22,8 +22,13 @@ const AmenityIcon: React.FC<{ amenity: string }> = ({ amenity }) => {
 };
 
 const SearchResultCard: React.FC<{ result: any, onSelect: () => void }> = ({ result, onSelect }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-6 transform hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-6 transform hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 relative">
         <div className="flex-shrink-0 w-full sm:w-auto text-center sm:text-left">
+            {result.tag && (
+                <div className="absolute top-0 left-0 transform -translate-x-3 -translate-y-3 -rotate-12 bg-yellow-400 text-blue-900 text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                    {result.tag}
+                </div>
+            )}
             <p className="font-bold text-gray-700 dark:text-gray-200 text-lg">{result.company}</p>
             <div className="flex items-center justify-center sm:justify-start space-x-3 mt-1">
                 {result.amenities.map((amenity: string) => <AmenityIcon key={amenity} amenity={amenity} />)}

@@ -165,3 +165,9 @@ export const QrCodeIcon: React.FC<{ className?: string }> = ({ className }) => (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h4v4H4V4zm0 12h4v4H4v-4zM16 4h4v4h-4V4zM16 16h4v4h-4v-4zM12 4h4v4h-4V4zM4 12h4v4H4v-4zm8 0h4v4h-4v-4zm-4-4h4v4H8V8zM12 12h.01M8 16h.01M16 8h.01M12 8v.01" />
     </svg>
 );
+
+export const MapIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13v-6m0-4V4m6 16l5.447-2.724A1 1 0 0021 16.382V5.618a1 1 0 00-1.447-.894L15 7m0 13v-6m0-4V4m-6 4v6m6-6v6" />
+    </svg>
+);

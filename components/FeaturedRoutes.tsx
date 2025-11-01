@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowRightIcon } from './icons';
 
 interface RouteCardProps {
   from: string;
@@ -8,28 +9,35 @@ interface RouteCardProps {
 }
 
 const RouteCard: React.FC<RouteCardProps> = ({ from, to, price, imageUrl }) => (
-  <div className="flex-shrink-0 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-all duration-300 group">
-    <div className="relative">
-        <img src={imageUrl} alt={`View of ${to}`} className="w-full h-40 object-cover" />
-        <div className="absolute inset-0 bg-black/20"></div>
-    </div>
-    <div className="p-5 bg-gradient-to-br from-green-50 to-teal-50 dark:from-gray-700 dark:to-gray-800">
-      <h3 className="text-lg font-bold text-gray-800 dark:text-white">{from} - {to}</h3>
-      <div className="flex justify-between items-center mt-4">
-        <p className="text-sm text-gray-500 dark:text-gray-400">Guhera ku</p>
-        <p className="text-xl font-bold text-green-700 dark:text-green-400">{price}</p>
-      </div>
+  <div className="flex-shrink-0 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-all duration-300 group cursor-pointer">
+    <div className="relative h-52">
+        <img src={imageUrl} alt={`Bus for route ${from} to ${to}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 p-4 w-full">
+           <div className="flex justify-between items-end">
+                <div>
+                    <h3 className="text-xl font-bold text-white tracking-wide">{from}</h3>
+                    <ArrowRightIcon className="w-5 h-5 text-yellow-300 my-1" />
+                    <h3 className="text-xl font-bold text-white tracking-wide">{to}</h3>
+                </div>
+                <div className="text-right">
+                    <p className="text-sm text-gray-200">Guhera ku</p>
+                    <p className="text-2xl font-bold text-yellow-300">{price}</p>
+                </div>
+           </div>
+        </div>
     </div>
   </div>
 );
 
+
 const FeaturedRoutes: React.FC = () => {
   const routes: RouteCardProps[] = [
-    { from: 'Kigali', to: 'Rubavu', price: '4,500 FRW', imageUrl: 'https://images.unsplash.com/photo-1605641793224-6512a8d8363b?q=80&w=1974&auto=format&fit=crop' },
-    { from: 'Huye', to: 'Musanze', price: '5,000 FRW', imageUrl: 'https://images.unsplash.com/photo-1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop' },
-    { from: 'Kigali', to: 'Nyungwe', price: '7,000 FRW', imageUrl: 'https://images.unsplash.com/photo-1581739814283-565f4c8d33d3?q=80&w=2070&auto=format&fit=crop' },
-    { from: 'Musanze', to: 'Gisenyi', price: '3,000 FRW', imageUrl: 'https://images.unsplash.com/photo-1618237381044-734c3826868a?q=80&w=2070&auto=format&fit=crop' },
-    { from: 'Kigali', to: 'Akagera', price: '8,000 FRW', imageUrl: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop' },
+    { from: 'Kigali', to: 'Rubavu', price: '4,500 FRW', imageUrl: 'https://images.unsplash.com/photo-1570125909232-eb263c186922?q=80&w=2070&auto=format&fit=crop' },
+    { from: 'Huye', to: 'Musanze', price: '5,000 FRW', imageUrl: 'https://images.pexels.com/photos/385997/pexels-photo-385997.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+    { from: 'Kigali', to: 'Nyungwe', price: '7,000 FRW', imageUrl: 'https://images.pexels.com/photos/18413861/pexels-photo-18413861/free-photo-of-a-bus-is-driving-down-a-road-in-the-mountains.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+    { from: 'Musanze', to: 'Gisenyi', price: '3,000 FRW', imageUrl: 'https://images.pexels.com/photos/2174975/pexels-photo-2174975.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
+    { from: 'Kigali', to: 'Akagera', price: '8,000 FRW', imageUrl: 'https://images.pexels.com/photos/2418491/pexels-photo-2418491.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' },
   ];
 
   return (

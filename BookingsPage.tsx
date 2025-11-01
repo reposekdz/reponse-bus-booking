@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import StarRating from './components/StarRating';
 import AdBanner from './components/AdBanner';
-import { QrCodeIcon } from './components/icons';
+import { QrCodeIcon, MapIcon } from './components/icons';
+import LiveTrackingModal from './components/LiveTrackingModal';
 
 const ReviewModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClose }) => {
   const [rating, setRating] = useState(0);
@@ -50,7 +51,7 @@ const ReviewModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClo
 };
 
 
-const BookingCard: React.FC<{ trip: any; isPast?: boolean; onReview: (trip: any) => void }> = ({ trip, isPast, onReview }) => (
+const BookingCard: React.FC<{ trip: any; isPast?: boolean; onReview: (trip: any) => void; onTrack: (trip: any) => void; }> = ({ trip, isPast, onReview, onTrack }) => (
   <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col sm:flex-row transition-shadow hover:shadow-xl">
     <div className="p-5 flex-grow">
       <div className="flex justify-between items-start">
@@ -74,7 +75,12 @@ const BookingCard: React.FC<{ trip: any; isPast?: boolean; onReview: (trip: any)
             Tanga igitekerezo
           </button>
         ) : (
-           <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">Reba ibisobanuro</button>
+           <div className="flex items-center space-x-2">
+                <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">Reba ibisobanuro</button>
+                <button onClick={() => onTrack(trip)} className="flex items-center px-3 py-2 rounded-md bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold hover:from-green-600 hover:to-green-700 transition-all">
+                    <MapIcon className="w-4 h-4 mr-2" /> Kurikirana
+                </button>
+            </div>
         )}
       </div>
     </div>
@@ -91,6 +97,7 @@ const BookingCard: React.FC<{ trip: any; isPast?: boolean; onReview: (trip: any)
 const BookingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [reviewingTrip, setReviewingTrip] = useState<any | null>(null);
+  const [trackingTrip, setTrackingTrip] = useState<any | null>(null);
 
   const upcomingTrips = [
     { date: '28 Ukwakira, 2024', route: 'Kigali - Rubavu', company: 'Volcano Express', seats: 'A5, A6', price: '9,000 FRW' },
@@ -118,8 +125,8 @@ const BookingsPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-6">
-                  {activeTab === 'upcoming' && (upcomingTrips.length > 0 ? upcomingTrips.map((trip, i) => <BookingCard key={i} trip={trip} onReview={setReviewingTrip} />) : <p>Nta ngendo ziteganyijwe.</p>)}
-                  {activeTab === 'past' && (pastTrips.length > 0 ? pastTrips.map((trip, i) => <BookingCard key={i} trip={trip} isPast onReview={setReviewingTrip} />) : <p>Nta ngendo zarangiye.</p>)}
+                  {activeTab === 'upcoming' && (upcomingTrips.length > 0 ? upcomingTrips.map((trip, i) => <BookingCard key={i} trip={trip} onReview={setReviewingTrip} onTrack={setTrackingTrip} />) : <p>Nta ngendo ziteganyijwe.</p>)}
+                  {activeTab === 'past' && (pastTrips.length > 0 ? pastTrips.map((trip, i) => <BookingCard key={i} trip={trip} isPast onReview={setReviewingTrip} onTrack={setTrackingTrip} />) : <p>Nta ngendo zarangiye.</p>)}
                 </div>
             </div>
             <aside className="md:col-span-1">
@@ -131,6 +138,7 @@ const BookingsPage: React.FC = () => {
         </div>
       </div>
       {reviewingTrip && <ReviewModal trip={reviewingTrip} onClose={() => setReviewingTrip(null)} />}
+      {trackingTrip && <LiveTrackingModal trip={trackingTrip} onClose={() => setTrackingTrip(null)} />}
     </div>
   );
 };
