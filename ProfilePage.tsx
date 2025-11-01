@@ -94,28 +94,28 @@ const ProfilePage: React.FC = () => {
     
     // Analytics calculations
     const analytics = useMemo(() => {
-        // FIX: The initial value for reduce must be typed to prevent the accumulator from being inferred as '{}'.
-        const companyCounts = travelHistory.reduce((acc: Record<string, number>, trip) => {
+        // FIX: Correctly type the reduce accumulator by providing a generic type argument to the `reduce` function. This resolves downstream type errors.
+        const companyCounts = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             acc[trip.company] = (acc[trip.company] || 0) + 1;
             return acc;
-        }, {} as Record<string, number>);
+        }, {});
 
         const favoriteCompany = Object.keys(companyCounts).reduce((a, b) => companyCounts[a] > companyCounts[b] ? a : b, '');
 
-        // FIX: The initial value for reduce must be typed to prevent the accumulator from being inferred as '{}'.
-        const destinationCounts = travelHistory.reduce((acc: Record<string, number>, trip) => {
+        // FIX: Correctly type the reduce accumulator by providing a generic type argument to the `reduce` function.
+        const destinationCounts = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             acc[trip.to] = (acc[trip.to] || 0) + 1;
             return acc;
-        }, {} as Record<string, number>);
+        }, {});
         
         const mostVisitedCity = Object.keys(destinationCounts).reduce((a, b) => destinationCounts[a] > destinationCounts[b] ? a : b, '');
 
-        // FIX: The initial value for reduce must be typed to prevent the accumulator from being inferred as '{}'.
-        const monthlySpending = travelHistory.reduce((acc: Record<string, number>, trip) => {
+        // FIX: Correctly type the reduce accumulator by providing a generic type argument to the `reduce` function. This resolves downstream type errors for `amount` and `maxSpending`.
+        const monthlySpending = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             const month = new Date(trip.date).toLocaleString('default', { month: 'short', year: '2-digit' });
             acc[month] = (acc[month] || 0) + trip.price;
             return acc;
-        }, {} as Record<string, number>);
+        }, {});
 
         return { favoriteCompany, mostVisitedCity, monthlySpending };
     }, []);
