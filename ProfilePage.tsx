@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { UserCircleIcon, TicketIcon, CogIcon, ShieldCheckIcon, CreditCardIcon, InformationCircleIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon } from './components/icons';
+import { UserCircleIcon, TicketIcon, CogIcon, ShieldCheckIcon, CreditCardIcon, InformationCircleIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon } from './components/icons';
+import StarRating from './components/StarRating';
+
 
 const user = {
     name: 'Kalisa Jean',
@@ -19,17 +21,17 @@ const userWallet = {
   ]
 };
 
-const menuItems = [
-    { icon: UserCircleIcon, label: 'Amakuru y\'umwirondoro', description: 'Hindura amazina, imeri, n\'ijambobanga' },
-    { icon: TicketIcon, label: 'Amateka y\'ingendo', description: 'Reba ingendo zawe zose zarangiye' },
-    { icon: CreditCardIcon, label: 'Uburyo bwo Kwishyura', description: 'Gucunga amakarita yawe yishyuza' },
-    { icon: ShieldCheckIcon, label: 'Umutekano', description: 'Gucunga iby\'umutekano wa konti' },
-    { icon: InformationCircleIcon, label: 'Ubufasha & Inkunga', description: 'Bona ibisubizo by\'ibibazo byawe' },
+const userReviews = [
+    { id: 1, company: 'Volcano Express', rating: 5, date: '28 Nzeri, 2024', comment: 'Serivisi nziza cyane, bisi zirasukuye kandi zigeze ku gihe. Nzakomeza kubagana!'},
+    { id: 2, company: 'RITCO', rating: 4, date: '15 Kanama, 2024', comment: 'Urugendo rwari rwiza muri rusange, ariko interineti ya WiFi ntiyakoraga neza.'},
+    { id: 3, company: 'Horizon Express', rating: 5, date: '01 Gicurasi, 2024', comment: 'Bisi nziza cyane kandi zihuta. Umushoferi yari umunyamwuga.'},
 ];
 
-const TabButton: React.FC<{label: string; isActive: boolean; onClick: () => void}> = ({ label, isActive, onClick}) => (
-    <button onClick={onClick} className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${isActive ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
-        {label}
+
+const TabButton: React.FC<{label: string; isActive: boolean; onClick: () => void, icon: React.FC<{className?: string}>}> = ({ label, isActive, onClick, icon: Icon}) => (
+    <button onClick={onClick} className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 flex items-center space-x-2 ${isActive ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+        <Icon className="w-5 h-5" />
+        <span>{label}</span>
     </button>
 );
 
@@ -44,9 +46,30 @@ const TransactionIcon: React.FC<{ type: string }> = ({ type }) => {
     return <div className={`${baseClasses} bg-gray-100 dark:bg-gray-700`}><WalletIcon className="w-5 h-5 text-gray-500" /></div>;
 }
 
+const SettingToggle: React.FC<{ label: string; description: string; enabled: boolean; onToggle: () => void }> = ({ label, description, enabled, onToggle }) => (
+    <div className="flex items-center justify-between py-3">
+        <div>
+            <p className="font-semibold text-gray-800 dark:text-gray-200">{label}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
+        </div>
+        <button onClick={onToggle} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+        </button>
+    </div>
+);
+
 
 const ProfilePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState('wallet');
+    const [notificationSettings, setNotificationSettings] = useState({
+        promotions: true,
+        tripReminders: true,
+        accountUpdates: false
+    });
+
+    const handleToggle = (setting: keyof typeof notificationSettings) => {
+        setNotificationSettings(prev => ({...prev, [setting]: !prev[setting]}));
+    }
 
     return (
         <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-full py-12">
@@ -65,9 +88,10 @@ const ProfilePage: React.FC = () => {
                 {/* Main Content */}
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
                     <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
-                        <div className="flex items-center space-x-2">
-                           <TabButton label="Ikofi & Ibikorwa" isActive={activeTab === 'wallet'} onClick={() => setActiveTab('wallet')} />
-                           <TabButton label="Iboneza" isActive={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+                        <div className="flex items-center space-x-2 overflow-x-auto custom-scrollbar pb-2">
+                           <TabButton label="Ikofi & Ibikorwa" isActive={activeTab === 'wallet'} onClick={() => setActiveTab('wallet')} icon={WalletIcon} />
+                           <TabButton label="Ibisubizo Byanjye" isActive={activeTab === 'reviews'} onClick={() => setActiveTab('reviews')} icon={ChatBubbleLeftRightIcon}/>
+                           <TabButton label="Iboneza" isActive={activeTab === 'settings'} onClick={() => setActiveTab('settings')} icon={CogIcon} />
                         </div>
                     </div>
 
@@ -109,19 +133,56 @@ const ProfilePage: React.FC = () => {
                             </ul>
                         </div>
                     )}
+
+                     {activeTab === 'reviews' && (
+                        <div className="animate-fade-in">
+                             <h3 className="text-xl font-bold mb-4 dark:text-white">Ibisubizo watanze</h3>
+                             <div className="space-y-4">
+                                {userReviews.map(review => (
+                                    <div key={review.id} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border dark:border-gray-700">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="font-bold text-gray-800 dark:text-white">{review.company}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">{review.date}</p>
+                                            </div>
+                                            <StarRating rating={review.rating} size="small" />
+                                        </div>
+                                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 italic">"{review.comment}"</p>
+                                    </div>
+                                ))}
+                             </div>
+                        </div>
+                     )}
                     
                     {activeTab === 'settings' && (
-                         <div className="animate-fade-in space-y-2">
-                           {menuItems.map((item, index) => (
-                                <button key={index} className="w-full flex items-center text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group">
-                                    <item.icon className="w-6 h-6 text-gray-500 dark:text-gray-400 mr-4 flex-shrink-0" />
-                                    <div className="flex-grow">
-                                        <p className="font-semibold text-gray-800 dark:text-gray-200">{item.label}</p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">{item.description}</p>
-                                    </div>
-                                    <ArrowRightIcon className="w-5 h-5 text-gray-400 ml-auto transform transition-transform group-hover:translate-x-1 flex-shrink-0" />
-                                </button>
-                           ))}
+                         <div className="animate-fade-in space-y-6">
+                            <div>
+                                <h3 className="text-lg font-bold mb-2 flex items-center dark:text-white"><UserCircleIcon className="w-5 h-5 mr-2 text-gray-500"/> Konti</h3>
+                                <div className="pl-7 divide-y dark:divide-gray-700">
+                                    <button className="w-full flex justify-between items-center py-3 text-left group">
+                                        <div>
+                                            <p className="font-semibold text-gray-800 dark:text-gray-200">Hindura umwirondoro</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Uzuza amazina yawe, imeri, na telefone</p>
+                                        </div>
+                                        <ArrowRightIcon className="w-5 h-5 text-gray-400 transform transition-transform group-hover:translate-x-1"/>
+                                    </button>
+                                     <button className="w-full flex justify-between items-center py-3 text-left group">
+                                        <div>
+                                            <p className="font-semibold text-gray-800 dark:text-gray-200">Hindura ijambobanga</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Hindura ijambobanga ryawe buri gihe</p>
+                                        </div>
+                                        <ArrowRightIcon className="w-5 h-5 text-gray-400 transform transition-transform group-hover:translate-x-1"/>
+                                    </button>
+                                </div>
+                            </div>
+                             <div>
+                                <h3 className="text-lg font-bold mb-2 flex items-center dark:text-white"><BellAlertIcon className="w-5 h-5 mr-2 text-gray-500"/> Ibimenyetso</h3>
+                                 <div className="pl-7 divide-y dark:divide-gray-700">
+                                    <SettingToggle label="Promosiyo n'Amashya" description="Akira amakuru y'ibishya n'ibyagabanijwe" enabled={notificationSettings.promotions} onToggle={() => handleToggle('promotions')} />
+                                    <SettingToggle label="Kwibutswa ingendo" description="Ubutumwa bwo kukwibutsa mbere y'urugendo" enabled={notificationSettings.tripReminders} onToggle={() => handleToggle('tripReminders')} />
+                                    <SettingToggle label="Amakuru ya Konti" description="Ibimenyetso by'ingenzi ku bijyanye na konti yawe" enabled={notificationSettings.accountUpdates} onToggle={() => handleToggle('accountUpdates')} />
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

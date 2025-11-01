@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 // FIX: Import `ArrowRightIcon` which was missing.
-import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon } from './components/icons';
+import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon } from './components/icons';
 import FleetDetailModal from './components/FleetDetailModal';
 import StarRating from './components/StarRating';
 
@@ -30,6 +30,12 @@ const mockCompanyData: { [key: string]: any } = {
     reviews: [
         { author: 'Kalisa J.', rating: 5, comment: 'Serivisi nziza cyane! Bisi zirasukuye kandi zigezweho.'},
         { author: 'Umutoni G.', rating: 4, comment: 'Bagerageza kugera ku gihe, ariko interineti ya WiFi ntiyakoraga neza.'},
+    ],
+    gallery: [
+        'https://www.ritco.rw/wp-content/uploads/2021/04/IMG-20210408-WA0002.jpg',
+        'https://www.ritco.rw/wp-content/uploads/2021/04/IMG_6733.jpg',
+        'https://fortune.rw/wp-content/uploads/2023/12/RITCO-to-acquire-150-new-buses-to-meet-festive-season-demand.jpg',
+        'https://pbs.twimg.com/media/Fxtp0bPWIAAh6-p.jpg',
     ]
   },
   volcano: {
@@ -58,6 +64,12 @@ const mockCompanyData: { [key: string]: any } = {
     },
     reviews: [
         { author: 'Mugisha F.', rating: 5, comment: 'Nta kundi navuga, Volcano ni abahanga! Buri gihe serivisi ni nziza.'},
+    ],
+    gallery: [
+        'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/1-1.jpg',
+        'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/DJI_0028-1.jpg',
+        'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/3-1.jpg',
+        'https://www.kigalitoday.com/IMG/jpg/volcano-2.jpg',
     ]
   },
 };
@@ -72,7 +84,8 @@ const defaultCompanyData = {
     routes: [],
     services: [],
     schedule: {},
-    reviews: []
+    reviews: [],
+    gallery: [],
 }
 
 const AmenityIcon: React.FC<{ amenity: string; withText?: boolean }> = ({ amenity, withText = false }) => {
@@ -129,11 +142,36 @@ interface CompanyProfilePageProps {
   onSelectTrip: (from?: string, to?: string) => void;
 }
 
+const PhotoViewerModal: React.FC<{ images: string[], startIndex: number, onClose: () => void }> = ({ images, startIndex, onClose }) => {
+    const [currentIndex, setCurrentIndex] = useState(startIndex);
+
+    const nextImage = () => setCurrentIndex(prev => (prev + 1) % images.length);
+    const prevImage = () => setCurrentIndex(prev => (prev - 1 + images.length) % images.length);
+
+    return (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
+            <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/30 transition-colors z-20">
+                <XIcon className="w-6 h-6" />
+            </button>
+            <div className="relative w-full max-w-4xl" onClick={e => e.stopPropagation()}>
+                <img src={images[currentIndex]} alt="Company gallery" className="max-h-[85vh] w-auto mx-auto rounded-lg shadow-2xl" />
+                <button onClick={prevImage} className="absolute left-0 top-1/2 -translate-y-1/2 p-3 bg-white/10 text-white rounded-full hover:bg-white/30 transition-colors ml-2">
+                    <ChevronRightIcon className="w-6 h-6 transform rotate-180" />
+                </button>
+                <button onClick={nextImage} className="absolute right-0 top-1/2 -translate-y-1/2 p-3 bg-white/10 text-white rounded-full hover:bg-white/30 transition-colors mr-2">
+                    <ChevronRightIcon className="w-6 h-6" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSelectTrip }) => {
   const [selectedBus, setSelectedBus] = useState(null);
   const [activeTab, setActiveTab] = useState('about');
   const [fromLocation, setFromLocation] = useState('');
   const [toLocation, setToLocation] = useState('');
+  const [viewingPhotoIndex, setViewingPhotoIndex] = useState<number | null>(null);
 
   const data = mockCompanyData[company.id] || defaultCompanyData;
   const averageRating = data.reviews.length > 0 ? data.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / data.reviews.length : 0;
@@ -149,7 +187,7 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
   const TabButton: React.FC<{tabName: string; label: string}> = ({ tabName, label }) => (
     <button
         onClick={() => setActiveTab(tabName)}
-        className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 ${activeTab === tabName ? 'border-b-2 border-yellow-400 text-blue-600 dark:text-yellow-300' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'}`}
+        className={`px-4 py-3 text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === tabName ? 'border-b-2 border-yellow-400 text-blue-600 dark:text-yellow-300' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'}`}
     >
         {label}
     </button>
@@ -181,13 +219,15 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
+            <div className="border-b border-gray-200 dark:border-gray-700 mb-8 overflow-x-auto custom-scrollbar">
                 <nav className="flex space-x-4">
                     <TabButton tabName="about" label="Abo Turi Bo" />
                     <TabButton tabName="schedule" label="Jadwali y'Ingendo" />
                     <TabButton tabName="routes" label="Ingendo Zose" />
                     <TabButton tabName="fleet" label="Imodoka" />
+                    <TabButton tabName="gallery" label="Amashusho" />
                     <TabButton tabName="services" label="Serivisi" />
+                    <TabButton tabName="contact" label="Twandikire" />
                 </nav>
             </div>
             <div className="animate-fade-in">
@@ -312,6 +352,23 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                   ) : <p className="text-gray-500 dark:text-gray-400">Amakuru y'imodoka ntazwi.</p>}
                 </div>
               )}
+               {activeTab === 'gallery' && (
+                <div>
+                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Amashusho</h3>
+                    {data.gallery.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {data.gallery.map((img: string, index: number) => (
+                                <button key={index} onClick={() => setViewingPhotoIndex(index)} className="aspect-square rounded-lg overflow-hidden group relative">
+                                    <img src={img} alt={`Gallery image ${index + 1}`} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300" />
+                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                        <CameraIcon className="w-8 h-8 text-white" />
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    ) : <p className="text-gray-500 dark:text-gray-400">Nta mashusho arahari.</p>}
+                </div>
+              )}
               {activeTab === 'services' && (
                 <div>
                     <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Serivisi ku Bagenzi</h3>
@@ -323,6 +380,28 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                             ))}
                         </div>
                     ) : <p className="text-gray-500 dark:text-gray-400">Amakuru ya serivisi ntazwi.</p>}
+                </div>
+              )}
+               {activeTab === 'contact' && (
+                <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg shadow-sm border dark:border-gray-700/50">
+                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Ohereza ubutumwa</h3>
+                    <form className="space-y-4" onSubmit={e => {e.preventDefault(); alert('Ubutumwa bwawe bwoherejwe!')}}>
+                        <div>
+                            <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amazina yawe</label>
+                            <input type="text" id="contact-name" required className="w-full p-2 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" />
+                        </div>
+                        <div>
+                            <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Imeri yawe</label>
+                            <input type="email" id="contact-email" required className="w-full p-2 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" />
+                        </div>
+                        <div>
+                            <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ubutumwa</label>
+                            <textarea id="contact-message" rows={4} required className="w-full p-2 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600"></textarea>
+                        </div>
+                         <button type="submit" className="w-full flex items-center justify-center p-3 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md">
+                            Ohereza <PaperAirplaneIcon className="w-5 h-5 ml-2" />
+                        </button>
+                    </form>
                 </div>
               )}
             </div>
@@ -388,6 +467,7 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
         </div>
       </div>
       {selectedBus && <FleetDetailModal bus={selectedBus} onClose={() => setSelectedBus(null)} />}
+      {viewingPhotoIndex !== null && <PhotoViewerModal images={data.gallery} startIndex={viewingPhotoIndex} onClose={() => setViewingPhotoIndex(null)} />}
     </div>
   );
 };
