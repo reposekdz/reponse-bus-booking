@@ -29,7 +29,7 @@ const StarRating: React.FC<StarRatingProps> = ({
         const starClass =
           star <= currentRating
             ? 'text-yellow-400'
-            : 'text-gray-300';
+            : 'text-gray-300 dark:text-gray-600';
         
         return (
           <button

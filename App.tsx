@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import FeaturedRoutes from './components/FeaturedRoutes';
@@ -20,14 +20,23 @@ const App: React.FC = () => {
   const [page, setPage] = useState<Page>('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [bookingData, setBookingData] = useState<any>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   const navigate = (targetPage: Page) => {
-    // Prevent access to certain pages if not logged in
     if ((targetPage === 'bookings') && !isLoggedIn) {
       setPage('login');
       return;
     }
     setPage(targetPage);
+    window.scrollTo(0, 0);
   };
 
   const handleLogin = () => {
@@ -50,9 +59,8 @@ const App: React.FC = () => {
   };
   
   const handleBookingConfirm = (selection: any) => {
-    // In a real app, this would submit the booking
     console.log('Booking confirmed:', selection);
-    alert('Booking successful! View details in "My Bookings".');
+    alert('Itike yawe yemejwe! Reba amakuru yayo mu "Amatike Yanjye".');
     navigate('bookings');
   }
 
@@ -88,10 +96,18 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
-      <Header navigate={navigate} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+    <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 min-h-screen flex flex-col">
+      <Header 
+        navigate={navigate} 
+        isLoggedIn={isLoggedIn} 
+        onLogout={handleLogout}
+        theme={theme}
+        setTheme={setTheme}
+      />
       <main className="flex-grow pt-16">
-        {renderContent()}
+        <div key={page} className="animate-fade-in">
+          {renderContent()}
+        </div>
       </main>
       <Footer />
     </div>

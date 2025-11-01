@@ -11,26 +11,26 @@ const companies = [
 ];
 
 const CompanyCard: React.FC<{ company: typeof companies[0] }> = ({ company }) => (
-    <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300">
-        <div className="h-24 w-24 bg-gray-100 border-4 border-white -mt-16 mb-4 rounded-full flex items-center justify-center shadow-lg">
-            <p className="font-bold text-gray-700 tracking-widest text-sm">{company.name}</p>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col items-center text-center transform hover:-translate-y-2 transition-transform duration-300">
+        <div className="h-24 w-24 bg-gray-100 dark:bg-gray-700 border-4 border-white dark:border-gray-600 -mt-16 mb-4 rounded-full flex items-center justify-center shadow-lg">
+            <p className="font-bold text-gray-700 dark:text-gray-300 tracking-widest text-sm">{company.name}</p>
         </div>
-        <h3 className="text-xl font-bold text-gray-800 mb-2">{company.name}</h3>
+        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{company.name}</h3>
         <div className="flex items-center space-x-2">
             <StarRating rating={company.rating} />
-            <span className="text-sm text-gray-500">({company.reviews} reviews)</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">({company.reviews} ibitekerezo)</span>
         </div>
     </div>
 );
 
 const CompaniesPage: React.FC = () => {
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white py-16 sm:py-24">
+    <div className="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 py-16 sm:py-24">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Our Trusted Partners</h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-            We partner with the best bus companies in Rwanda to ensure you have a safe and comfortable journey.
+          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Ibigo Twizera Dukorana</h1>
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
+            Dukorana n'ibigo bya bisi by'imena mu Rwanda kugira ngo tukwizere urugendo rwiza kandi rutekanye.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-20">
