@@ -12,11 +12,9 @@ import ContactPage from './ContactPage';
 import SearchResultsPage from './SearchResultsPage';
 import SeatSelectionPage from './SeatSelectionPage';
 import PartnerCompanies from './components/PartnerCompanies';
-import AITripPlanner from './components/AITripPlanner';
 import BottomNavigation from './components/BottomNavigation';
 import CompanyProfilePage from './CompanyProfilePage';
 import ProfilePage from './ProfilePage';
-import InteractiveMap from './components/InteractiveMap';
 import NextTripWidget from './components/NextTripWidget';
 
 export type Page = 'home' | 'login' | 'register' | 'bookings' | 'companies' | 'help' | 'contact' | 'searchResults' | 'seatSelection' | 'companyProfile' | 'profile';
@@ -111,9 +109,7 @@ const App: React.FC = () => {
           <>
             <HeroSection onSearch={() => handleSearch()} />
             <PartnerCompanies navigate={navigate} />
-            <InteractiveMap onSearch={handleSearch} />
             <HowItWorks />
-            <AITripPlanner />
           </>
         );
     }
