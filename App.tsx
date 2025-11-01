@@ -14,6 +14,7 @@ import SearchResultsPage from './SearchResultsPage';
 import SeatSelectionPage from './SeatSelectionPage';
 import PartnerCompanies from './components/PartnerCompanies';
 import AITripPlanner from './components/AITripPlanner';
+import BottomNavigation from './components/BottomNavigation';
 
 export type Page = 'home' | 'login' | 'register' | 'bookings' | 'companies' | 'help' | 'contact' | 'searchResults' | 'seatSelection';
 
@@ -105,13 +106,15 @@ const App: React.FC = () => {
         onLogout={handleLogout}
         theme={theme}
         setTheme={setTheme}
+        currentPage={page}
       />
-      <main className="flex-grow pt-16">
+      <main className="flex-grow pt-16 pb-20 md:pb-0">
         <div key={page} className="animate-fade-in">
           {renderContent()}
         </div>
       </main>
       <Footer />
+      <BottomNavigation navigate={navigate} currentPage={page} />
     </div>
   );
 };

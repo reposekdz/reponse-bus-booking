@@ -13,6 +13,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   const [departureDate, setDepartureDate] = useState<Date | null>(null);
   const [returnDate, setReturnDate] = useState<Date | null>(null);
   const [showCalendar, setShowCalendar] = useState<'departure' | 'return' | null>(null);
+  const [passengers, setPassengers] = useState('1');
 
   const handleDateSelect = (date: Date) => {
     if (showCalendar === 'departure') {
@@ -27,6 +28,22 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
     if (!date) return '';
     return date.toLocaleDateString('fr-CA'); // YYYY-MM-DD format
   };
+
+  const handlePassengerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow positive integers, or an empty string for clearing
+    if (value === '' || /^[1-9]\d*$/.test(value)) {
+      setPassengers(value);
+    }
+  };
+
+  const handlePassengerBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // If input is empty on blur, default it back to 1
+    if (e.target.value === '') {
+      setPassengers('1');
+    }
+  };
+
 
   return (
     <div className="text-left relative">
@@ -61,7 +78,15 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
         </div>
          <div className="md:col-span-1">
           <label htmlFor="passengers" className="block text-sm font-medium mb-1 text-gray-200">Abagenzi</label>
-           <input id="passengers" type="number" defaultValue="1" min="1" className="w-full bg-white/10 border border-white/20 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all" />
+           <input 
+             id="passengers" 
+             type="text" 
+             inputMode="numeric"
+             value={passengers}
+             onChange={handlePassengerChange}
+             onBlur={handlePassengerBlur}
+             className="w-full bg-white/10 border border-white/20 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all" 
+           />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

@@ -8,9 +8,10 @@ interface HeaderProps {
   onLogout: () => void;
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
+  currentPage: Page;
 }
 
-const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, setTheme }) => {
+const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, setTheme, currentPage }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -40,19 +41,19 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
             RWANDA BUS
           </span>
         </button>
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden lg:flex items-center space-x-8">
           {navItems.map((item) => (
             <button
               key={item.page}
               onClick={() => handleNavClick(item.page)}
-              className="text-gray-200 hover:text-yellow-300 transition-colors duration-300 relative group"
+              className={`relative group transition-colors duration-300 ${currentPage === item.page ? 'text-yellow-300' : 'text-gray-200 hover:text-yellow-300'}`}
             >
               {item.label}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-300 group-hover:w-full transition-all duration-300"></span>
+              <span className={`absolute bottom-0 left-0 h-0.5 bg-yellow-300 transition-all duration-300 ${currentPage === item.page ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
             </button>
           ))}
         </nav>
-        <div className="hidden md:flex items-center space-x-4">
+        <div className="flex items-center space-x-4">
           <button onClick={toggleTheme} className="text-gray-200 hover:text-yellow-300 transition-colors duration-300">
             {theme === 'light' ? <MoonIcon className="w-6 h-6" /> : <SunIcon className="w-6 h-6" />}
           </button>
@@ -72,46 +73,48 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
             )}
           </div>
 
-          {isLoggedIn ? (
-            <button 
-              onClick={onLogout}
-              className="px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md text-sm font-semibold"
-            >
-              Sohoka
-            </button>
-          ) : (
-            <>
+          <div className="hidden sm:flex items-center space-x-4">
+            {isLoggedIn ? (
               <button 
-                onClick={() => handleNavClick('login')}
-                className="px-4 py-2 rounded-md border border-blue-400 text-blue-300 hover:bg-blue-400 hover:text-white transition-all duration-300 text-sm font-semibold"
-              >
-                Injira
-              </button>
-              <button 
-                onClick={() => handleNavClick('register')}
+                onClick={onLogout}
                 className="px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md text-sm font-semibold"
               >
-                Iyandikishe
+                Sohoka
               </button>
-            </>
-          )}
-        </div>
-         <div className="md:hidden">
+            ) : (
+              <>
+                <button 
+                  onClick={() => handleNavClick('login')}
+                  className="px-4 py-2 rounded-md border border-blue-400 text-blue-300 hover:bg-blue-400 hover:text-white transition-all duration-300 text-sm font-semibold"
+                >
+                  Injira
+                </button>
+                <button 
+                  onClick={() => handleNavClick('register')}
+                  className="px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md text-sm font-semibold"
+                >
+                  Iyandikishe
+                </button>
+              </>
+            )}
+          </div>
+         <div className="hidden md:block lg:hidden">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white focus:outline-none">
               {isMenuOpen ? <XIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
             </button>
           </div>
+        </div>
       </div>
-      {/* Mobile Menu */}
+      {/* Tablet Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-[#0c2461] dark:bg-gray-900 pb-4">
+        <div className="lg:hidden bg-[#0c2461] dark:bg-gray-900 pb-4">
           <nav className="flex flex-col items-center space-y-4">
             {navItems.map((item) => (
               <button key={item.page} onClick={() => handleNavClick(item.page)} className="text-gray-200 hover:text-yellow-300 transition-colors duration-300">
                 {item.label}
               </button>
             ))}
-             <div className="flex flex-col items-center space-y-4 pt-4 border-t border-gray-700 w-full">
+             <div className="sm:hidden flex flex-col items-center space-y-4 pt-4 border-t border-gray-700 w-full mt-4">
                {isLoggedIn ? (
                   <button onClick={onLogout} className="w-3/4 px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] text-sm font-semibold">
                     Sohoka
@@ -126,9 +129,6 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
                     </button>
                   </>
                 )}
-                <button onClick={toggleTheme} className="text-gray-200 hover:text-yellow-300 transition-colors duration-300 pt-2">
-                    {theme === 'light' ? <MoonIcon className="w-6 h-6" /> : <SunIcon className="w-6 h-6" />}
-                </button>
               </div>
           </nav>
         </div>
