@@ -34,15 +34,22 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
         <div>
           <label htmlFor="from" className="block text-sm font-medium mb-1 text-gray-200">From</label>
           <select id="from" className="w-full bg-white/10 border border-white/20 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition-all">
-            <option>From Nyamata to Rubavu</option>
+            <option>Nyamata</option>
             <option>Kigali</option>
             <option>Huye</option>
             <option>Musanze</option>
+            <option>Rubavu</option>
           </select>
         </div>
         <div>
           <label htmlFor="to" className="block text-sm font-medium mb-1 text-gray-200">To</label>
-           <input type="text" id="to" placeholder="Gisenyi to Tibati" className="w-full bg-white/90 text-gray-800 border border-transparent rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition-all" />
+           <select id="to" className="w-full bg-white/10 border border-white/20 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 focus:outline-none transition-all">
+            <option>Gisenyi</option>
+            <option>Kigali</option>
+            <option>Huye</option>
+            <option>Musanze</option>
+            <option>Rubavu</option>
+          </select>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -64,7 +71,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       </div>
       <button 
         onClick={onSearch}
-        className="w-full flex items-center justify-center p-4 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold text-lg hover:from-yellow-500 hover:to-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-lg"
+        className="w-full flex items-center justify-center p-4 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-[#0033A0] font-bold text-lg hover:from-yellow-500 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-lg"
       >
         Search Buses
         <ArrowRightIcon className="w-6 h-6 ml-3" />

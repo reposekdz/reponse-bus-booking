@@ -12,6 +12,7 @@ import HelpPage from './HelpPage';
 import ContactPage from './ContactPage';
 import SearchResultsPage from './SearchResultsPage';
 import SeatSelectionPage from './SeatSelectionPage';
+import PartnerCompanies from './components/PartnerCompanies';
 
 export type Page = 'home' | 'login' | 'register' | 'bookings' | 'companies' | 'help' | 'contact' | 'searchResults' | 'seatSelection';
 
@@ -78,6 +79,7 @@ const App: React.FC = () => {
         return (
           <>
             <HeroSection onSearch={handleSearch} />
+            <PartnerCompanies />
             <FeaturedRoutes />
             <HowItWorks />
           </>
