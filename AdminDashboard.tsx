@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, ChangeEvent, FormEvent } from 'react';
 import { 
     SunIcon, MoonIcon, BellIcon, UserCircleIcon, CogIcon, UsersIcon, ChartBarIcon, BuildingOfficeIcon, 
-    ArrowLeftIcon, PlusIcon, PencilSquareIcon, TrashIcon, ArrowUpTrayIcon, SearchIcon, TicketIcon, MapIcon, BusIcon
+    ArrowLeftIcon, PlusIcon, PencilSquareIcon, TrashIcon, ArrowUpTrayIcon, SearchIcon, TicketIcon, MapIcon, BusIcon, XIcon
 } from './components/icons';
 
 interface AdminDashboardProps {
@@ -11,10 +11,11 @@ interface AdminDashboardProps {
 }
 
 // MOCK DATA
-const mockCompaniesData = [
+export const mockCompaniesData = [
     {
         id: 'volcano_express',
         name: 'Volcano Express',
+        password: 'password123',
         logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png',
         coverUrl: 'https://images.unsplash.com/photo-1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop',
         description: "Volcano Express is a leading transport company in Rwanda, known for its punctuality and excellent customer service.",
@@ -41,6 +42,7 @@ const mockCompaniesData = [
     {
         id: 'ritco',
         name: 'RITCO',
+        password: 'password456',
         logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg',
         coverUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop',
         description: "RITCO offers country-wide public transport with a large and modern fleet of buses.",
@@ -90,11 +92,106 @@ const DashboardHome = () => (
     </div>
 );
 
-const CompanyManagement = ({ companies, onSelectCompany, onEdit, onDelete, onAdd }) => (
+const CompanyFormModal = ({ company, onSave, onClose }) => {
+    const [formData, setFormData] = useState(company || {
+        name: '', contactEmail: '', password: '', description: '', fleetSize: 0,
+    });
+    const [logoPreview, setLogoPreview] = useState(company?.logoUrl || null);
+    const [coverPreview, setCoverPreview] = useState(company?.coverUrl || null);
+    const isNew = !company;
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>, type: 'logo' | 'cover') => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const previewUrl = URL.createObjectURL(file);
+            if (type === 'logo') setLogoPreview(previewUrl);
+            if (type === 'cover') setCoverPreview(previewUrl);
+        }
+    };
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        // In a real app, you'd handle file uploads separately and get back URLs
+        const finalData = { ...formData, logoUrl: logoPreview, coverUrl: coverPreview };
+        onSave(finalData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full relative max-h-[90vh] overflow-y-auto">
+                <button onClick={onClose} className="absolute top-4 right-4 p-1 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"><XIcon className="w-6 h-6" /></button>
+                <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    <h2 className="text-2xl font-bold dark:text-white">{isNew ? 'Add New Company' : 'Edit Company'}</h2>
+                    {/* Form fields for name, email, password, description, images etc. */}
+                     <div>
+                        <label className="text-sm font-medium">Company Name</label>
+                        <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
+                    </div>
+                     <div>
+                        <label className="text-sm font-medium">Contact Email (for login)</label>
+                        <input name="contactEmail" type="email" value={formData.contactEmail} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
+                    </div>
+                     <div>
+                        <label className="text-sm font-medium">Password</label>
+                        <input name="password" type="password" value={formData.password} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
+                    </div>
+                    {/* ... other fields */}
+                    <div className="flex justify-end space-x-4">
+                        <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg">Cancel</button>
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Save Company</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    )
+};
+
+
+const CompanyManagement = ({ companies, onSelectCompany, onUpdateCompanies }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingCompany, setEditingCompany] = useState(null);
+
+    const handleAdd = () => {
+        setEditingCompany(null);
+        setIsModalOpen(true);
+    };
+
+    const handleEdit = (company) => {
+        setEditingCompany(company);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = (id) => {
+        if (window.confirm("Are you sure you want to delete this company?")) {
+            onUpdateCompanies(companies.filter(c => c.id !== id));
+        }
+    };
+    
+    const handleSave = (companyData) => {
+        const isNew = !editingCompany;
+        if (isNew) {
+            // Add new company (ensure it has a unique ID)
+            const newCompany = { ...companyData, id: companyData.name.toLowerCase().replace(/\s+/g, '_') + Date.now(), totalPassengers: 0, totalRevenue: 0 };
+            onUpdateCompanies([...companies, newCompany]);
+        } else {
+            // Update existing company
+            onUpdateCompanies(companies.map(c => c.id === editingCompany.id ? { ...c, ...companyData } : c));
+        }
+        setIsModalOpen(false);
+        setEditingCompany(null);
+    };
+
+
+    return (
     <div>
         <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Manage Companies</h1>
-            <button onClick={onAdd} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+            <button onClick={handleAdd} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
                 <PlusIcon className="w-5 h-5 mr-2" />
                 Add New Company
             </button>
@@ -122,8 +219,8 @@ const CompanyManagement = ({ companies, onSelectCompany, onEdit, onDelete, onAdd
                                 <td className="px-6 py-4">
                                     <div className="flex items-center space-x-2">
                                         <button onClick={() => onSelectCompany(company.id)} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold">View Details</button>
-                                        <button onClick={() => onEdit(company)} className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button onClick={() => onDelete(company.id)} className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500"><TrashIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => handleEdit(company)} className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"><PencilSquareIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => handleDelete(company.id)} className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500"><TrashIcon className="w-5 h-5"/></button>
                                     </div>
                                 </td>
                             </tr>
@@ -132,8 +229,10 @@ const CompanyManagement = ({ companies, onSelectCompany, onEdit, onDelete, onAdd
                 </table>
             </div>
         </div>
+        {isModalOpen && <CompanyFormModal company={editingCompany} onSave={handleSave} onClose={() => setIsModalOpen(false)} />}
     </div>
-);
+    )
+};
 
 const CompanyDetails = ({ company, onBack }) => {
     const maxIncome = Math.max(...company.weeklyIncome.map(d => d.income));
@@ -204,8 +303,6 @@ const CompanyDetails = ({ company, onBack }) => {
     );
 };
 
-// ... More components like UserManagement, Settings could be added here
-
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setTheme }) => {
   const [view, setView] = useState('companies');
   const [companies, setCompanies] = useState(mockCompaniesData);
@@ -225,13 +322,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
         return <CompanyManagement 
                     companies={companies} 
                     onSelectCompany={(id) => { setSelectedCompanyId(id); setView('companyDetails'); }}
-                    onAdd={() => alert("Add new company form would open here.")}
-                    onEdit={(company) => alert(`Editing ${company.name}`)}
-                    onDelete={(id) => {
-                        if (window.confirm("Are you sure you want to delete this company?")) {
-                            setCompanies(prev => prev.filter(c => c.id !== id));
-                        }
-                    }}
+                    onUpdateCompanies={setCompanies}
                 />;
       case 'companyDetails':
           return selectedCompany ? <CompanyDetails company={selectedCompany} onBack={() => setView('companies')} /> : <div>Company not found.</div>;

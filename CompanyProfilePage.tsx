@@ -9,6 +9,7 @@ const mockCompanyData: { [key: string]: any } = {
     coverImage: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop',
     address: 'Kiyovu, Kigali, Rwanda',
     hours: 'Buri munsi: 05:00 - 22:00',
+    contactEmail: 'info@ritco.rw',
     stats: { passengers: '2M+', fleet: 85, routes: 25 },
     description: "RITCO ni ikigo cya Leta gishinzwe gutwara abantu mu buryo bwa rusange, kizwiho kugira imodoka nini kandi zigezweho zitwara abantu mu gihugu hose.",
     fleet: [
@@ -42,6 +43,7 @@ const mockCompanyData: { [key: string]: any } = {
     coverImage: 'https://images.unsplash.com/photo-1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop',
     address: 'Nyabugogo, Kigali, Rwanda',
     hours: 'Buri munsi: 04:30 - 23:00',
+    contactEmail: 'contact@volcano.rw',
     stats: { passengers: '3.5M+', fleet: 120, routes: 30 },
     description: "Volcano Express ni kimwe mu bigo bikunzwe cyane mu Rwanda, kizwiho serivisi nziza, isuku, no kugera ku gihe. Bakorera mu mihanda myinshi ikomeye.",
     fleet: [
@@ -78,6 +80,7 @@ const defaultCompanyData = {
     coverImage: 'https://images.unsplash.com/photo-1616372819235-9b2e1577a2d4?q=80&w=2070&auto=format&fit=crop',
     address: 'Amakuru ntazwi',
     hours: 'Amakuru ntazwi',
+    contactEmail: 'not-available@example.com',
     stats: { passengers: 'N/A', fleet: 'N/A', routes: 'N/A' },
     description: "Nta makuru ahagije kuri iki kigo araboneka. Tuzayongeramo vuba.",
     fleet: [],
@@ -385,6 +388,9 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                {activeTab === 'contact' && (
                 <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg shadow-sm border dark:border-gray-700/50">
                     <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Ohereza ubutumwa</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Ifite ikibazo? Ubutumwa bwawe buzoherezwa kuri <strong className="text-blue-600 dark:text-blue-400">{data.contactEmail}</strong>
+                    </p>
                     <form className="space-y-4" onSubmit={e => {e.preventDefault(); alert('Ubutumwa bwawe bwoherejwe!')}}>
                         <div>
                             <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amazina yawe</label>
@@ -420,6 +426,10 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                         <li className="flex items-start">
                             <ClockIcon className="w-5 h-5 mr-3 mt-1 flex-shrink-0 text-gray-400" />
                             <span className="text-gray-700 dark:text-gray-300">{data.hours}</span>
+                        </li>
+                        <li className="flex items-start">
+                            <EnvelopeIcon className="w-5 h-5 mr-3 mt-1 flex-shrink-0 text-gray-400" />
+                            <span className="text-gray-700 dark:text-gray-300">{data.contactEmail}</span>
                         </li>
                     </ul>
                 </div>

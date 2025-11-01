@@ -17,13 +17,16 @@ import CompanyProfilePage from './CompanyProfilePage';
 import ProfilePage from './ProfilePage';
 import NextTripWidget from './components/NextTripWidget';
 import AdminDashboard from './AdminDashboard';
+import CompanyDashboard from './CompanyDashboard'; // Import the new Company Dashboard
+import { mockCompaniesData } from './AdminDashboard'; // Import mock data for login check
 
 export type Page = 'home' | 'login' | 'register' | 'bookings' | 'companies' | 'help' | 'contact' | 'searchResults' | 'seatSelection' | 'companyProfile' | 'profile';
 
 const App: React.FC = () => {
   const [page, setPage] = useState<Page>('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<'passenger' | 'admin' | null>(null);
+  const [userRole, setUserRole] = useState<'passenger' | 'admin' | 'company' | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null); // To store company or user data
   const [bookingData, setBookingData] = useState<any>(null);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -54,12 +57,26 @@ const App: React.FC = () => {
     if (credentials.email === 'reponse@gmail.com' && credentials.password === '2025') {
         setIsLoggedIn(true);
         setUserRole('admin');
+        setCurrentUser({ name: 'Admin Reponse' });
         return;
     }
     
-    // Default to passenger login
+    // Company Login Check
+    const companyUser = mockCompaniesData.find(
+      c => c.contactEmail === credentials.email && c.password === credentials.password
+    );
+
+    if (companyUser) {
+        setIsLoggedIn(true);
+        setUserRole('company');
+        setCurrentUser(companyUser);
+        return;
+    }
+    
+    // Default to passenger login for any other successful login
     setIsLoggedIn(true);
     setUserRole('passenger');
+    setCurrentUser({ name: 'Kalisa Jean' }); // Mock passenger user
     setShowNextTripWidget(true); // Show widget on login
     setPage('home');
   };
@@ -67,6 +84,7 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserRole(null);
+    setCurrentUser(null);
     setShowNextTripWidget(false); // Hide widget on logout
     setPage('home');
   };
@@ -127,8 +145,13 @@ const App: React.FC = () => {
     }
   };
 
-  if (isLoggedIn && userRole === 'admin') {
-      return <AdminDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} />;
+  if (isLoggedIn) {
+      if (userRole === 'admin') {
+          return <AdminDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} />;
+      }
+      if (userRole === 'company') {
+          return <CompanyDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} companyData={currentUser} />;
+      }
   }
 
   return (
