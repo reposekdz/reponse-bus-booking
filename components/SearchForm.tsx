@@ -5,11 +5,13 @@ import FareCalendar from './FareCalendar';
 type TripType = 'one-way' | 'round-trip';
 
 interface SearchFormProps {
-  onSearch: () => void;
+  onSearch: (from?: string, to?: string) => void;
 }
 
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   const [tripType, setTripType] = useState<TripType>('one-way');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
   const [departureDate, setDepartureDate] = useState<Date | null>(null);
   const [returnDate, setReturnDate] = useState<Date | null>(null);
   const [showCalendar, setShowCalendar] = useState<'departure' | 'return' | null>(null);
@@ -69,12 +71,12 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
         <div className="md:col-span-2 relative">
           <label htmlFor="from" className="block text-sm font-medium mb-1 text-gray-200">Uva</label>
            <LocationMarkerIcon className="absolute left-3 top-10 h-5 w-5 text-gray-300" />
-          <input id="from" type="text" placeholder="Aho uva" className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all" />
+          <input id="from" type="text" placeholder="Aho uva" value={from} onChange={e => setFrom(e.target.value)} className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all" />
         </div>
         <div className="md:col-span-2 relative">
           <label htmlFor="to" className="block text-sm font-medium mb-1 text-gray-200">Ujya</label>
           <LocationMarkerIcon className="absolute left-3 top-10 h-5 w-5 text-gray-300" />
-           <input id="to" type="text" placeholder="Aho ujya" className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all" />
+           <input id="to" type="text" placeholder="Aho ujya" value={to} onChange={e => setTo(e.target.value)} className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all" />
         </div>
          <div className="md:col-span-1">
           <label htmlFor="passengers" className="block text-sm font-medium mb-1 text-gray-200">Abagenzi</label>
@@ -121,7 +123,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       )}
 
       <button 
-        onClick={onSearch}
+        onClick={() => onSearch(from, to)}
         className="w-full flex items-center justify-center p-4 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-[#0033A0] font-bold text-lg hover:from-yellow-500 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-lg"
       >
         Shakisha Bisi

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 // FIX: Import `ArrowRightIcon` which was missing.
-import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon } from './components/icons';
+import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon, ChatBubbleLeftRightIcon } from './components/icons';
 import FleetDetailModal from './components/FleetDetailModal';
 import StarRating from './components/StarRating';
 
@@ -226,6 +226,7 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                 <nav className="flex space-x-4">
                     <TabButton tabName="about" label="Abo Turi Bo" />
                     <TabButton tabName="schedule" label="Jadwali y'Ingendo" />
+                    <TabButton tabName="reviews" label="Ibisubizo" />
                     <TabButton tabName="routes" label="Ingendo Zose" />
                     <TabButton tabName="fleet" label="Imodoka" />
                     <TabButton tabName="gallery" label="Amashusho" />
@@ -240,22 +241,24 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                         <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Abo Turi Bo</h3>
                         <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{data.description}</p>
                     </div>
-                    <div>
-                        <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Ibitekerezo by'Abakiriya</h3>
-                        {data.reviews.length > 0 ? (
-                            <div className="space-y-6">
-                                {data.reviews.map((review: any, index: number) => (
-                                    <div key={index} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border dark:border-gray-700/50">
-                                       <div className="flex items-center mb-2">
-                                           <StarRating rating={review.rating} size="small" />
-                                           <p className="ml-3 font-bold text-sm text-gray-800 dark:text-gray-200">{review.author}</p>
-                                       </div>
-                                       <p className="text-gray-600 dark:text-gray-400 text-sm">"{review.comment}"</p>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : <p className="text-gray-500 dark:text-gray-400">Nta bitekerezo biratangwa.</p>}
-                    </div>
+                </div>
+              )}
+               {activeTab === 'reviews' && (
+                 <div>
+                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Ibitekerezo by'Abakiriya</h3>
+                    {data.reviews.length > 0 ? (
+                        <div className="space-y-6">
+                            {data.reviews.map((review: any, index: number) => (
+                                <div key={index} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border dark:border-gray-700/50">
+                                   <div className="flex items-center mb-2">
+                                       <StarRating rating={review.rating} size="small" />
+                                       <p className="ml-3 font-bold text-sm text-gray-800 dark:text-gray-200">{review.author}</p>
+                                   </div>
+                                   <p className="text-gray-600 dark:text-gray-400 text-sm italic">"{review.comment}"</p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : <p className="text-gray-500 dark:text-gray-400">Nta bitekerezo biratangwa kuri iki kigo.</p>}
                 </div>
               )}
               {activeTab === 'schedule' && (

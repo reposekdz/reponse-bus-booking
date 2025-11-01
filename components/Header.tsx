@@ -29,6 +29,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
     { label: 'Ahabanza', page: 'home' },
     { label: 'Amatike Yanjye', page: 'bookings' },
     { label: 'Ibigo', page: 'companies' },
+    { label: 'Serivisi', page: 'services' },
     { label: 'Ubufasha', page: 'help' },
     { label: 'Twandikire', page: 'contact' },
   ];
@@ -39,6 +40,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
           { label: 'Amatike Yanjye', page: 'bookings' },
           { label: 'Umwirondoro', page: 'profile' },
           { label: 'Ibigo', page: 'companies' },
+          { label: 'Serivisi', page: 'services' },
           { label: 'Twandikire', page: 'contact' },
       ]
   }

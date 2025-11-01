@@ -275,3 +275,16 @@ export const ArrowUpTrayIcon: React.FC<IconProps> = (props) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
   </svg>
 );
+
+export const CreditCardIcon: React.FC<IconProps> = (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+    </svg>
+);
+
+export const ArchiveBoxIcon: React.FC<IconProps> = (props) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.383-.03.766-.03 1.149 0 .383.03.766.03 1.149 0 1.131.094 1.976 1.057 1.976 2.192V7.5M12 14.25m-3.375 0V12a3.375 3.375 0 013.375-3.375h.001c1.863 0 3.375 1.512 3.375 3.375v2.25m-6.75 0v-2.25m6.75 0v-2.25m0 2.25H12m0 0h-3.375M12 12.75v1.5m0 0v1.5m0 0v1.5m0 0H9.375m2.625 0H12m0 0h2.625m0 0h1.5m-16.5 0h1.5" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25v10.5a2.25 2.25 0 01-2.25 2.25H5.25a2.25 2.25 0 01-2.25-2.25V8.25a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 8.25z" />
+  </svg>
+);

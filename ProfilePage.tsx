@@ -94,31 +94,31 @@ const ProfilePage: React.FC = () => {
     
     // Analytics calculations
     const analytics = useMemo(() => {
-        // FIX: Correctly type the reduce accumulator by providing a generic type argument to the `reduce` function. This resolves downstream type errors.
-        // FIX: Explicitly typing the accumulator `acc` to fix type inference issues.
-        const companyCounts = travelHistory.reduce<Record<string, number>>((acc, trip) => {
+        // FIX: The generic type on `reduce` is invalid in TSX. Explicitly typing
+        // the accumulator's initial value ensures correct type inference.
+        const companyCounts = travelHistory.reduce((acc, trip) => {
             acc[trip.company] = (acc[trip.company] || 0) + 1;
             return acc;
-        }, {});
+        }, {} as Record<string, number>);
 
         const favoriteCompany = Object.keys(companyCounts).length > 0 ? Object.keys(companyCounts).reduce((a, b) => companyCounts[a] > companyCounts[b] ? a : b) : 'N/A';
 
-        // FIX: Correctly type the reduce accumulator by providing a generic type argument to the `reduce` function.
-        // FIX: Explicitly typing the accumulator `acc` to fix type inference issues.
-        const destinationCounts = travelHistory.reduce<Record<string, number>>((acc, trip) => {
+        // FIX: The generic type on `reduce` is invalid in TSX. Explicitly typing
+        // the accumulator's initial value ensures correct type inference.
+        const destinationCounts = travelHistory.reduce((acc, trip) => {
             acc[trip.to] = (acc[trip.to] || 0) + 1;
             return acc;
-        }, {});
+        }, {} as Record<string, number>);
         
         const mostVisitedCity = Object.keys(destinationCounts).length > 0 ? Object.keys(destinationCounts).reduce((a, b) => destinationCounts[a] > destinationCounts[b] ? a : b) : 'N/A';
 
-        // FIX: Correctly type the reduce accumulator by providing a generic type argument to the `reduce` function. This resolves downstream type errors for `amount` and `maxSpending`.
-        // FIX: Explicitly typing the accumulator `acc` to fix type inference issues.
-        const monthlySpending = travelHistory.reduce<Record<string, number>>((acc, trip) => {
+        // FIX: The generic type on `reduce` is invalid in TSX. Explicitly typing
+        // the accumulator's initial value ensures correct type inference and fixes downstream errors.
+        const monthlySpending = travelHistory.reduce((acc, trip) => {
             const month = new Date(trip.date).toLocaleString('default', { month: 'short', year: '2-digit' });
             acc[month] = (acc[month] || 0) + trip.price;
             return acc;
-        }, {});
+        }, {} as Record<string, number>);
 
         return { favoriteCompany, mostVisitedCity, monthlySpending };
     }, []);

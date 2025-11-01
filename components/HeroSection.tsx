@@ -2,7 +2,7 @@ import React from 'react';
 import SearchForm from './SearchForm';
 
 interface HeroSectionProps {
-  onSearch: () => void;
+  onSearch: (from?: string, to?: string) => void;
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {

@@ -1,7 +1,8 @@
-import React, { useState, useMemo, ChangeEvent, FormEvent } from 'react';
+import React, { useState, useMemo, ChangeEvent, FormEvent, useEffect } from 'react';
 import { 
     SunIcon, MoonIcon, BellIcon, UserCircleIcon, CogIcon, UsersIcon, ChartBarIcon, BuildingOfficeIcon, 
-    ArrowLeftIcon, PlusIcon, PencilSquareIcon, TrashIcon, ArrowUpTrayIcon, SearchIcon, TicketIcon, MapIcon, BusIcon, XIcon
+    ArrowLeftIcon, PlusIcon, PencilSquareIcon, TrashIcon, ArrowUpTrayIcon, SearchIcon, TicketIcon, MapIcon, BusIcon, XIcon,
+    WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, CreditCardIcon
 } from './components/icons';
 
 interface AdminDashboardProps {
@@ -10,7 +11,7 @@ interface AdminDashboardProps {
   setTheme: (theme: 'light' | 'dark') => void;
 }
 
-// MOCK DATA
+// MOCK DATA ENHANCED WITH WALLET INFO
 export const mockCompaniesData = [
     {
         id: 'volcano_express',
@@ -23,6 +24,15 @@ export const mockCompaniesData = [
         fleetSize: 120,
         totalPassengers: 3500000,
         totalRevenue: 15_750_000_000,
+        wallet: {
+            balance: 12540000,
+            currency: 'RWF',
+            transactions: [
+                { id: 1, type: 'payout', description: 'Weekly Settlement', amount: -10000000, date: '2024-10-25', status: 'Completed' },
+                { id: 2, type: 'fee', description: 'Platform Fee - October', amount: -1500000, date: '2024-10-24', status: 'Completed' },
+                { id: 3, type: 'adjustment', description: 'Refund TX-123', amount: 4500, date: '2024-10-22', status: 'Completed' }
+            ]
+        },
         routes: [
             { from: 'Kigali', to: 'Rubavu', price: 4500, tripsToday: 15, avgPassengers: 550 },
             { from: 'Kigali', to: 'Musanze', price: 3500, tripsToday: 20, avgPassengers: 800 },
@@ -33,8 +43,8 @@ export const mockCompaniesData = [
             { id: 'V03', model: 'Yutong Grand', capacity: 65, status: 'Maintenance', assignedRoute: '-' },
         ],
         recentPassengers: [
-            { name: 'Mugisha F.', route: 'Kigali - Rubavu', ticketId: 'VK-83AD1' },
-            { name: 'Keza C.', route: 'Kigali - Musanze', ticketId: 'VK-83AD2' },
+            { name: 'Mugisha F.', route: 'Kigali - Rubavu', ticketId: 'VK-83AD1', date: '2024-10-28' },
+            { name: 'Keza C.', route: 'Kigali - Musanze', ticketId: 'VK-83AD2', date: '2024-10-28' },
         ],
         weeklyIncome: [ { day: 'M', income: 4500000 }, { day: 'T', income: 4200000 }, { day: 'W', income: 4800000 }, { day: 'T', income: 4600000 }, { day: 'F', income: 5500000 }, { day: 'S', income: 6200000 }, { day: 'S', income: 5900000 }],
         dailyTickets: [ { day: 'M', tickets: 980 }, { day: 'T', tickets: 920 }, { day: 'W', tickets: 1050 }, { day: 'T', tickets: 1000 }, { day: 'F', tickets: 1250 }, { day: 'S', tickets: 1400 }, { day: 'S', tickets: 1350 }],
@@ -50,6 +60,14 @@ export const mockCompaniesData = [
         fleetSize: 85,
         totalPassengers: 2000000,
         totalRevenue: 9_000_000_000,
+        wallet: {
+            balance: 8750000,
+            currency: 'RWF',
+            transactions: [
+                { id: 1, type: 'payout', description: 'Weekly Settlement', amount: -7500000, date: '2024-10-25', status: 'Completed' },
+                { id: 2, type: 'fee', description: 'Platform Fee - October', amount: -900000, date: '2024-10-24', status: 'Completed' },
+            ]
+        },
         routes: [
             { from: 'Kigali', to: 'Huye', price: 3000, tripsToday: 25, avgPassengers: 1200 },
             { from: 'Kigali', to: 'Nyungwe', price: 7000, tripsToday: 5, avgPassengers: 200 },
@@ -59,7 +77,7 @@ export const mockCompaniesData = [
              { id: 'R02', model: 'Scania Marcopolo', capacity: 70, status: 'Active', assignedRoute: 'Kigali - Nyungwe' },
         ],
         recentPassengers: [
-             { name: 'Umutoni G.', route: 'Kigali - Huye', ticketId: 'RT-98CD3' },
+             { name: 'Umutoni G.', route: 'Kigali - Huye', ticketId: 'RT-98CD3', date: '2024-10-27' },
         ],
         weeklyIncome: [ { day: 'M', income: 3200000 }, { day: 'T', income: 3100000 }, { day: 'W', income: 3400000 }, { day: 'T', income: 3300000 }, { day: 'F', income: 4000000 }, { day: 'S', income: 4500000 }, { day: 'S', income: 4300000 }],
         dailyTickets: [ { day: 'M', tickets: 1100 }, { day: 'T', tickets: 1050 }, { day: 'W', tickets: 1150 }, { day: 'T', tickets: 1120 }, { day: 'F', tickets: 1350 }, { day: 'S', tickets: 1500 }, { day: 'S', tickets: 1450 }],
@@ -80,14 +98,61 @@ const StatCard = ({ title, value, icon, format = true }) => (
     </div>
 );
 
+const LiveBookingsFeed = () => {
+    const [bookings, setBookings] = useState([]);
+    const passengerNames = ['Kalisa', 'Umutoni', 'Mugisha', 'Keza', 'Niyonsenga', 'Gatete'];
+    
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const company = mockCompaniesData[Math.floor(Math.random() * mockCompaniesData.length)];
+            const route = company.routes[Math.floor(Math.random() * company.routes.length)];
+            const name = passengerNames[Math.floor(Math.random() * passengerNames.length)];
+            const newBooking = {
+                id: Date.now(),
+                passenger: `${name} ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}.`,
+                route: `${route.from} to ${route.to}`,
+                company: company.name,
+                amount: route.price,
+                logoUrl: company.logoUrl,
+            };
+            setBookings(prev => [newBooking, ...prev.slice(0, 5)]);
+        }, 3000 + Math.random() * 2000); // every 3-5 seconds
+
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+            <h3 className="font-bold mb-4 dark:text-white">Live Bookings Feed</h3>
+            <div className="space-y-4 h-72 overflow-y-auto custom-scrollbar">
+                {bookings.length > 0 ? bookings.map(b => (
+                    <div key={b.id} className="flex items-center space-x-4 animate-fade-in">
+                        <img src={b.logoUrl} alt={b.company} className="w-10 h-10 rounded-full object-contain bg-gray-100 dark:bg-gray-700 p-1" />
+                        <div>
+                            <p className="text-sm font-semibold dark:text-white">{b.passenger} booked a trip</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{b.route} with {b.company}</p>
+                        </div>
+                        <p className="text-sm font-bold text-green-600 dark:text-green-400 ml-auto">+{new Intl.NumberFormat('fr-RW').format(b.amount)}</p>
+                    </div>
+                )) : <p className="text-sm text-gray-500 dark:text-gray-400 text-center pt-24">Waiting for new bookings...</p>}
+            </div>
+        </div>
+    );
+};
+
 const DashboardHome = () => (
-    <div>
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard title="Total Revenue" value="24,750,000,000 FRW" icon={<ChartBarIcon className="w-6 h-6 text-blue-500" />} format={false} />
-            <StatCard title="Total Passengers" value={5500000} icon={<UsersIcon className="w-6 h-6 text-blue-500" />} />
-            <StatCard title="Companies" value={mockCompaniesData.length} icon={<BuildingOfficeIcon className="w-6 h-6 text-blue-500" />} format={false}/>
-            <StatCard title="Active Routes" value={35} icon={<MapIcon className="w-6 h-6 text-blue-500" />} format={false}/>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Dashboard</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <StatCard title="Total Revenue" value="24,750,000,000 FRW" icon={<ChartBarIcon className="w-6 h-6 text-blue-500" />} format={false} />
+                <StatCard title="Total Passengers" value={5500000} icon={<UsersIcon className="w-6 h-6 text-blue-500" />} />
+                <StatCard title="Companies" value={mockCompaniesData.length} icon={<BuildingOfficeIcon className="w-6 h-6 text-blue-500" />} format={false}/>
+                <StatCard title="Active Routes" value={35} icon={<MapIcon className="w-6 h-6 text-blue-500" />} format={false}/>
+            </div>
+        </div>
+        <div className="lg:col-span-1">
+            <LiveBookingsFeed />
         </div>
     </div>
 );
@@ -116,40 +181,72 @@ const CompanyFormModal = ({ company, onSave, onClose }) => {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        // In a real app, you'd handle file uploads separately and get back URLs
         const finalData = { ...formData, logoUrl: logoPreview, coverUrl: coverPreview };
         onSave(finalData);
     };
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full relative max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                 <button onClick={onClose} className="absolute top-4 right-4 p-1 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"><XIcon className="w-6 h-6" /></button>
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                     <h2 className="text-2xl font-bold dark:text-white">{isNew ? 'Add New Company' : 'Edit Company'}</h2>
-                    {/* Form fields for name, email, password, description, images etc. */}
                      <div>
-                        <label className="text-sm font-medium">Company Name</label>
+                        <label className="text-sm font-medium dark:text-gray-300">Company Name</label>
                         <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
                     </div>
                      <div>
-                        <label className="text-sm font-medium">Contact Email (for login)</label>
+                        <label className="text-sm font-medium dark:text-gray-300">Contact Email (for login)</label>
                         <input name="contactEmail" type="email" value={formData.contactEmail} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
                     </div>
                      <div>
-                        <label className="text-sm font-medium">Password</label>
-                        <input name="password" type="password" value={formData.password} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
+                        <label className="text-sm font-medium dark:text-gray-300">Password</label>
+                        <input name="password" type="password" placeholder={isNew ? "" : "Enter new password to change"} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required={isNew}/>
                     </div>
-                    {/* ... other fields */}
-                    <div className="flex justify-end space-x-4">
-                        <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg">Cancel</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Save Company</button>
+                    <div className="flex justify-end space-x-4 pt-4 border-t dark:border-gray-700">
+                        <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg dark:border-gray-600 dark:text-gray-300">Cancel</button>
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Save Company</button>
                     </div>
                 </form>
             </div>
         </div>
     )
 };
+
+const CompanyCard: React.FC<{
+    company: any;
+    onSelect: (id: any) => void;
+    onEdit: (company: any) => void;
+    onDelete: (id: any) => void;
+}> = ({ company, onSelect, onEdit, onDelete }) => (
+    <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/50 overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:border-blue-400/50">
+        <div className="relative h-32">
+            <img src={company.coverUrl} alt={`${company.name} cover`} className="w-full h-full object-cover"/>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            <img src={company.logoUrl} alt={`${company.name} logo`} className="absolute bottom-2 left-4 w-16 h-16 object-contain bg-white/80 dark:bg-gray-900/80 p-1 rounded-full shadow-md border-2 border-white dark:border-gray-700"/>
+        </div>
+        <div className="p-4">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-white truncate">{company.name}</h3>
+            <div className="flex justify-between items-center mt-4">
+                <div className="text-center">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Revenue</p>
+                    <p className="font-bold text-green-600 dark:text-green-400 text-sm">{(company.totalRevenue / 1_000_000_000).toFixed(1)}B</p>
+                </div>
+                <div className="text-center">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Passengers</p>
+                    <p className="font-bold text-blue-600 dark:text-blue-400 text-sm">{(company.totalPassengers / 1_000_000).toFixed(1)}M</p>
+                </div>
+                <div className="flex items-center space-x-1">
+                     <button onClick={() => onEdit(company)} className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><PencilSquareIcon className="w-5 h-5"/></button>
+                     <button onClick={() => onDelete(company.id)} className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><TrashIcon className="w-5 h-5"/></button>
+                </div>
+            </div>
+            <button onClick={() => onSelect(company.id)} className="mt-4 w-full text-center py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all text-sm">
+                View Details
+            </button>
+        </div>
+    </div>
+);
 
 
 const CompanyManagement = ({ companies, onSelectCompany, onUpdateCompanies }) => {
@@ -175,11 +272,14 @@ const CompanyManagement = ({ companies, onSelectCompany, onUpdateCompanies }) =>
     const handleSave = (companyData) => {
         const isNew = !editingCompany;
         if (isNew) {
-            // Add new company (ensure it has a unique ID)
-            const newCompany = { ...companyData, id: companyData.name.toLowerCase().replace(/\s+/g, '_') + Date.now(), totalPassengers: 0, totalRevenue: 0 };
+            const newCompany = { 
+                ...companyData, 
+                id: companyData.name.toLowerCase().replace(/\s+/g, '_') + Date.now(), 
+                totalPassengers: 0, totalRevenue: 0, fleetSize: 0, weeklyIncome: [], dailyTickets: [], routes: [], fleetDetails: [], recentPassengers: [],
+                wallet: { balance: 0, currency: 'RWF', transactions: [] }
+            };
             onUpdateCompanies([...companies, newCompany]);
         } else {
-            // Update existing company
             onUpdateCompanies(companies.map(c => c.id === editingCompany.id ? { ...c, ...companyData } : c));
         }
         setIsModalOpen(false);
@@ -193,35 +293,151 @@ const CompanyManagement = ({ companies, onSelectCompany, onUpdateCompanies }) =>
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Manage Companies</h1>
             <button onClick={handleAdd} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
                 <PlusIcon className="w-5 h-5 mr-2" />
-                Add New Company
+                Add Company
             </button>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
-            <div className="overflow-x-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           {companies.map(company => (
+               <CompanyCard 
+                key={company.id} 
+                company={company} 
+                onSelect={onSelectCompany}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+               />
+           ))}
+        </div>
+        {isModalOpen && <CompanyFormModal company={editingCompany} onSave={handleSave} onClose={() => setIsModalOpen(false)} />}
+    </div>
+    )
+};
+
+const TransactionIcon = ({ type }) => {
+    const baseClasses = "w-8 h-8 rounded-full flex items-center justify-center mr-3";
+    if (type === 'payout') return <div className={`${baseClasses} bg-green-100 dark:bg-green-900/50`}><ArrowUpRightIcon className="w-4 h-4 text-green-500" /></div>;
+    if (type === 'fee') return <div className={`${baseClasses} bg-red-100 dark:bg-red-900/50`}><ArrowDownLeftIcon className="w-4 h-4 text-red-500" /></div>;
+    return <div className={`${baseClasses} bg-gray-100 dark:bg-gray-700`}><WalletIcon className="w-4 h-4 text-gray-500" /></div>;
+}
+
+const CompanyDetails = ({ company, onBack }) => {
+    const maxIncome = Math.max(...(company.weeklyIncome?.map(d => d.income) || [0]));
+    const maxTickets = Math.max(...(company.dailyTickets?.map(d => d.tickets) || [0]));
+    const [activeTab, setActiveTab] = useState('routes');
+
+    return (
+        <div className="space-y-8">
+             <button onClick={onBack} className="flex items-center text-gray-600 dark:text-gray-300 font-semibold hover:text-gray-800 dark:hover:text-white mb-2">
+                <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                Back to All Companies
+            </button>
+            <div className="flex items-center space-x-4">
+                <img src={company.logoUrl} alt={company.name} className="w-20 h-20 object-contain bg-white dark:bg-gray-700 p-2 rounded-full shadow-md"/>
+                <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-200">{company.name}</h1>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <StatCard title="Total Revenue" value={company.totalRevenue} icon={<ChartBarIcon className="w-6 h-6 text-blue-500" />} />
+                    <StatCard title="Total Passengers" value={company.totalPassengers} icon={<UsersIcon className="w-6 h-6 text-blue-500" />} />
+                    <div className="md:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                        <h3 className="font-bold mb-4 dark:text-white">Weekly Income (FRW)</h3>
+                        <div className="flex items-end h-40 space-x-2">
+                            {company.weeklyIncome.map(data => (
+                                <div key={data.day} className="flex-1 flex flex-col items-center justify-end group">
+                                    <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">{(data.income / 1000000).toFixed(1)}M</div>
+                                    <div className="w-full bg-green-200 dark:bg-green-800/80 rounded-t-lg hover:bg-green-300 dark:hover:bg-green-700 transition-colors" style={{height: `${(data.income / (maxIncome || 1)) * 100}%`}}></div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{data.day}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                 <div className="space-y-6">
+                    <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 rounded-xl shadow-lg">
+                        <p className="text-sm opacity-80">Wallet Balance</p>
+                        <p className="text-3xl font-bold mt-1 mb-4">{new Intl.NumberFormat('fr-RW').format(company.wallet.balance)} <span className="text-xl font-normal opacity-80">RWF</span></p>
+                        <h4 className="font-semibold text-sm border-t border-white/30 pt-3">Recent Transactions</h4>
+                        <ul className="text-xs mt-2 space-y-1">
+                            {company.wallet.transactions.slice(0, 2).map(tx => (
+                                <li key={tx.id} className="flex justify-between"><span className="opacity-80">{tx.description}</span> <span>{tx.amount.toLocaleString()}</span></li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+                        <h4 className="font-bold text-sm mb-2 dark:text-white">Credentials</h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Login Email:</p>
+                        <p className="text-sm text-gray-800 dark:text-gray-200 font-mono">{company.contactEmail}</p>
+                        <button className="mt-2 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">Reset Password</button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+                <div className="border-b border-gray-200 dark:border-gray-700">
+                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button onClick={() => setActiveTab('routes')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'routes' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500'}`}>Routes</button>
+                        <button onClick={() => setActiveTab('fleet')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'fleet' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500'}`}>Fleet</button>
+                        <button onClick={() => setActiveTab('passengers')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'passengers' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500'}`}>Recent Passengers</button>
+                    </nav>
+                </div>
+                <div className="pt-4 overflow-x-auto">
+                    {activeTab === 'routes' && (
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">From</th><th className="px-4 py-2">To</th><th className="px-4 py-2">Price</th><th className="px-4 py-2">Trips Today</th><th className="px-4 py-2">Avg. Passengers</th></tr></thead>
+                            <tbody>{company.routes.map(r => <tr key={`${r.from}-${r.to}`} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{r.from}</td><td className="px-4 py-2">{r.to}</td><td className="px-4 py-2">{r.price}</td><td className="px-4 py-2">{r.tripsToday}</td><td className="px-4 py-2">{r.avgPassengers}</td></tr>)}</tbody>
+                        </table>
+                    )}
+                    {activeTab === 'fleet' && (
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">ID</th><th className="px-4 py-2">Model</th><th className="px-4 py-2">Capacity</th><th className="px-4 py-2">Status</th><th className="px-4 py-2">Assigned Route</th></tr></thead>
+                            <tbody>{company.fleetDetails.map(f => <tr key={f.id} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{f.id}</td><td className="px-4 py-2">{f.model}</td><td className="px-4 py-2">{f.capacity}</td><td className="px-4 py-2"><span className={`px-2 py-1 text-xs rounded-full ${f.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{f.status}</span></td><td className="px-4 py-2">{f.assignedRoute}</td></tr>)}</tbody>
+                        </table>
+                    )}
+                     {activeTab === 'passengers' && (
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">Name</th><th className="px-4 py-2">Route</th><th className="px-4 py-2">Ticket ID</th><th className="px-4 py-2">Date</th></tr></thead>
+                            <tbody>{company.recentPassengers.map(p => <tr key={p.ticketId} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{p.name}</td><td className="px-4 py-2">{p.route}</td><td className="px-4 py-2">{p.ticketId}</td><td className="px-4 py-2">{p.date}</td></tr>)}</tbody>
+                        </table>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const TransactionsPage = ({ companies }) => {
+    const allTransactions = useMemo(() => {
+        return companies.flatMap(c => 
+            c.wallet.transactions.map(t => ({ ...t, companyName: c.name, logoUrl: c.logoUrl }))
+        ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [companies]);
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">All Transactions</h1>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
                 <table className="w-full text-sm text-left">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
-                            <th className="px-6 py-3">Company</th>
-                            <th className="px-6 py-3">Passengers</th>
-                            <th className="px-6 py-3">Revenue (FRW)</th>
-                            <th className="px-6 py-3">Actions</th>
+                            <th className="px-4 py-3">Company</th>
+                            <th className="px-4 py-3">Description</th>
+                            <th className="px-4 py-3">Date</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3 text-right">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {companies.map(company => (
-                            <tr key={company.id} className="border-b dark:border-gray-700">
-                                <td className="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center space-x-3">
-                                    <img src={company.logoUrl} alt={company.name} className="w-8 h-8 object-contain"/>
-                                    <span>{company.name}</span>
+                        {allTransactions.map((tx, index) => (
+                            <tr key={index} className="border-b dark:border-gray-700">
+                                <td className="px-4 py-3 font-medium text-gray-900 dark:text-white flex items-center space-x-2">
+                                    <img src={tx.logoUrl} alt={tx.companyName} className="w-6 h-6 object-contain"/>
+                                    <span>{tx.companyName}</span>
                                 </td>
-                                <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{company.totalPassengers.toLocaleString()}</td>
-                                <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{company.totalRevenue.toLocaleString()}</td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center space-x-2">
-                                        <button onClick={() => onSelectCompany(company.id)} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold">View Details</button>
-                                        <button onClick={() => handleEdit(company)} className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button onClick={() => handleDelete(company.id)} className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500"><TrashIcon className="w-5 h-5"/></button>
-                                    </div>
+                                <td className="px-4 py-3">{tx.description}</td>
+                                <td className="px-4 py-3">{tx.date}</td>
+                                <td className="px-4 py-3"><span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">{tx.status}</span></td>
+                                <td className={`px-4 py-3 text-right font-semibold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {new Intl.NumberFormat('fr-RW').format(tx.amount)}
                                 </td>
                             </tr>
                         ))}
@@ -229,82 +445,11 @@ const CompanyManagement = ({ companies, onSelectCompany, onUpdateCompanies }) =>
                 </table>
             </div>
         </div>
-        {isModalOpen && <CompanyFormModal company={editingCompany} onSave={handleSave} onClose={() => setIsModalOpen(false)} />}
-    </div>
-    )
-};
-
-const CompanyDetails = ({ company, onBack }) => {
-    const maxIncome = Math.max(...company.weeklyIncome.map(d => d.income));
-    const maxTickets = Math.max(...company.dailyTickets.map(d => d.tickets));
-
-    return (
-        <div>
-             <button onClick={onBack} className="flex items-center text-gray-600 dark:text-gray-300 font-semibold hover:text-gray-800 dark:hover:text-white mb-6">
-                <ArrowLeftIcon className="w-5 h-5 mr-2" />
-                Back to Companies
-            </button>
-            <div className="flex items-center space-x-4 mb-6">
-                <img src={company.logoUrl} alt={company.name} className="w-16 h-16 object-contain bg-white dark:bg-gray-700 p-2 rounded-full shadow-md"/>
-                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">{company.name}</h1>
-            </div>
-            
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard title="Total Revenue" value={`${(company.totalRevenue / 1_000_000_000).toFixed(2)}B FRW`} icon={<ChartBarIcon className="w-6 h-6 text-blue-500" />} format={false} />
-                <StatCard title="Total Passengers" value={`${(company.totalPassengers / 1_000_000).toFixed(1)}M`} icon={<UsersIcon className="w-6 h-6 text-blue-500" />} format={false} />
-                <StatCard title="Fleet Size" value={company.fleetSize} icon={<BusIcon className="w-6 h-6 text-blue-500" />} format={false}/>
-                <StatCard title="Active Routes" value={company.routes.length} icon={<MapIcon className="w-6 h-6 text-blue-500" />} format={false}/>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                    <h3 className="font-bold mb-4 dark:text-white">Weekly Income (FRW)</h3>
-                    <div className="flex items-end h-48 space-x-2">
-                        {company.weeklyIncome.map(data => (
-                            <div key={data.day} className="flex-1 flex flex-col items-center justify-end group">
-                                <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {(data.income / 1000000).toFixed(1)}M
-                                </div>
-                                <div className="w-full bg-green-200 dark:bg-green-800/80 rounded-t-lg hover:bg-green-300 dark:hover:bg-green-700 transition-colors" style={{height: `${(data.income / maxIncome) * 100}%`}}></div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{data.day}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                    <h3 className="font-bold mb-4 dark:text-white">Daily Tickets Sold</h3>
-                    <div className="flex items-end h-48 space-x-2">
-                        {company.dailyTickets.map(data => (
-                            <div key={data.day} className="flex-1 flex flex-col items-center justify-end group">
-                                <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {data.tickets}
-                                </div>
-                                <div className="w-full bg-yellow-200 dark:bg-yellow-800/80 rounded-t-lg hover:bg-yellow-300 dark:hover:bg-yellow-700 transition-colors" style={{height: `${(data.tickets / maxTickets) * 100}%`}}></div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{data.day}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Tables for Routes, Fleet, Passengers */}
-            <div className="space-y-8">
-                 <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
-                    <h3 className="font-bold mb-4 dark:text-white px-2">Route Management</h3>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                           {/* ... Table for Routes ... */}
-                        </table>
-                    </div>
-                </div>
-                {/* ... Other tables for Fleet and Passengers ... */}
-            </div>
-        </div>
     );
 };
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setTheme }) => {
-  const [view, setView] = useState('companies');
+  const [view, setView] = useState('dashboard');
   const [companies, setCompanies] = useState(mockCompaniesData);
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
 
@@ -324,6 +469,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
                     onSelectCompany={(id) => { setSelectedCompanyId(id); setView('companyDetails'); }}
                     onUpdateCompanies={setCompanies}
                 />;
+      case 'transactions':
+        return <TransactionsPage companies={companies} />;
       case 'companyDetails':
           return selectedCompany ? <CompanyDetails company={selectedCompany} onBack={() => setView('companies')} /> : <div>Company not found.</div>;
       case 'users':
@@ -336,7 +483,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
   };
 
   const NavLink = ({ viewName, label, icon: Icon }) => (
-      <button onClick={() => setView(viewName)} className={`w-full flex items-center px-4 py-3 transition-colors duration-200 ${view === viewName ? 'text-white bg-gray-700' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'} rounded-md`}>
+      <button onClick={() => setView(viewName)} className={`w-full flex items-center px-4 py-3 transition-colors duration-200 ${view === viewName || (view === 'companyDetails' && viewName === 'companies') ? 'text-white bg-gray-900 dark:bg-gray-700' : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'} rounded-md`}>
           <Icon className="w-5 h-5 mr-3" />
           <span>{label}</span>
       </button>
@@ -344,20 +491,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
 
   return (
     <div className={`min-h-screen flex ${theme}`}>
-      <aside className="w-64 bg-gray-800 text-gray-300 flex-col hidden lg:flex">
-        <div className="h-16 flex items-center justify-center text-white font-bold text-xl border-b border-gray-700">
+      <aside className="w-64 bg-gray-800 dark:bg-gray-900 text-gray-300 flex-col hidden lg:flex border-r border-gray-700 dark:border-gray-800">
+        <div className="h-16 flex items-center justify-center text-white font-bold text-xl border-b border-gray-700 dark:border-gray-800">
           RWANDA BUS ADMIN
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
             <NavLink viewName="dashboard" label="Dashboard" icon={ChartBarIcon} />
-            <NavLink viewName="companies" label="Ibigo" icon={BuildingOfficeIcon} />
-            <NavLink viewName="users" label="Abakoresha" icon={UsersIcon} />
-            <NavLink viewName="settings" label="Iboneza" icon={CogIcon} />
+            <NavLink viewName="companies" label="Companies" icon={BuildingOfficeIcon} />
+            <NavLink viewName="transactions" label="Transactions" icon={CreditCardIcon} />
+            <NavLink viewName="users" label="Users" icon={UsersIcon} />
+            <NavLink viewName="settings" label="Settings" icon={CogIcon} />
         </nav>
       </aside>
 
       <div className="flex-1 flex flex-col bg-gray-100 dark:bg-gray-900">
-        <header className="h-16 bg-white dark:bg-gray-800 shadow-md flex items-center justify-between lg:justify-end px-6">
+        <header className="h-16 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-between lg:justify-end px-6 border-b dark:border-gray-700">
            <div className="lg:hidden text-gray-800 dark:text-white font-bold text-lg">ADMIN</div>
           <div className="flex items-center space-x-4">
             <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
@@ -366,9 +514,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
             <button className="text-gray-500 dark:text-gray-400">
               <BellIcon className="w-6 h-6" />
             </button>
-            <div className="flex items-center space-x-2">
-              <UserCircleIcon className="w-8 h-8 text-gray-500 dark:text-gray-400" />
-            </div>
             <button
               onClick={onLogout}
               className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
@@ -378,8 +523,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
           </div>
         </header>
 
-        <main className="flex-1 p-6 overflow-y-auto">
-          {renderContent()}
+        <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+          <div className="animate-fade-in">
+            {renderContent()}
+          </div>
         </main>
       </div>
     </div>
