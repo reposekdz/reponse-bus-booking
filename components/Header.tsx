@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BusIcon, SunIcon, MoonIcon, BellIcon, MenuIcon, XIcon } from './icons';
+import { BusIcon, SunIcon, MoonIcon, BellIcon, MenuIcon, XIcon, UserCircleIcon } from './icons';
 import type { Page } from '../App';
 
 interface HeaderProps {
@@ -25,13 +25,23 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const navItems: { label: string; page: Page }[] = [
+  let navItems: { label: string; page: Page }[] = [
     { label: 'Ahabanza', page: 'home' },
     { label: 'Amatike Yanjye', page: 'bookings' },
     { label: 'Ibigo', page: 'companies' },
     { label: 'Ubufasha', page: 'help' },
     { label: 'Twandikire', page: 'contact' },
   ];
+  
+  if (isLoggedIn) {
+      navItems = [
+          { label: 'Ahabanza', page: 'home' },
+          { label: 'Amatike Yanjye', page: 'bookings' },
+          { label: 'Umwirondoro', page: 'profile' },
+          { label: 'Ibigo', page: 'companies' },
+          { label: 'Twandikire', page: 'contact' },
+      ]
+  }
   
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -88,12 +98,17 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
 
             <div className="hidden sm:flex items-center space-x-4">
               {isLoggedIn ? (
-                <button 
-                  onClick={onLogout}
-                  className="px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md text-sm font-semibold"
-                >
-                  Sohoka
-                </button>
+                <div className="flex items-center space-x-4">
+                  <button onClick={() => navigate('profile')} className="flex items-center text-gray-200 hover:text-yellow-300 transition-colors duration-300">
+                    <UserCircleIcon className="w-7 h-7" />
+                  </button>
+                  <button 
+                    onClick={onLogout}
+                    className="px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md text-sm font-semibold"
+                  >
+                    Sohoka
+                  </button>
+                </div>
               ) : (
                 <>
                   <button 
