@@ -16,12 +16,14 @@ import BottomNavigation from './components/BottomNavigation';
 import CompanyProfilePage from './CompanyProfilePage';
 import ProfilePage from './ProfilePage';
 import NextTripWidget from './components/NextTripWidget';
+import AdminDashboard from './AdminDashboard';
 
 export type Page = 'home' | 'login' | 'register' | 'bookings' | 'companies' | 'help' | 'contact' | 'searchResults' | 'seatSelection' | 'companyProfile' | 'profile';
 
 const App: React.FC = () => {
   const [page, setPage] = useState<Page>('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<'passenger' | 'admin' | null>(null);
   const [bookingData, setBookingData] = useState<any>(null);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -47,14 +49,24 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  const handleLogin = () => {
+  const handleLogin = (credentials: { email?: string, password?: string }) => {
+    // Admin Login Check
+    if (credentials.email === 'reponse@gmail.com' && credentials.password === '2025') {
+        setIsLoggedIn(true);
+        setUserRole('admin');
+        return;
+    }
+    
+    // Default to passenger login
     setIsLoggedIn(true);
+    setUserRole('passenger');
     setShowNextTripWidget(true); // Show widget on login
     setPage('home');
   };
   
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setUserRole(null);
     setShowNextTripWidget(false); // Hide widget on logout
     setPage('home');
   };
@@ -115,6 +127,10 @@ const App: React.FC = () => {
     }
   };
 
+  if (isLoggedIn && userRole === 'admin') {
+      return <AdminDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} />;
+  }
+
   return (
     <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 min-h-screen flex flex-col">
       <Header 
@@ -131,7 +147,7 @@ const App: React.FC = () => {
         </div>
       </main>
       <Footer />
-      {isLoggedIn && showNextTripWidget && (
+      {isLoggedIn && userRole === 'passenger' && showNextTripWidget && (
           <NextTripWidget trip={upcomingTripForWidget} onDismiss={() => setShowNextTripWidget(false)} onTrack={() => navigate('bookings')} />
       )}
       <BottomNavigation navigate={navigate} currentPage={page} />
