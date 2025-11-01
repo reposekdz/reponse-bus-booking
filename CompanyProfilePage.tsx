@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
-// FIX: Import `ArrowRightIcon` which was missing.
-import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon, ChatBubbleLeftRightIcon } from './components/icons';
+import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon, TagIcon } from './components/icons';
 import FleetDetailModal from './components/FleetDetailModal';
 import StarRating from './components/StarRating';
 
@@ -33,10 +32,14 @@ const mockCompanyData: { [key: string]: any } = {
         { author: 'Umutoni G.', rating: 4, comment: 'Bagerageza kugera ku gihe, ariko interineti ya WiFi ntiyakoraga neza.'},
     ],
     gallery: [
-        'https://www.ritco.rw/wp-content/uploads/2021/04/IMG-20210408-WA0002.jpg',
-        'https://www.ritco.rw/wp-content/uploads/2021/04/IMG_6733.jpg',
-        'https://fortune.rw/wp-content/uploads/2023/12/RITCO-to-acquire-150-new-buses-to-meet-festive-season-demand.jpg',
-        'https://pbs.twimg.com/media/Fxtp0bPWIAAh6-p.jpg',
+        { src: 'https://www.ritco.rw/wp-content/uploads/2021/04/IMG-20210408-WA0002.jpg', category: 'exterior' },
+        { src: 'https://www.ritco.rw/wp-content/uploads/2021/04/IMG_6733.jpg', category: 'interior' },
+        { src: 'https://fortune.rw/wp-content/uploads/2023/12/RITCO-to-acquire-150-new-buses-to-meet-festive-season-demand.jpg', category: 'exterior' },
+        { src: 'https://pbs.twimg.com/media/Fxtp0bPWIAAh6-p.jpg', category: 'exterior' },
+        { src: 'https://www.kigalitoday.com/IMG/jpg/ritco_bus_stop.jpg', category: 'staff' }
+    ],
+    promotions: [
+        { id: 'RITCO01', title: 'Igabanyirizwa ry\'Abanyeshuri', description: 'Bona 15% by\'igabanyirizwa ku ngendo zose werekanye ikarita y\'ishuri.', code: 'STUDENT15', expiryDate: '2024-12-31' }
     ]
   },
   volcano: {
@@ -68,10 +71,15 @@ const mockCompanyData: { [key: string]: any } = {
         { author: 'Mugisha F.', rating: 5, comment: 'Nta kundi navuga, Volcano ni abahanga! Buri gihe serivisi ni nziza.'},
     ],
     gallery: [
-        'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/1-1.jpg',
-        'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/DJI_0028-1.jpg',
-        'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/3-1.jpg',
-        'https://www.kigalitoday.com/IMG/jpg/volcano-2.jpg',
+        { src: 'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/1-1.jpg', category: 'interior' },
+        { src: 'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/DJI_0028-1.jpg', category: 'exterior' },
+        { src: 'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/3-1.jpg', category: 'interior' },
+        { src: 'https://www.kigalitoday.com/IMG/jpg/volcano-2.jpg', category: 'exterior' },
+        { src: 'https://live.staticflickr.com/4885/45920785752_11b33b708b_b.jpg', category: 'staff' },
+    ],
+    promotions: [
+        { id: 'VOLC01', title: 'Gura Itike ya Gatatu ku buntu!', description: 'Gura amatike abiri ajya Rubavu, ubone iya gatatu ku buntu. Byihuse, ibi ntibizatinze!', code: 'GENDANEZA', expiryDate: '2024-11-30' },
+        { id: 'VOLC02', title: 'Igabanyirizwa rya Weekend', description: 'Bona 10% by\'igabanyirizwa ku ngendo zose za weekend (Kuwa Gatanu - Ku Cyumweru).', code: 'WEEKEND10', expiryDate: '2024-12-22' }
     ]
   },
 };
@@ -89,6 +97,7 @@ const defaultCompanyData = {
     schedule: {},
     reviews: [],
     gallery: [],
+    promotions: [],
 }
 
 const AmenityIcon: React.FC<{ amenity: string; withText?: boolean }> = ({ amenity, withText = false }) => {
@@ -175,6 +184,7 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
   const [fromLocation, setFromLocation] = useState('');
   const [toLocation, setToLocation] = useState('');
   const [viewingPhotoIndex, setViewingPhotoIndex] = useState<number | null>(null);
+  const [galleryFilter, setGalleryFilter] = useState('all');
 
   const data = mockCompanyData[company.id] || defaultCompanyData;
   const averageRating = data.reviews.length > 0 ? data.reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / data.reviews.length : 0;
@@ -186,6 +196,11 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
   }, [fromLocation, data.routes]);
   
   const scheduleForRoute = data.schedule[`${fromLocation}-${toLocation}`] || [];
+
+  const filteredGallery = useMemo(() => {
+    if (galleryFilter === 'all') return data.gallery;
+    return data.gallery.filter((img: any) => img.category === galleryFilter);
+  }, [galleryFilter, data.gallery]);
 
   const TabButton: React.FC<{tabName: string; label: string}> = ({ tabName, label }) => (
     <button
@@ -226,11 +241,10 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                 <nav className="flex space-x-4">
                     <TabButton tabName="about" label="Abo Turi Bo" />
                     <TabButton tabName="schedule" label="Jadwali y'Ingendo" />
+                    <TabButton tabName="promotions" label="Amashya" />
                     <TabButton tabName="reviews" label="Ibisubizo" />
-                    <TabButton tabName="routes" label="Ingendo Zose" />
-                    <TabButton tabName="fleet" label="Imodoka" />
                     <TabButton tabName="gallery" label="Amashusho" />
-                    <TabButton tabName="services" label="Serivisi" />
+                    <TabButton tabName="fleet" label="Imodoka" />
                     <TabButton tabName="contact" label="Twandikire" />
                 </nav>
             </div>
@@ -297,33 +311,30 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                      </div>
                 </div>
               )}
-               {activeTab === 'routes' && (
-                <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg shadow-sm border dark:border-gray-700/50">
-                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Ingendo Zose</h3>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3">Uva</th>
-                                    <th scope="col" className="px-6 py-3">Ujya</th>
-                                    <th scope="col" className="px-6 py-3">Igiciro</th>
-                                    <th scope="col" className="px-6 py-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {data.routes.map((route: any, index: number) => (
-                                    <tr key={index} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                        <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{route.from}</td>
-                                        <td className="px-6 py-4">{route.to}</td>
-                                        <td className="px-6 py-4 font-semibold text-green-600 dark:text-green-400">{route.price}</td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button onClick={() => onSelectTrip(route.from, route.to)} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Gura Itike</button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+               {activeTab === 'promotions' && (
+                <div>
+                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Amashya Ariho</h3>
+                    {data.promotions.length > 0 ? (
+                        <div className="space-y-6">
+                            {data.promotions.map((promo: any) => (
+                                <div key={promo.id} className="bg-gradient-to-r from-yellow-50 to-blue-50 dark:from-gray-800/50 dark:to-blue-900/20 p-6 rounded-lg border-l-4 border-yellow-400">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h4 className="text-lg font-bold text-gray-800 dark:text-white">{promo.title}</h4>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{promo.description}</p>
+                                        </div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">Birangira: {promo.expiryDate}</div>
+                                    </div>
+                                    <div className="mt-4 flex items-center space-x-4">
+                                        <div className="font-mono text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 px-3 py-1 rounded-md border-2 border-dashed border-blue-300 dark:border-blue-700">
+                                            {promo.code}
+                                        </div>
+                                        <button onClick={() => navigator.clipboard.writeText(promo.code).then(() => alert('Code copied!'))} className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">Koporora Kode</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : <p className="text-gray-500 dark:text-gray-400">Nta mashya ariho ubu.</p>}
                 </div>
               )}
               {activeTab === 'fleet' && (
@@ -361,31 +372,24 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                {activeTab === 'gallery' && (
                 <div>
                     <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Amashusho</h3>
-                    {data.gallery.length > 0 ? (
+                    <div className="flex items-center space-x-2 mb-6 border-b dark:border-gray-700 pb-3">
+                        <button onClick={() => setGalleryFilter('all')} className={`px-3 py-1 text-sm rounded-full ${galleryFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>Byose</button>
+                        <button onClick={() => setGalleryFilter('interior')} className={`px-3 py-1 text-sm rounded-full ${galleryFilter === 'interior' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>Bisi Imbere</button>
+                        <button onClick={() => setGalleryFilter('exterior')} className={`px-3 py-1 text-sm rounded-full ${galleryFilter === 'exterior' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>Hanze</button>
+                        <button onClick={() => setGalleryFilter('staff')} className={`px-3 py-1 text-sm rounded-full ${galleryFilter === 'staff' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>Abakozi</button>
+                    </div>
+                    {filteredGallery.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {data.gallery.map((img: string, index: number) => (
-                                <button key={index} onClick={() => setViewingPhotoIndex(index)} className="aspect-square rounded-lg overflow-hidden group relative">
-                                    <img src={img} alt={`Gallery image ${index + 1}`} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300" />
+                            {filteredGallery.map((img: any, index: number) => (
+                                <button key={index} onClick={() => setViewingPhotoIndex(data.gallery.findIndex(g => g.src === img.src))} className="aspect-square rounded-lg overflow-hidden group relative">
+                                    <img src={img.src} alt={`Gallery image ${index + 1}`} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300" />
                                     <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                         <CameraIcon className="w-8 h-8 text-white" />
                                     </div>
                                 </button>
                             ))}
                         </div>
-                    ) : <p className="text-gray-500 dark:text-gray-400">Nta mashusho arahari.</p>}
-                </div>
-              )}
-              {activeTab === 'services' && (
-                <div>
-                    <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Serivisi ku Bagenzi</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">Dutanga serivisi zitandukanye kugira ngo urugendo rwawe rube rwiza.</p>
-                    {data.services.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {data.services.map((service: string, index: number) => (
-                                <AmenityIcon key={index} amenity={service} withText />
-                            ))}
-                        </div>
-                    ) : <p className="text-gray-500 dark:text-gray-400">Amakuru ya serivisi ntazwi.</p>}
+                    ) : <p className="text-gray-500 dark:text-gray-400">Nta mashusho ahari muri iki cyiciro.</p>}
                 </div>
               )}
                {activeTab === 'contact' && (
@@ -480,7 +484,7 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
         </div>
       </div>
       {selectedBus && <FleetDetailModal bus={selectedBus} onClose={() => setSelectedBus(null)} />}
-      {viewingPhotoIndex !== null && <PhotoViewerModal images={data.gallery} startIndex={viewingPhotoIndex} onClose={() => setViewingPhotoIndex(null)} />}
+      {viewingPhotoIndex !== null && <PhotoViewerModal images={data.gallery.map(g => g.src)} startIndex={viewingPhotoIndex} onClose={() => setViewingPhotoIndex(null)} />}
     </div>
   );
 };
