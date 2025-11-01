@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { UserCircleIcon, TicketIcon, CogIcon, ShieldCheckIcon, CreditCardIcon, InformationCircleIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon } from './components/icons';
+import React, { useState, useMemo } from 'react';
+// FIX: Add missing icon imports
+import { UserCircleIcon, CogIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon, ChartBarIcon, SearchIcon, BusIcon, BuildingOfficeIcon, MapPinIcon } from './components/icons';
 import StarRating from './components/StarRating';
 
 
@@ -26,6 +27,29 @@ const userReviews = [
     { id: 2, company: 'RITCO', rating: 4, date: '15 Kanama, 2024', comment: 'Urugendo rwari rwiza muri rusange, ariko interineti ya WiFi ntiyakoraga neza.'},
     { id: 3, company: 'Horizon Express', rating: 5, date: '01 Gicurasi, 2024', comment: 'Bisi nziza cyane kandi zihuta. Umushoferi yari umunyamwuga.'},
 ];
+
+const travelHistory = [
+    { id: 1, company: 'Volcano Express', from: 'Kigali', to: 'Rubavu', date: '2024-10-25', price: 9000, logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png' },
+    { id: 2, company: 'RITCO', from: 'Kigali', to: 'Nyungwe', date: '2024-10-18', price: 7000, logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg' },
+    { id: 3, company: 'Horizon Express', from: 'Huye', to: 'Musanze', date: '2024-09-15', price: 5000, logoUrl: 'https://media.jobinrwanda.com/logo/horizon-express-ltd-1681284534.png' },
+    { id: 4, company: 'Volcano Express', from: 'Kigali', to: 'Musanze', date: '2024-09-10', price: 7000, logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png' },
+    { id: 5, company: 'RITCO', from: 'Kigali', to: 'Huye', date: '2024-08-22', price: 6000, logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg' },
+    { id: 6, company: 'Volcano Express', from: 'Rubavu', to: 'Kigali', date: '2024-08-05', price: 9000, logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png' },
+    { id: 7, company: 'STELLART', from: 'Kigali', to: 'Rusizi', date: '2024-07-19', price: 8500, logoUrl: null },
+    { id: 8, company: 'RITCO', from: 'Huye', to: 'Kigali', date: '2024-07-02', price: 6000, logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg' },
+];
+
+const StatCard: React.FC<{title: string; value: string; icon: React.ReactNode}> = ({ title, value, icon }) => (
+    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl flex items-center space-x-4">
+        <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+            {icon}
+        </div>
+        <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
+            <p className="text-lg font-bold text-gray-800 dark:text-white">{value}</p>
+        </div>
+    </div>
+);
 
 
 const TabButton: React.FC<{label: string; isActive: boolean; onClick: () => void, icon: React.FC<{className?: string}>}> = ({ label, isActive, onClick, icon: Icon}) => (
@@ -60,12 +84,53 @@ const SettingToggle: React.FC<{ label: string; description: string; enabled: boo
 
 
 const ProfilePage: React.FC = () => {
-    const [activeTab, setActiveTab] = useState('wallet');
+    const [activeTab, setActiveTab] = useState('analytics');
+    const [searchTerm, setSearchTerm] = useState('');
     const [notificationSettings, setNotificationSettings] = useState({
         promotions: true,
         tripReminders: true,
         accountUpdates: false
     });
+    
+    // Analytics calculations
+    const analytics = useMemo(() => {
+        // FIX: Add explicit type to accumulator to ensure correct type inference.
+        const companyCounts = travelHistory.reduce((acc: Record<string, number>, trip) => {
+            acc[trip.company] = (acc[trip.company] || 0) + 1;
+            return acc;
+        }, {});
+
+        const favoriteCompany = Object.keys(companyCounts).reduce((a, b) => companyCounts[a] > companyCounts[b] ? a : b, '');
+
+        // FIX: Add explicit type to accumulator to ensure correct type inference.
+        const destinationCounts = travelHistory.reduce((acc: Record<string, number>, trip) => {
+            acc[trip.to] = (acc[trip.to] || 0) + 1;
+            return acc;
+        }, {});
+        
+        const mostVisitedCity = Object.keys(destinationCounts).reduce((a, b) => destinationCounts[a] > destinationCounts[b] ? a : b, '');
+
+        // FIX: Add explicit type to accumulator to ensure correct type inference.
+        const monthlySpending = travelHistory.reduce((acc: Record<string, number>, trip) => {
+            const month = new Date(trip.date).toLocaleString('default', { month: 'short', year: '2-digit' });
+            acc[month] = (acc[month] || 0) + trip.price;
+            return acc;
+        }, {});
+
+        return { favoriteCompany, mostVisitedCity, monthlySpending };
+    }, []);
+
+    const maxSpending = Math.max(...Object.values(analytics.monthlySpending), 0);
+    
+    const filteredHistory = useMemo(() => {
+        if (!searchTerm) return travelHistory;
+        return travelHistory.filter(trip => 
+            trip.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            trip.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            trip.to.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [searchTerm]);
+
 
     const handleToggle = (setting: keyof typeof notificationSettings) => {
         setNotificationSettings(prev => ({...prev, [setting]: !prev[setting]}));
@@ -89,11 +154,79 @@ const ProfilePage: React.FC = () => {
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
                     <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
                         <div className="flex items-center space-x-2 overflow-x-auto custom-scrollbar pb-2">
+                           <TabButton label="Uko Ugena" isActive={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} icon={ChartBarIcon}/>
                            <TabButton label="Ikofi & Ibikorwa" isActive={activeTab === 'wallet'} onClick={() => setActiveTab('wallet')} icon={WalletIcon} />
                            <TabButton label="Ibisubizo Byanjye" isActive={activeTab === 'reviews'} onClick={() => setActiveTab('reviews')} icon={ChatBubbleLeftRightIcon}/>
                            <TabButton label="Iboneza" isActive={activeTab === 'settings'} onClick={() => setActiveTab('settings')} icon={CogIcon} />
                         </div>
                     </div>
+                    
+                    {activeTab === 'analytics' && (
+                        <div className="animate-fade-in space-y-8">
+                            <div>
+                                <h3 className="text-xl font-bold mb-4 dark:text-white">Imibare y'Ingendo</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <StatCard title="Ingendo Zose" value={travelHistory.length.toString()} icon={<BusIcon className="w-6 h-6 text-blue-600" />} />
+                                    <StatCard title="Ikigo Ukunda" value={analytics.favoriteCompany} icon={<BuildingOfficeIcon className="w-6 h-6 text-blue-600" />} />
+                                    <StatCard title="Aho Ujya Cyane" value={analytics.mostVisitedCity} icon={<MapPinIcon className="w-6 h-6 text-blue-600" />} />
+                                </div>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold mb-4 dark:text-white">Amafaranga Wakoresheje</h3>
+                                <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                                    <div className="flex items-end h-48 space-x-2">
+                                        {Object.entries(analytics.monthlySpending).map(([month, amount]) => (
+                                            <div key={month} className="flex-1 flex flex-col items-center justify-end group">
+                                                <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {new Intl.NumberFormat('fr-RW').format(amount)}
+                                                </div>
+                                                <div className="w-full bg-blue-200 dark:bg-blue-800/80 rounded-t-lg hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors" style={{height: `${(amount / maxSpending) * 100}%`}}></div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{month}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                             <div>
+                                <h3 className="text-xl font-bold mb-4 dark:text-white">Amateka y'Ingendo</h3>
+                                <div className="relative mb-4">
+                                     <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <input 
+                                        type="text"
+                                        placeholder="Shakisha ikigo, aho wavuye, cyangwa aho wagiye..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
+                                    />
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                            <tr>
+                                                <th className="px-4 py-3">Ikigo</th>
+                                                <th className="px-4 py-3">Urugendo</th>
+                                                <th className="px-4 py-3">Itariki</th>
+                                                <th className="px-4 py-3 text-right">Igiciro</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredHistory.map(trip => (
+                                                <tr key={trip.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-white flex items-center space-x-3">
+                                                        {trip.logoUrl ? <img src={trip.logoUrl} alt={trip.company} className="w-6 h-6 object-contain"/> : <div className="w-6 h-6 bg-gray-200 dark:bg-gray-600 rounded-full"></div>}
+                                                        <span>{trip.company}</span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{trip.from} &rarr; {trip.to}</td>
+                                                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{new Date(trip.date).toLocaleDateString('en-GB', {day:'2-digit', month: 'short', year: 'numeric'})}</td>
+                                                    <td className="px-4 py-3 font-semibold text-right text-gray-800 dark:text-gray-200">{new Intl.NumberFormat('fr-RW').format(trip.price)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {activeTab === 'wallet' && (
                         <div className="animate-fade-in">
