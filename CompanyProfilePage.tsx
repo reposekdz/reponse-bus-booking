@@ -75,31 +75,52 @@ const defaultCompanyData = {
     reviews: []
 }
 
-const AmenityIcon: React.FC<{ amenity: string; withText?: boolean }> = ({ amenity, withText=false }) => {
+const AmenityIcon: React.FC<{ amenity: string; withText?: boolean }> = ({ amenity, withText = false }) => {
     const iconClass = withText ? "w-6 h-6 text-blue-600 dark:text-blue-400" : "w-4 h-4 text-gray-500 dark:text-gray-400";
     const containerClass = withText ? "flex flex-col items-center text-center p-4 rounded-lg bg-gray-100 dark:bg-gray-800" : "";
     
     let IconComponent;
+    let text = amenity;
+
     switch (amenity) {
-        case 'WiFi': IconComponent = WifiIcon; break;
-        case 'Air Conditioning': IconComponent = AcIcon; break;
-        case 'Charging Ports': IconComponent = PowerIcon; break;
-        case 'On-board Restroom': IconComponent = UsersIcon; break;
-        case 'Luggage Allowance': IconComponent = BriefcaseIcon; break;
-        case 'On-board Entertainment': IconComponent = TvIcon; break;
-        case 'Safety Briefing': IconComponent = ShieldCheckIcon; break;
-        default: return null;
+        case 'WiFi':
+            IconComponent = WifiIcon;
+            break;
+        case 'AC':
+        case 'Air Conditioning':
+            IconComponent = AcIcon;
+            text = 'Air Conditioning';
+            break;
+        case 'Charging':
+        case 'Charging Ports':
+            IconComponent = PowerIcon;
+            text = 'Charging Ports';
+            break;
+        case 'On-board Restroom':
+            IconComponent = UsersIcon;
+            break;
+        case 'Luggage Allowance':
+            IconComponent = BriefcaseIcon;
+            break;
+        case 'On-board Entertainment':
+            IconComponent = TvIcon;
+            break;
+        case 'Safety Briefing':
+            IconComponent = ShieldCheckIcon;
+            break;
+        default:
+            return null;
     }
     
     if (withText) {
         return (
             <div className={containerClass}>
                 <IconComponent className={iconClass} />
-                <span className="text-sm mt-2 text-gray-700 dark:text-gray-300">{amenity}</span>
+                <span className="text-sm mt-2 text-gray-700 dark:text-gray-300">{text}</span>
             </div>
         );
     }
-    return <IconComponent className={iconClass} />;
+    return <IconComponent className={iconClass} title={text} />;
 };
 
 
@@ -234,18 +255,25 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                   <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Imodoka Zacu</h3>
                   {data.fleet.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {data.fleet.map((bus: any, index: number) => (
-                            <button key={index} onClick={() => setSelectedBus(bus)} className="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform text-left group">
-                                <div className="relative">
-                                    <img src={bus.image} alt={bus.name} className="w-full h-40 object-cover" />
-                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 bg-white/80 dark:bg-black/80 text-sm font-bold rounded-full opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">Reba Ibindi</div>
+                        {data.fleet.map((bus: any) => (
+                            <button key={bus.id} onClick={() => setSelectedBus(bus)} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 text-left group border dark:border-gray-700/50 hover:shadow-yellow-400/20">
+                                <div className="relative h-40">
+                                    <img src={bus.image} alt={bus.name} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                    <div className="absolute bottom-0 left-0 p-4 text-white">
+                                        <h4 className="font-bold text-lg">{bus.name}</h4>
+                                        <p className="text-sm text-gray-200">Imyanya: {bus.capacity}</p>
+                                    </div>
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <span className="px-4 py-2 bg-white text-gray-800 text-sm font-bold rounded-full">Reba Ibindi</span>
+                                    </div>
                                 </div>
                                 <div className="p-4">
-                                    <h4 className="font-bold">{bus.name}</h4>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Imyanya: {bus.capacity}</p>
-                                    <div className="flex space-x-3 mt-2">
-                                        {bus.amenities.map((amenity: string) => <AmenityIcon key={amenity} amenity={amenity} />)}
+                                    <h5 className="text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold mb-3">Ibyiza by'imbere</h5>
+                                    <div className="flex flex-wrap gap-x-4 gap-y-2">
+                                        {bus.amenities.length > 0 ? bus.amenities.map((amenity: string) => (
+                                            <AmenityIcon key={amenity} amenity={amenity} />
+                                        )) : <p className="text-sm text-gray-500">Nta byiza by'imbere byihariye.</p>}
                                     </div>
                                 </div>
                             </button>
