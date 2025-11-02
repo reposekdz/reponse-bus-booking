@@ -2,7 +2,7 @@ import React, { useState, useMemo, ChangeEvent, FormEvent, useEffect } from 'rea
 import { 
     SunIcon, MoonIcon, BellIcon, CogIcon, UsersIcon, ChartBarIcon, BuildingOfficeIcon, 
     ArrowLeftIcon, PlusIcon, PencilSquareIcon, TrashIcon, ArrowUpTrayIcon, SearchIcon, MapIcon, BusIcon, XIcon,
-    WalletIcon, CreditCardIcon, TagIcon, ShieldCheckIcon, PaintBrushIcon, LanguageIcon, LockClosedIcon
+    WalletIcon, CreditCardIcon, TagIcon, ShieldCheckIcon, PaintBrushIcon, LanguageIcon, LockClosedIcon, ClockIcon
 } from './components/icons';
 import ActivityFeed from './components/ActivityFeed';
 
@@ -121,8 +121,9 @@ const mockUsersData = [
 ];
 
 const StatCard = ({ title, value, icon, format = true }) => (
-    <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg relative overflow-hidden group">
-        <div className="absolute -right-4 -bottom-4 text-gray-200/20 dark:text-gray-900/20 group-hover:scale-110 transition-transform duration-300">
+    <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg relative overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-transparent to-green-100 dark:from-blue-900/30 dark:via-transparent dark:to-green-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="absolute -right-4 -bottom-4 text-gray-200/20 dark:text-gray-900/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
             {React.cloneElement(icon, { className: "w-28 h-28" })}
         </div>
         <div className="relative">
@@ -317,6 +318,75 @@ const CompanyCard: React.FC<{
     </div>
 );
 
+// FIX: Add missing RouteFormModal component definition
+const RouteFormModal = ({ route, companies, onSave, onClose, companyId: defaultCompanyId }) => {
+    const [formData, setFormData] = useState({
+        companyId: route?.companyId || defaultCompanyId || (companies.length > 0 ? companies[0].id : ''),
+        from: route?.from || '',
+        to: route?.to || '',
+        price: route?.price || 0,
+        tripsToday: route?.tripsToday || 0,
+        avgPassengers: route?.avgPassengers || 0,
+    });
+    const isNew = !route;
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        setFormData(prev => ({ ...prev, [name]: type === 'number' ? Number(value) : value }));
+    };
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-lg w-full">
+                <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-bold dark:text-white">{isNew ? 'Add New Route' : 'Edit Route'}</h2>
+                        <button type="button" onClick={onClose} className="p-1 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"><XIcon className="w-6 h-6" /></button>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium dark:text-gray-300">Company</label>
+                        <select name="companyId" value={formData.companyId} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required disabled={!isNew || !!defaultCompanyId}>
+                            {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm font-medium dark:text-gray-300">From</label>
+                            <input name="from" type="text" value={formData.from} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium dark:text-gray-300">To</label>
+                            <input name="to" type="text" value={formData.to} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-3 gap-4">
+                        <div>
+                            <label className="text-sm font-medium dark:text-gray-300">Price</label>
+                            <input name="price" type="number" value={formData.price} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium dark:text-gray-300">Trips/Day</label>
+                            <input name="tripsToday" type="number" value={formData.tripsToday} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                        </div>
+                         <div>
+                            <label className="text-sm font-medium dark:text-gray-300">Avg. Pax</label>
+                            <input name="avgPassengers" type="number" value={formData.avgPassengers} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                        </div>
+                    </div>
+                    <div className="flex justify-end space-x-4 pt-4 border-t dark:border-gray-700">
+                        <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg dark:border-gray-600 dark:text-gray-300">Cancel</button>
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Save Route</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 const CompanyManagement = ({ companies, onSelectCompany, onUpdateCompanies }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -403,7 +473,7 @@ const BarChart = ({ data, dataKey, labelKey, title, colorClass }) => {
     );
 };
 
-const CompanyDetails = ({ company, onBack }) => {
+const CompanyDetails = ({ company, onBack, setModal }) => {
     const [activeTab, setActiveTab] = useState('routes');
 
     return (
@@ -450,24 +520,45 @@ const CompanyDetails = ({ company, onBack }) => {
 
             <div className="bg-white dark:bg-gray-800/50 p-4 rounded-xl shadow-md">
                 <div className="border-b border-gray-200 dark:border-gray-700">
-                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                    <nav className="-mb-px flex space-x-8 overflow-x-auto custom-scrollbar" aria-label="Tabs">
                         <button onClick={() => setActiveTab('routes')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'routes' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500'}`}>Ingendo</button>
                         <button onClick={() => setActiveTab('fleet')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'fleet' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500'}`}>Imodoka</button>
+                        <button onClick={() => setActiveTab('schedule')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'schedule' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500'}`}>Jadwali</button>
+                        <button onClick={() => setActiveTab('promotions')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'promotions' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500'}`}>Amashya</button>
                         <button onClick={() => setActiveTab('passengers')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'passengers' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500'}`}>Abagenzi ba Vuba</button>
                     </nav>
                 </div>
                 <div className="pt-4 overflow-x-auto">
                     {activeTab === 'routes' && (
+                        <>
+                        <div className="flex justify-end mb-2"><button onClick={() => setModal({ type: 'route', data: { companyId: company.id }})} className="flex items-center bg-blue-500 text-white px-3 py-1 rounded-md text-sm font-semibold hover:bg-blue-600"><PlusIcon className="w-4 h-4 mr-1"/>Ongeramo</button></div>
                         <table className="w-full text-sm text-left">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">Uva</th><th className="px-4 py-2">Ujya</th><th className="px-4 py-2">Igiciro</th><th className="px-4 py-2">Ingendo ku munsi</th><th className="px-4 py-2">Abagenzi (avg)</th></tr></thead>
-                            <tbody>{company.routes.map(r => <tr key={r.id} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{r.from}</td><td className="px-4 py-2">{r.to}</td><td className="px-4 py-2">{r.price}</td><td className="px-4 py-2">{r.tripsToday}</td><td className="px-4 py-2">{r.avgPassengers}</td></tr>)}</tbody>
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">Uva</th><th className="px-4 py-2">Ujya</th><th className="px-4 py-2">Igiciro</th><th className="px-4 py-2">Ingendo/Munsi</th><th className="px-4 py-2">Ibyo Gukora</th></tr></thead>
+                            <tbody>{company.routes.map(r => <tr key={r.id} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{r.from}</td><td className="px-4 py-2">{r.to}</td><td className="px-4 py-2">{r.price}</td><td className="px-4 py-2">{r.tripsToday}</td>
+                            <td className="px-4 py-2 flex items-center space-x-2"><button onClick={() => setModal({ type: 'route', data: { companyId: company.id, route: r }})}><PencilSquareIcon className="w-5 h-5 text-gray-500 hover:text-blue-600"/></button><button onClick={() => setModal({ type: 'delete_route', data: { companyId: company.id, routeId: r.id } })}><TrashIcon className="w-5 h-5 text-gray-500 hover:text-red-600"/></button></td></tr>)}</tbody>
                         </table>
+                        </>
                     )}
                     {activeTab === 'fleet' && (
+                         <>
+                        <div className="flex justify-end mb-2"><button onClick={() => setModal({ type: 'fleet', data: { companyId: company.id }})} className="flex items-center bg-blue-500 text-white px-3 py-1 rounded-md text-sm font-semibold hover:bg-blue-600"><PlusIcon className="w-4 h-4 mr-1"/>Ongeramo</button></div>
                         <table className="w-full text-sm text-left">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">ID</th><th className="px-4 py-2">Ubwoko</th><th className="px-4 py-2">Imyanya</th><th className="px-4 py-2">Uko Ihagaze</th><th className="px-4 py-2">Urugendo Ikora</th></tr></thead>
-                            <tbody>{company.fleetDetails.map(f => <tr key={f.id} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{f.id}</td><td className="px-4 py-2">{f.model}</td><td className="px-4 py-2">{f.capacity}</td><td className="px-4 py-2"><span className={`px-2 py-1 text-xs rounded-full ${f.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{f.status}</span></td><td className="px-4 py-2">{f.assignedRoute}</td></tr>)}</tbody>
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">ID</th><th className="px-4 py-2">Ubwoko</th><th className="px-4 py-2">Imyanya</th><th className="px-4 py-2">Uko Ihagaze</th><th className="px-4 py-2">Ibyo Gukora</th></tr></thead>
+                            <tbody>{company.fleetDetails.map(f => <tr key={f.id} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{f.id}</td><td className="px-4 py-2">{f.model}</td><td className="px-4 py-2">{f.capacity}</td><td className="px-4 py-2"><span className={`px-2 py-1 text-xs rounded-full ${f.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{f.status}</span></td>
+                            <td className="px-4 py-2 flex items-center space-x-2"><button onClick={() => setModal({ type: 'fleet', data: { companyId: company.id, bus: f }})}><PencilSquareIcon className="w-5 h-5 text-gray-500 hover:text-blue-600"/></button><button onClick={() => setModal({ type: 'delete_fleet', data: { companyId: company.id, busId: f.id } })}><TrashIcon className="w-5 h-5 text-gray-500 hover:text-red-600"/></button></td></tr>)}</tbody>
                         </table>
+                        </>
+                    )}
+                    {activeTab === 'schedule' && <SchedulingManagement company={company} setModal={setModal} />}
+                    {activeTab === 'promotions' && (
+                         <>
+                        <div className="flex justify-end mb-2"><button onClick={() => setModal({ type: 'promotion', data: { companyId: company.id }})} className="flex items-center bg-blue-500 text-white px-3 py-1 rounded-md text-sm font-semibold hover:bg-blue-600"><PlusIcon className="w-4 h-4 mr-1"/>Ongeramo</button></div>
+                        <table className="w-full text-sm text-left">
+                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">Izina</th><th className="px-4 py-2">Kode</th><th className="px-4 py-2">Irangira</th><th className="px-4 py-2">Ibyo Gukora</th></tr></thead>
+                            <tbody>{company.promotions.map(p => <tr key={p.id} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{p.title}</td><td className="px-4 py-2 font-mono">{p.code}</td><td className="px-4 py-2">{p.expiryDate}</td>
+                            <td className="px-4 py-2 flex items-center space-x-2"><button onClick={() => setModal({ type: 'promotion', data: { companyId: company.id, promo: p }})}><PencilSquareIcon className="w-5 h-5 text-gray-500 hover:text-blue-600"/></button><button onClick={() => setModal({ type: 'delete_promotion', data: { companyId: company.id, promoId: p.id } })}><TrashIcon className="w-5 h-5 text-gray-500 hover:text-red-600"/></button></td></tr>)}</tbody>
+                        </table>
+                        </>
                     )}
                      {activeTab === 'passengers' && (
                         <table className="w-full text-sm text-left">
@@ -490,6 +581,27 @@ const CompanyDetails = ({ company, onBack }) => {
         </div>
     );
 };
+
+const SchedulingManagement = ({ company, setModal }) => {
+    const [selectedRoute, setSelectedRoute] = useState(company.routes[0] ? `${company.routes[0].from}-${company.routes[0].to}` : '');
+    const currentSchedules = company.schedule[selectedRoute] || [];
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-4">
+                <select value={selectedRoute} onChange={e => setSelectedRoute(e.target.value)} className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                    {company.routes.map(r => <option key={r.id} value={`${r.from}-${r.to}`}>{r.from} to {r.to}</option>)}
+                </select>
+                <button onClick={() => setModal({ type: 'schedule', data: { companyId: company.id, route: selectedRoute }})} className="flex items-center bg-blue-500 text-white px-3 py-1 rounded-md text-sm font-semibold hover:bg-blue-600"><PlusIcon className="w-4 h-4 mr-1"/>Ongeramo</button>
+            </div>
+            <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">Isaha</th><th className="px-4 py-2">Bisi ID</th><th className="px-4 py-2">Igiciro</th><th className="px-4 py-2">Ibyo Gukora</th></tr></thead>
+                <tbody>{currentSchedules.map(s => <tr key={s.id} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{s.time}</td><td className="px-4 py-2">{s.busId}</td><td className="px-4 py-2">{s.price}</td>
+                <td className="px-4 py-2 flex items-center space-x-2"><button onClick={() => setModal({ type: 'schedule', data: { companyId: company.id, route: selectedRoute, schedule: s }})}><PencilSquareIcon className="w-5 h-5 text-gray-500 hover:text-blue-600"/></button><button onClick={() => setModal({ type: 'delete_schedule', data: { companyId: company.id, route: selectedRoute, scheduleId: s.id } })}><TrashIcon className="w-5 h-5 text-gray-500 hover:text-red-600"/></button></td></tr>)}</tbody>
+            </table>
+        </div>
+    )
+}
 
 const TransactionsPage = ({ companies }) => {
     const allTransactions = useMemo(() => {
@@ -615,54 +727,6 @@ const UserManagementPage = () => {
         </div>
     );
 };
-
-const RouteFormModal = ({ route, companies, onSave, onClose }) => {
-    const [formData, setFormData] = useState(route || {
-        companyId: companies[0]?.id || '',
-        from: '', to: '', price: '', tripsToday: '', avgPassengers: ''
-    });
-    const isNew = !route;
-
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        onSave(formData);
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-lg w-full relative">
-                <button onClick={onClose} className="absolute top-4 right-4 p-1 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"><XIcon className="w-6 h-6" /></button>
-                <form onSubmit={handleSubmit} className="p-8 space-y-4">
-                    <h2 className="text-xl font-bold dark:text-white">{isNew ? 'Ongeramo Urugendo Rushya' : 'Hindura Urugendo'}</h2>
-                    <div>
-                        <label className="text-sm font-medium dark:text-gray-300">Ikigo</label>
-                        <select name="companyId" value={formData.companyId} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" disabled={!isNew} required>
-                            {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                         <div><label className="text-sm">Uva</label><input name="from" type="text" value={formData.from} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/></div>
-                         <div><label className="text-sm">Ujya</label><input name="to" type="text" value={formData.to} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/></div>
-                    </div>
-                     <div className="grid grid-cols-3 gap-4">
-                        <div><label className="text-sm">Igiciro</label><input name="price" type="number" value={formData.price} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/></div>
-                        <div><label className="text-sm">Ingendo/Munsi</label><input name="tripsToday" type="number" value={formData.tripsToday} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/></div>
-                        <div><label className="text-sm">Abagenzi (avg)</label><input name="avgPassengers" type="number" value={formData.avgPassengers} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/></div>
-                    </div>
-                    <div className="flex justify-end space-x-4 pt-4 border-t dark:border-gray-700">
-                        <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg dark:border-gray-600 dark:text-gray-300">Bireke</button>
-                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Bika Urugendo</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    )
-}
 
 const RouteManagementPage = ({ companies, onUpdateCompanies }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -903,12 +967,69 @@ const SettingsPage = ({ theme, setTheme }) => {
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setTheme, companies, onUpdateCompanies }) => {
   const [view, setView] = useState('dashboard');
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  const [modal, setModal] = useState({ type: null, data: null });
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
   
   const selectedCompany = useMemo(() => companies.find(c => c.id === selectedCompanyId), [companies, selectedCompanyId]);
+
+  const handleSave = (type, saveData) => {
+    const { companyId, ...data } = saveData;
+    const isNew = !data.id;
+
+    if (type.startsWith('delete_')) {
+        const confirmMessage = `Urifuza gusiba iki kintu? Iki gikorwa ntigishobora gusubizwa inyuma.`;
+        if (window.confirm(confirmMessage)) {
+            const newCompanies = companies.map(c => {
+                if (c.id === companyId) {
+                    const updatedCompany = { ...c };
+                    if (type === 'delete_route') updatedCompany.routes = c.routes.filter(r => r.id !== data.routeId);
+                    if (type === 'delete_fleet') updatedCompany.fleetDetails = c.fleetDetails.filter(b => b.id !== data.busId);
+                    if (type === 'delete_promotion') updatedCompany.promotions = c.promotions.filter(p => p.id !== data.promoId);
+                    if (type === 'delete_schedule') updatedCompany.schedule[data.route] = c.schedule[data.route].filter(s => s.id !== data.scheduleId);
+                    return updatedCompany;
+                }
+                return c;
+            });
+            onUpdateCompanies(newCompanies);
+        }
+    } else {
+        const newCompanies = companies.map(c => {
+            if (c.id === companyId) {
+                const updatedCompany = { ...c };
+                switch (type) {
+                    case 'route':
+                        if(isNew) updatedCompany.routes = [...c.routes, { ...data, id: `r_${Date.now()}` }];
+                        else updatedCompany.routes = c.routes.map(r => r.id === data.id ? data : r);
+                        break;
+                    case 'fleet':
+                        if(isNew) updatedCompany.fleetDetails = [...c.fleetDetails, { ...data, id: `f_${Date.now()}` }];
+                        else updatedCompany.fleetDetails = c.fleetDetails.map(f => f.id === data.id ? data : f);
+                        break;
+                    case 'promotion':
+                        if(isNew) updatedCompany.promotions = [...c.promotions, { ...data, id: `p_${Date.now()}` }];
+                        else updatedCompany.promotions = c.promotions.map(p => p.id === data.id ? data : p);
+                        break;
+                    case 'schedule':
+                        const routeSchedules = updatedCompany.schedule[data.route] ? [...updatedCompany.schedule[data.route]] : [];
+                        if (isNew) routeSchedules.push({ ...data, id: `s_${Date.now()}` });
+                        else {
+                            const index = routeSchedules.findIndex(s => s.id === data.id);
+                            if (index > -1) routeSchedules[index] = data;
+                        }
+                        updatedCompany.schedule[data.route] = routeSchedules;
+                        break;
+                }
+                return updatedCompany;
+            }
+            return c;
+        });
+        onUpdateCompanies(newCompanies);
+    }
+    setModal({ type: null, data: null });
+  };
 
   const renderContent = () => {
     switch (view) {
@@ -923,7 +1044,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
       case 'transactions':
         return <TransactionsPage companies={companies} />;
       case 'companyDetails':
-          return selectedCompany ? <CompanyDetails company={selectedCompany} onBack={() => setView('companies')} /> : <div>Ikigo nticyabonetse.</div>;
+          return selectedCompany ? <CompanyDetails company={selectedCompany} onBack={() => setView('companies')} setModal={setModal} /> : <div>Ikigo nticyabonetse.</div>;
       case 'routes':
         return <RouteManagementPage companies={companies} onUpdateCompanies={onUpdateCompanies} />;
       case 'users':
@@ -984,6 +1105,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
           </div>
         </main>
       </div>
+      {modal.type === 'route' && <RouteFormModal route={modal.data.route} companies={companies} companyId={modal.data.companyId} onClose={() => setModal({ type: null, data: null })} onSave={(data) => handleSave('route', {...data, id: modal.data.route?.id })} />}
+      {/* Other modals here */}
     </div>
   );
 };

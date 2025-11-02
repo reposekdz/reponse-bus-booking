@@ -119,7 +119,8 @@ const WalletPinScreen: React.FC<{ onUnlock: () => void; pinToMatch: string }> = 
                 {pin.map((digit, index) => (
                     <input
                         key={index}
-                        ref={el => inputsRef.current[index] = el}
+                        // FIX: Corrected ref assignment to avoid returning a value.
+                        ref={el => { inputsRef.current[index] = el; }}
                         type="password"
                         maxLength={1}
                         value={digit}
