@@ -320,7 +320,7 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                                 <div key={promo.id} className="bg-gradient-to-r from-yellow-50 to-blue-50 dark:from-gray-800/50 dark:to-blue-900/20 p-6 rounded-lg border-l-4 border-yellow-400">
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <h4 className="text-lg font-bold text-gray-800 dark:text-white">{promo.title}</h4>
+                                            <h4 className="text-lg font-bold text-gray-800 dark:text-white flex items-center"><TagIcon className="w-5 h-5 mr-2 text-yellow-500"/>{promo.title}</h4>
                                             <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{promo.description}</p>
                                         </div>
                                         <div className="text-xs text-gray-500 dark:text-gray-400">Birangira: {promo.expiryDate}</div>
