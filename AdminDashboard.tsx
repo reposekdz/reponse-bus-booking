@@ -794,7 +794,6 @@ const RouteManagementPage = ({ companies, onUpdateCompanies }) => {
     )
 }
 
-// FIX: Correctly type the SettingsCard component props to accept children.
 const SettingsCard = ({ title, icon: Icon, children }: React.PropsWithChildren<{ title: string; icon: React.ElementType }>) => (
     <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
         <h3 className="text-xl font-bold mb-4 dark:text-white flex items-center">
@@ -832,7 +831,6 @@ const SettingInputRow = ({ label, type = "text", placeholder, value, onChange })
 
 const SettingsPage = ({ theme, setTheme }) => {
     const [notifications, setNotifications] = useState({ newUser: true, newCompany: true, monthlyReport: true });
-    // FIX: Add state for settings inputs to make them controlled components
     const [appName, setAppName] = useState('Rwanda Bus');
     const [supportEmail, setSupportEmail] = useState('support@rwandabus.rw');
     const [oldPassword, setOldPassword] = useState('');
@@ -845,9 +843,7 @@ const SettingsPage = ({ theme, setTheme }) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-8">
                     <SettingsCard title="Iboneza Rusange" icon={CogIcon}>
-                        {/* FIX: Add value and onChange to SettingInputRow */}
                         <SettingInputRow label="Izina rya Porogaramu" placeholder="Rwanda Bus" value={appName} onChange={(e) => setAppName(e.target.value)}/>
-                        {/* FIX: Add value and onChange to SettingInputRow */}
                         <SettingInputRow label="Imeri yo Kohererezaho" placeholder="support@rwandabus.rw" value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)}/>
                         <button className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">Bika Impinduka</button>
                     </SettingsCard>
@@ -880,11 +876,8 @@ const SettingsPage = ({ theme, setTheme }) => {
                  <div className="space-y-8">
                     <SettingsCard title="Umutekano" icon={ShieldCheckIcon}>
                         <h4 className="font-bold text-gray-700 dark:text-gray-300">Hindura Ijambobanga</h4>
-                        {/* FIX: Add placeholder, value and onChange to SettingInputRow */}
                         <SettingInputRow label="Ijambobanga rya Kera" type="password" placeholder="Ijambobanga rya Kera" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
-                        {/* FIX: Add placeholder, value and onChange to SettingInputRow */}
                         <SettingInputRow label="Ijambobanga Rishya" type="password" placeholder="Ijambobanga Rishya" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-                        {/* FIX: Add placeholder, value and onChange to SettingInputRow */}
                         <SettingInputRow label="Emeza Ijambobanga Rishya" type="password" placeholder="Emeza Ijambobanga Rishya" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                         <button className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">Hindura Ijambobanga</button>
                         <SettingToggle 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import SearchForm from './SearchForm';
+import BookingForm from './BookingForm';
 import AITripPlanner from './AITripPlanner';
 import { SparklesIcon } from './icons';
 
@@ -21,7 +21,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
             Kata itike ya bisi mu buryo bworoshye kandi bwizewe. Urugendo rwawe ruhebuje rutangirira hano.
           </p>
           <div className="bg-gradient-to-br from-white/20 to-white/0 backdrop-blur-xl rounded-2xl shadow-2xl p-6 md:p-8 max-w-4xl mx-auto border border-white/20">
-            <SearchForm onSearch={onSearch} />
+            <BookingForm onSearch={onSearch} />
           </div>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import SearchForm from './components/SearchForm';
+// FIX: Corrected import to point to the existing BookingForm component
+import SearchForm from './components/BookingForm';
 import { ClockIcon, ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, SparklesIcon, FilterIcon, TruckIcon } from './components/icons';
 import SearchResultSkeleton from './components/SearchResultSkeleton';
 
