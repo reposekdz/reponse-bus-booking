@@ -7,7 +7,7 @@ const user = {
     name: 'Kalisa Jean',
     email: 'kalisa.j@example.com',
     memberSince: 'Mutarama 2023',
-    walletPin: '12345', // Hardcoded for simulation
+    walletPin: '1234', // Hardcoded for simulation
     avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop',
     coverUrl: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=2070&auto=format&fit=crop'
 };
@@ -85,7 +85,7 @@ const SettingToggle: React.FC<{ label: string; description: string; enabled: boo
 );
 
 const WalletPinScreen: React.FC<{ onUnlock: () => void; pinToMatch: string }> = ({ onUnlock, pinToMatch }) => {
-    const [pin, setPin] = useState<string[]>(Array(5).fill(''));
+    const [pin, setPin] = useState<string[]>(Array(4).fill(''));
     const [error, setError] = useState('');
     const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -100,7 +100,7 @@ const WalletPinScreen: React.FC<{ onUnlock: () => void; pinToMatch: string }> = 
             newPin[index] = value;
             setPin(newPin);
 
-            if (value && index < 4) {
+            if (value && index < 3) {
                 inputsRef.current[index + 1]?.focus();
             }
         }
@@ -117,7 +117,7 @@ const WalletPinScreen: React.FC<{ onUnlock: () => void; pinToMatch: string }> = 
             onUnlock();
         } else {
             setError('PIN itariyo. Ongera ugerageze.');
-            setPin(Array(5).fill(''));
+            setPin(Array(4).fill(''));
             inputsRef.current[0]?.focus();
         }
     }
@@ -126,7 +126,7 @@ const WalletPinScreen: React.FC<{ onUnlock: () => void; pinToMatch: string }> = 
         <div className="text-center max-w-sm mx-auto py-8">
             <LockClosedIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-bold dark:text-white">Fungura Ikofi Yawe</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Shyiramo PIN yawe y'imibare 5 kugira ngo urebe amafaranga yawe.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Shyiramo PIN yawe y'imibare 4 kugira ngo urebe amafaranga yawe.</p>
             <div className="flex justify-center space-x-3 mb-4">
                 {pin.map((digit, index) => (
                     <input
@@ -247,7 +247,9 @@ const ProfilePage: React.FC = () => {
         return { favoriteCompany, mostVisitedCity, monthlySpending };
     }, []);
 
-    const maxSpending = Math.max(0, ...Object.values(analytics.monthlySpending));
+    // FIX: Explicitly map values to Number to resolve TypeScript error where
+    // arguments to Math.max were being inferred as `unknown`.
+    const maxSpending = Math.max(0, ...Object.values(analytics.monthlySpending).map(Number));
     
     const filteredHistory = useMemo(() => {
         if (!searchTerm) return travelHistory;
@@ -400,7 +402,6 @@ const ProfilePage: React.FC = () => {
                                         {Object.entries(analytics.monthlySpending).map(([month, amount]) => (
                                             <div key={month} className="flex-1 flex flex-col items-center justify-end group">
                                                 <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    {/* FIX: Cast amount to number, as it can be inferred as 'unknown' from Object.entries. */}
                                                     {new Intl.NumberFormat('fr-RW').format(amount as number)}
                                                 </div>
                                                 <div className="w-full bg-blue-200 dark:bg-blue-800/80 rounded-t-lg hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors" style={{height: `${((amount as number) / (maxSpending || 1)) * 100}%`}}></div>
