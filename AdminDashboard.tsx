@@ -2,8 +2,9 @@ import React, { useState, useMemo, ChangeEvent, FormEvent, useEffect } from 'rea
 import { 
     SunIcon, MoonIcon, BellIcon, UserCircleIcon, CogIcon, UsersIcon, ChartBarIcon, BuildingOfficeIcon, 
     ArrowLeftIcon, PlusIcon, PencilSquareIcon, TrashIcon, ArrowUpTrayIcon, SearchIcon, TicketIcon, MapIcon, BusIcon, XIcon,
-    WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, CreditCardIcon
+    WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, CreditCardIcon, TagIcon
 } from './components/icons';
+import ActivityFeed from './components/ActivityFeed';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -188,8 +189,9 @@ const DashboardHome = ({ companies }) => (
                 <StatCard title="Active Routes" value={companies.reduce((acc, c) => acc + (c.routes?.length || 0), 0)} icon={<MapIcon className="w-6 h-6 text-blue-500" />} format={false}/>
             </div>
         </div>
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-6">
             <LiveBookingsFeed companies={companies} />
+            <ActivityFeed />
         </div>
     </div>
 );

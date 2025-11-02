@@ -154,8 +154,9 @@ const BookingConfirmationView: React.FC<{
 
 interface SeatSelectionPageProps {
   tripData: any;
-  onConfirm: (selection: { tripData: any; selectedSeats: string[]; totalPrice: string }) => void;
+  onConfirm: (selection: { tripData: any; selectedSeats: string[]; totalPrice: string; paymentMethod: string }) => void;
   navigate: (page: Page) => void;
+  walletData: any;
 }
 
 const generateSeats = () => {
@@ -175,7 +176,7 @@ const generateSeats = () => {
 };
 
 
-const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfirm, navigate }) => {
+const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfirm, navigate, walletData }) => {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [reservedSeats, setReservedSeats] = useState<string[]>([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
@@ -184,7 +185,7 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
   
   const sessionId = useRef(Date.now().toString(36) + Math.random().toString(36).substring(2));
   const storageKey = `realtime_seats_trip_${tripData.id}`;
-  const walletBalance = 75500;
+  const walletBalance = walletData.balance;
   
   const seats = useMemo(() => generateSeats(), []);
   const pricePerSeat = parseFloat(tripData.price.replace(/[^0-9.-]+/g,""));
@@ -291,7 +292,11 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
   const isWalletSufficient = walletBalance >= totalPrice;
   
   const handleConfirmClick = () => {
-    onConfirm({ tripData, selectedSeats, totalPrice: formattedTotalPrice });
+    if (paymentMethod === 'wallet' && !isWalletSufficient) {
+        alert("Amafaranga ari mu ikofi ntahagije.");
+        return;
+    }
+    onConfirm({ tripData, selectedSeats, totalPrice: formattedTotalPrice, paymentMethod });
     setTimeout(() => {
         setIsConfirmed(true);
         window.scrollTo(0, 0);
@@ -357,15 +362,15 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
                             <div className="border-t dark:border-gray-700 pt-4">
                                 <h3 className="font-semibold mb-2">Uburyo bwo Kwishyura</h3>
                                 <div className="space-y-3">
-                                    <label className={`flex items-center p-3 rounded-lg border-2 transition-all ${paymentMethod === 'wallet' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'} ${!isWalletSufficient ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-                                        <input type="radio" name="payment" value="wallet" checked={paymentMethod === 'wallet'} onChange={() => setPaymentMethod('wallet')} disabled={!isWalletSufficient} className="h-4 w-4 text-blue-600 focus:ring-blue-500"/>
+                                    <label className={`flex items-center p-3 rounded-lg border-2 transition-all ${paymentMethod === 'wallet' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'} ${totalPrice > 0 && !isWalletSufficient ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                        <input type="radio" name="payment" value="wallet" checked={paymentMethod === 'wallet'} onChange={() => setPaymentMethod('wallet')} disabled={totalPrice > 0 && !isWalletSufficient} className="h-4 w-4 text-blue-600 focus:ring-blue-500"/>
                                         <WalletIcon className="w-6 h-6 mx-3 text-blue-600"/>
                                         <div className="flex-grow">
                                             <p className="font-semibold dark:text-gray-200">Ikofi</p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Asigaye: {new Intl.NumberFormat('fr-RW').format(walletBalance)} RWF</p>
                                         </div>
                                     </label>
-                                     {!isWalletSufficient && selectedSeats.length > 0 && <p className="text-xs text-red-500">Amafaranga ari mu ikofi ntahagije. Ongera ubitsemo.</p>}
+                                     {totalPrice > 0 && !isWalletSufficient && paymentMethod === 'wallet' && <p className="text-xs text-red-500">Amafaranga ari mu ikofi ntahagije.</p>}
 
                                     <label className={`flex items-center p-3 rounded-lg border-2 transition-all cursor-pointer ${paymentMethod === 'card' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'}`}>
                                         <input type="radio" name="payment" value="card" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} className="h-4 w-4 text-blue-600 focus:ring-blue-500"/>

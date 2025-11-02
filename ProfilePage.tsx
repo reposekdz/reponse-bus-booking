@@ -12,18 +12,6 @@ const user = {
     coverUrl: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=2070&auto=format&fit=crop'
 };
 
-const userWallet = {
-  balance: 75_500,
-  currency: 'RWF',
-  serialCode: 'KJ7821',
-  transactions: [
-    { id: 1, type: 'deposit', description: 'Agent Deposit', amount: 50000, date: '25 Ukwakira, 2024', status: 'completed' },
-    { id: 2, type: 'payment', description: 'Itike ya Volcano Express', amount: -9000, date: '25 Ukwakira, 2024', status: 'completed' },
-    { id: 3, type: 'transfer_out', description: 'Oherejwe kuri UM1234', amount: -10000, date: '22 Ukwakira, 2024', status: 'completed' },
-    { id: 4, type: 'payment', description: 'Itike ya RITCO', amount: -7000, date: '18 Ukwakira, 2024', status: 'completed' }
-  ]
-};
-
 const userReviews = [
     { id: 1, company: 'Volcano Express', rating: 5, date: '28 Nzeri, 2024', comment: 'Serivisi nziza cyane, bisi zirasukuye kandi zigeze ku gihe. Nzakomeza kubagana!'},
     { id: 2, company: 'RITCO', rating: 4, date: '15 Kanama, 2024', comment: 'Urugendo rwari rwiza muri rusange, ariko interineti ya WiFi ntiyakoraga neza.'},
@@ -161,16 +149,16 @@ const WalletActionModal: React.FC<{
         e.preventDefault();
         const numAmount = parseFloat(amount);
         if (isNaN(numAmount) || numAmount <= 0) {
-            setError('Please enter a valid amount.');
+            setError('Shyiramo umubare w\'amafaranga wumvikana.');
             return;
         }
         if (action === 'send') {
             if (!recipient.trim()) {
-                setError('Please enter a recipient serial code.');
+                setError('Shyiramo serial code y\'uwo woherereza.');
                 return;
             }
             if (numAmount > currentBalance) {
-                setError('Insufficient balance.');
+                setError('Amafaranga ari mu ikofi ntahagije.');
                 return;
             }
         }
@@ -192,6 +180,15 @@ const WalletActionModal: React.FC<{
                             <input type="text" value={recipient} onChange={e => setRecipient(e.target.value)} placeholder="e.g., UM1234" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
                         </div>
                     )}
+                    {action === 'deposit' && (
+                         <div>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Uburyo bwo Kubitsa</label>
+                             <select className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                                <option>MTN Mobile Money</option>
+                                <option>Agent wemewe</option>
+                            </select>
+                        </div>
+                    )}
                     <div>
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Amafaranga</label>
                         <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0 RWF" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
@@ -199,7 +196,7 @@ const WalletActionModal: React.FC<{
                     {error && <p className="text-red-500 text-sm">{error}</p>}
                     <div className="flex justify-end space-x-3 pt-4 border-t dark:border-gray-700">
                          <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold border rounded-lg dark:border-gray-600">Bireke</button>
-                        <button type="submit" className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">{action === 'send' ? 'Ohereza' : 'Bika'}</button>
+                        <button type="submit" className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">{action === 'send' ? 'Ohereza' : 'Emeza'}</button>
                     </div>
                 </form>
             </div>
@@ -207,8 +204,12 @@ const WalletActionModal: React.FC<{
     );
 };
 
+interface ProfilePageProps {
+    walletData: any;
+    onWalletUpdate: (data: any) => void;
+}
 
-const ProfilePage: React.FC = () => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ walletData, onWalletUpdate }) => {
     const [activeTab, setActiveTab] = useState('analytics');
     const [searchTerm, setSearchTerm] = useState('');
     const [isWalletUnlocked, setIsWalletUnlocked] = useState(false);
@@ -216,7 +217,6 @@ const ProfilePage: React.FC = () => {
     const [cover, setCover] = useState(user.coverUrl);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const coverInputRef = useRef<HTMLInputElement>(null);
-    const [walletData, setWalletData] = useState(userWallet);
     const [modalAction, setModalAction] = useState<'send' | 'deposit' | null>(null);
 
     const [notificationSettings, setNotificationSettings] = useState({
@@ -225,6 +225,12 @@ const ProfilePage: React.FC = () => {
         accountUpdates: false
     });
     
+    useEffect(() => {
+        if (activeTab !== 'wallet') {
+            setIsWalletUnlocked(false);
+        }
+    }, [activeTab]);
+
     const analytics = useMemo(() => {
         const companyCounts = travelHistory.reduce((acc: Record<string, number>, trip) => {
             acc[trip.company] = (acc[trip.company] || 0) + 1;
@@ -247,8 +253,6 @@ const ProfilePage: React.FC = () => {
         return { favoriteCompany, mostVisitedCity, monthlySpending };
     }, []);
 
-    // FIX: Explicitly map values to Number to resolve TypeScript error where
-    // arguments to Math.max were being inferred as `unknown`.
     const maxSpending = Math.max(0, ...Object.values(analytics.monthlySpending).map(Number));
     
     const filteredHistory = useMemo(() => {
@@ -323,11 +327,11 @@ const ProfilePage: React.FC = () => {
                 date: now,
                 status: 'completed'
             };
-            setWalletData(prev => ({
-                ...prev,
-                balance: prev.balance - amount,
-                transactions: [newTransaction, ...prev.transactions]
-            }));
+            onWalletUpdate({
+                ...walletData,
+                balance: walletData.balance - amount,
+                transactions: [newTransaction, ...walletData.transactions]
+            });
         } else if (modalAction === 'deposit') {
             const newTransaction = {
                 id: Date.now(),
@@ -337,11 +341,11 @@ const ProfilePage: React.FC = () => {
                 date: now,
                 status: 'completed'
             };
-             setWalletData(prev => ({
-                ...prev,
-                balance: prev.balance + amount,
-                transactions: [newTransaction, ...prev.transactions]
-            }));
+             onWalletUpdate({
+                ...walletData,
+                balance: walletData.balance + amount,
+                transactions: [newTransaction, ...walletData.transactions]
+            });
         }
         setModalAction(null);
     };
@@ -507,7 +511,7 @@ const ProfilePage: React.FC = () => {
                                             <p className="text-4xl font-bold mt-1 mb-4">{new Intl.NumberFormat('fr-RW').format(walletData.balance)} <span className="text-2xl font-normal opacity-80">{walletData.currency}</span></p>
                                         </div>
                                         <div className="flex space-x-2">
-                                            <button onClick={() => setModalAction('deposit')} className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition">Bika Amafaranga</button>
+                                            <button onClick={() => setModalAction('deposit')} className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition flex items-center justify-center"><ArrowDownLeftIcon className="w-4 h-4 mr-2"/>Bika Amafaranga</button>
                                             <button onClick={() => setModalAction('send')} className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition flex items-center justify-center"><PaperAirplaneIcon className="w-4 h-4 mr-2"/>Ohereza Amafaranga</button>
                                         </div>
                                     </div>

@@ -26,6 +26,18 @@ import CompaniesAside from './components/CompaniesAside';
 
 export type Page = 'home' | 'login' | 'register' | 'bookings' | 'companies' | 'help' | 'contact' | 'searchResults' | 'seatSelection' | 'companyProfile' | 'profile' | 'services' | 'bookingSearch';
 
+const initialUserWallet = {
+  balance: 75_500,
+  currency: 'RWF',
+  serialCode: 'KJ7821',
+  transactions: [
+    { id: 1, type: 'deposit', description: 'Agent Deposit', amount: 50000, date: '25 Ukwakira, 2024', status: 'completed' },
+    { id: 2, type: 'payment', description: 'Itike ya Volcano Express', amount: -9000, date: '25 Ukwakira, 2024', status: 'completed' },
+    { id: 3, type: 'transfer_out', description: 'Oherejwe kuri UM1234', amount: -10000, date: '22 Ukwakira, 2024', status: 'completed' },
+    { id: 4, type: 'payment', description: 'Itike ya RITCO', amount: -7000, date: '18 Ukwakira, 2024', status: 'completed' }
+  ]
+};
+
 const App: React.FC = () => {
   const [page, setPage] = useState<Page>('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -38,6 +50,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [companies, setCompanies] = useState(mockCompaniesData); // State for companies lifted up
   const [isCompaniesAsideOpen, setIsCompaniesAsideOpen] = useState(false);
+  const [walletData, setWalletData] = useState(initialUserWallet);
 
   const showLoader = () => setIsLoading(true);
   const hideLoader = () => setIsLoading(false);
@@ -124,8 +137,27 @@ const App: React.FC = () => {
   const handleBookingConfirm = (selection: any) => {
     showLoader();
     setTimeout(() => {
-      console.log('Booking confirmed:', selection);
-      hideLoader();
+        console.log('Booking confirmed:', selection);
+
+        if (selection.paymentMethod === 'wallet' && walletData) {
+            const ticketPrice = parseFloat(selection.totalPrice.replace(/[^0-9.-]+/g,""));
+            const newBalance = walletData.balance - ticketPrice;
+            const newTransaction = {
+                id: Date.now(),
+                type: 'payment',
+                description: `Itike ya ${selection.tripData.company}`,
+                amount: -ticketPrice,
+                date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric'}),
+                status: 'completed'
+            };
+            setWalletData(prev => ({
+                ...prev,
+                balance: newBalance,
+                transactions: [newTransaction, ...prev.transactions]
+            }));
+        }
+
+        hideLoader();
     }, 2000);
   }
 
@@ -156,11 +188,11 @@ const App: React.FC = () => {
       case 'searchResults':
         return <SearchResultsPage onTripSelect={handleTripSelect} />;
       case 'seatSelection':
-        return <SeatSelectionPage tripData={bookingData.trip} onConfirm={handleBookingConfirm} navigate={navigate} />;
+        return <SeatSelectionPage tripData={bookingData.trip} onConfirm={handleBookingConfirm} navigate={navigate} walletData={walletData} />;
       case 'companyProfile':
         return <CompanyProfilePage company={selectedCompany} onSelectTrip={handleSearch} />;
       case 'profile':
-        return <ProfilePage />;
+        return <ProfilePage walletData={walletData} onWalletUpdate={setWalletData} />;
       case 'home':
       default:
         return (

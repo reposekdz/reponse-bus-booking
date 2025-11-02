@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import SearchForm from './components/SearchForm';
 import { ClockIcon, ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, SparklesIcon } from './components/icons';
+import SearchResultSkeleton from './components/SearchResultSkeleton';
 
 const searchResults = [
   { id: 1, company: 'Volcano Express', departureTime: '07:00 AM', arrivalTime: '10:30 AM', duration: '3h 30m', price: 4500, availableSeats: 23, amenities: ['WiFi', 'AC'], tag: 'Ikunzwe Cyane' },
@@ -83,6 +84,7 @@ interface BookingSearchPageProps {
 
 const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) => {
     const [showResults, setShowResults] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
     const [searchCriteria, setSearchCriteria] = useState<{ from?: string, to?: string }>({});
     const [priceFilter, setPriceFilter] = useState(5000);
     const [timeFilter, setTimeFilter] = useState<string[]>([]);
@@ -106,8 +108,13 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
     };
     
     const handleSearch = (from?: string, to?: string) => {
+        setIsSearching(true);
         setShowResults(true);
         setSearchCriteria({ from, to });
+        // Simulate API call
+        setTimeout(() => {
+            setIsSearching(false);
+        }, 1500);
     };
 
     const handleTimeFilter = (time: string) => {
@@ -215,10 +222,12 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
                             <div className="animate-fade-in">
                                 <div className="mb-6">
                                     <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Ibyavuye mu Gushakisha</h1>
-                                    <p className="text-gray-600 dark:text-gray-400">{searchCriteria.from} - {searchCriteria.to} &bull; {filteredResults.length} bisi zabonetse</p>
+                                    <p className="text-gray-600 dark:text-gray-400">{searchCriteria.from} - {searchCriteria.to} &bull; {!isSearching && `${filteredResults.length} bisi zabonetse`}</p>
                                 </div>
                                 <div className="space-y-6">
-                                    {filteredResults.length > 0 ? filteredResults.map(result => (
+                                    {isSearching ? (
+                                        <SearchResultSkeleton count={3} />
+                                    ) : filteredResults.length > 0 ? filteredResults.map(result => (
                                         <SearchResultCard 
                                             key={result.id} 
                                             result={result} 
