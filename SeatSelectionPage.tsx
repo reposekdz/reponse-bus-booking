@@ -29,7 +29,7 @@ const Seat: React.FC<SeatProps> = ({ status, seatNumber, onClick }) => {
         <span className="text-sm font-semibold">{seatNumber}</span>
       </div>
        {/* Tooltip */}
-       <div className="absolute bottom-full mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+       <div className="absolute bottom-full z-10 mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
         Umwanya {seatNumber}
       </div>
     </button>

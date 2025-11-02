@@ -50,6 +50,18 @@ export const mockCompaniesData = [
         ],
         weeklyIncome: [ { day: 'M', income: 4500000 }, { day: 'T', income: 4200000 }, { day: 'W', income: 4800000 }, { day: 'T', income: 4600000 }, { day: 'F', income: 5500000 }, { day: 'S', income: 6200000 }, { day: 'S', income: 5900000 }],
         dailyTickets: [ { day: 'M', tickets: 980 }, { day: 'T', tickets: 920 }, { day: 'W', tickets: 1050 }, { day: 'T', tickets: 1000 }, { day: 'F', tickets: 1250 }, { day: 'S', tickets: 1400 }, { day: 'S', tickets: 1350 }],
+        promotions: [
+            { id: 'VOLC01', title: 'Weekend Discount', description: 'Get 10% off on all weekend trips.', code: 'WEEKEND10', expiryDate: '2024-12-31' }
+        ],
+        schedule: {
+          'Kigali-Rubavu': [
+            { id: 'sch1', time: '07:00', busId: 'V01', price: 4500 },
+            { id: 'sch2', time: '08:30', busId: 'V01', price: 4500 },
+          ],
+          'Kigali-Musanze': [
+            { id: 'sch3', time: '09:00', busId: 'V02', price: 3500 },
+          ]
+        },
     },
     {
         id: 'ritco',
@@ -83,6 +95,18 @@ export const mockCompaniesData = [
         ],
         weeklyIncome: [ { day: 'M', income: 3200000 }, { day: 'T', income: 3100000 }, { day: 'W', income: 3400000 }, { day: 'T', income: 3300000 }, { day: 'F', income: 4000000 }, { day: 'S', income: 4500000 }, { day: 'S', income: 4300000 }],
         dailyTickets: [ { day: 'M', tickets: 1100 }, { day: 'T', tickets: 1050 }, { day: 'W', tickets: 1150 }, { day: 'T', tickets: 1120 }, { day: 'F', tickets: 1350 }, { day: 'S', tickets: 1500 }, { day: 'S', tickets: 1450 }],
+        promotions: [
+            { id: 'RITCO01', title: 'Student Discount', description: '15% off for students with valid ID.', code: 'STUDENT15', expiryDate: '2024-12-31' }
+        ],
+        schedule: {
+            'Kigali-Huye': [
+                { id: 'sch4', time: '06:00', busId: 'R01', price: 3000 },
+                { id: 'sch5', time: '08:00', busId: 'R01', price: 3000 },
+            ],
+            'Kigali-Nyungwe': [
+                { id: 'sch6', time: '07:00', busId: 'R02', price: 7000 },
+            ]
+        },
     }
 ];
 
@@ -317,7 +341,9 @@ const CompanyManagement = ({ companies, onSelectCompany, onUpdateCompanies }) =>
                 ...companyData, 
                 id: companyData.name.toLowerCase().replace(/\s+/g, '_') + Date.now(), 
                 totalPassengers: 0, totalRevenue: 0, fleetSize: 0, weeklyIncome: Array(7).fill({income:0}).map((d,i)=> ({...d, day: 'MTWTFSS'[i]})), dailyTickets: Array(7).fill({tickets:0}).map((d,i)=> ({...d, day: 'MTWTFSS'[i]})), routes: [], fleetDetails: [], recentPassengers: [],
-                wallet: { balance: 0, currency: 'RWF', transactions: [] }
+                wallet: { balance: 0, currency: 'RWF', transactions: [] },
+                schedule: {},
+                promotions: [],
             };
             onUpdateCompanies([...companies, newCompany]);
         } else {

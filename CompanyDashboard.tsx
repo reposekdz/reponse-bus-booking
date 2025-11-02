@@ -25,7 +25,6 @@ const StatCard = ({ title, value, icon }) => (
     </div>
 );
 
-// Fix: Added explicit props type for FormModal to resolve type inference issues.
 interface FormModalProps {
     title: string;
     children: React.ReactNode;
@@ -61,7 +60,6 @@ const ProfileManagement = ({ company, onUpdate }) => {
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     
-    // Fix: Correctly typed the form event to match the FormModal's onSave prop.
     const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
         onUpdate(formData);
         setIsEditing(false);
@@ -93,7 +91,6 @@ const FleetManagement = ({ fleet, onUpdate }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingBus, setEditingBus] = useState(null);
 
-    // Fix: Correctly typed the form event and used e.currentTarget for FormData.
     const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
         const formData = new FormData(e.currentTarget);
         const busData = Object.fromEntries(formData.entries());
@@ -150,7 +147,6 @@ const RouteManagement = ({ routes, onUpdate }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRoute, setEditingRoute] = useState(null);
 
-    // Fix: Correctly typed the form event and used e.currentTarget for FormData.
     const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
         const formData = new FormData(e.currentTarget);
         const routeData = Object.fromEntries(formData.entries());
@@ -235,8 +231,136 @@ const FinancialsManagement = ({ wallet }) => (
         </div>
     </div>
 );
-const SchedulingManagement = ({ company, onUpdate }) => { return (<div> <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Manage Schedules</h1> <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center"> <ClockIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" /> <h3 className="text-xl font-bold dark:text-white">Coming Soon</h3> <p className="text-gray-500 dark:text-gray-400 mt-2">A powerful scheduling tool to manage departure times for all your routes is under construction.</p> </div> </div> ) };
-const PromotionsManagement = ({ company, onUpdate }) => { return (<div> <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Manage Promotions</h1> <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center"> <TagIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" /> <h3 className="text-xl font-bold dark:text-white">Coming Soon</h3> <p className="text-gray-500 dark:text-gray-400 mt-2">Create and manage special offers and discount codes to attract more passengers.</p> </div> </div> ) }
+const SchedulingManagement = ({ company, onUpdate }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingSchedule, setEditingSchedule] = useState(null);
+    const [selectedRoute, setSelectedRoute] = useState(company.routes.length > 0 ? `${company.routes[0].from}-${company.routes[0].to}` : '');
+
+    const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+        const formData = new FormData(e.currentTarget);
+        const scheduleData = Object.fromEntries(formData.entries());
+        const updatedSchedule = { ...company.schedule };
+        const routeSchedules = updatedSchedule[selectedRoute] ? [...updatedSchedule[selectedRoute]] : [];
+
+        if (editingSchedule) {
+            const index = routeSchedules.findIndex(s => s.id === editingSchedule.id);
+            routeSchedules[index] = { ...routeSchedules[index], ...scheduleData };
+        } else {
+            routeSchedules.push({ ...scheduleData, id: `sch_${Date.now()}` });
+        }
+        updatedSchedule[selectedRoute] = routeSchedules;
+        onUpdate({ schedule: updatedSchedule });
+        setIsModalOpen(false);
+        setEditingSchedule(null);
+    };
+
+    const handleDelete = (id: string) => {
+        if (!window.confirm("Are you sure?")) return;
+        const updatedSchedule = { ...company.schedule };
+        updatedSchedule[selectedRoute] = updatedSchedule[selectedRoute].filter(s => s.id !== id);
+        onUpdate({ schedule: updatedSchedule });
+    }
+
+    const currentSchedules = company.schedule?.[selectedRoute] || [];
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Manage Schedules</h1>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                    <div>
+                        <label htmlFor="route-select" className="text-sm font-medium text-gray-500 dark:text-gray-400">Select Route</label>
+                        <select id="route-select" value={selectedRoute} onChange={e => setSelectedRoute(e.target.value)} className="mt-1 block w-full sm:w-64 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                            {company.routes.map(r => <option key={r.id} value={`${r.from}-${r.to}`}>{r.from} to {r.to}</option>)}
+                        </select>
+                    </div>
+                    <button onClick={() => { setEditingSchedule(null); setIsModalOpen(true); }} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700" disabled={!selectedRoute}>
+                        <PlusIcon className="w-5 h-5 mr-2"/>Add Departure
+                    </button>
+                </div>
+                <table className="w-full text-sm">
+                    <thead><tr className="text-left text-xs text-gray-500 uppercase"><th className="p-2">Time</th><th>Bus ID</th><th>Price (RWF)</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        {currentSchedules.map(sch => (
+                            <tr key={sch.id} className="border-t dark:border-gray-700">
+                                <td className="p-2 font-semibold dark:text-white">{sch.time}</td>
+                                <td>{sch.busId}</td>
+                                <td>{new Intl.NumberFormat('fr-RW').format(sch.price)}</td>
+                                <td className="flex space-x-2 py-2">
+                                    <button onClick={() => { setEditingSchedule(sch); setIsModalOpen(true); }}><PencilSquareIcon className="w-5 h-5 text-gray-500 hover:text-blue-600"/></button>
+                                    <button onClick={() => handleDelete(sch.id)}><TrashIcon className="w-5 h-5 text-gray-500 hover:text-red-600"/></button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                 {currentSchedules.length === 0 && <p className="text-center text-gray-500 dark:text-gray-400 py-4">No schedules for this route.</p>}
+            </div>
+            {isModalOpen && (
+                <FormModal title={editingSchedule ? 'Edit Schedule' : 'Add Schedule'} onClose={() => setIsModalOpen(false)} onSave={handleSave}>
+                    <div><label>Time</label><input name="time" type="time" defaultValue={editingSchedule?.time} className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required/></div>
+                    <div><label>Bus</label><select name="busId" defaultValue={editingSchedule?.busId} className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required>
+                        {company.fleetDetails.map(f => <option key={f.id} value={f.id}>{f.model} ({f.id})</option>)}
+                    </select></div>
+                    <div><label>Price</label><input name="price" type="number" defaultValue={editingSchedule?.price || company.routes.find(r => `${r.from}-${r.to}` === selectedRoute)?.price} className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required/></div>
+                </FormModal>
+            )}
+        </div>
+    );
+};
+const PromotionsManagement = ({ promotions, onUpdate }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingPromo, setEditingPromo] = useState(null);
+
+    const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+        const formData = new FormData(e.currentTarget);
+        const promoData = Object.fromEntries(formData.entries());
+        if (editingPromo) {
+            onUpdate(promotions.map(p => p.id === editingPromo.id ? { ...p, ...promoData } : p));
+        } else {
+            onUpdate([...promotions, { ...promoData, id: `promo_${Date.now()}` }]);
+        }
+        setIsModalOpen(false);
+        setEditingPromo(null);
+    };
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold dark:text-gray-200">Manage Promotions</h1>
+                <button onClick={() => { setEditingPromo(null); setIsModalOpen(true); }} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                    <PlusIcon className="w-5 h-5 mr-2"/>Create Promotion
+                </button>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+                 <table className="w-full text-sm">
+                    <thead><tr className="text-left text-xs text-gray-500 uppercase"><th className="p-2">Title</th><th>Code</th><th>Expires</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        {promotions.map(promo => (
+                            <tr key={promo.id} className="border-t dark:border-gray-700">
+                                <td className="p-2 font-semibold dark:text-white">{promo.title}</td>
+                                <td className="font-mono">{promo.code}</td>
+                                <td>{promo.expiryDate}</td>
+                                <td className="flex space-x-2 py-2">
+                                    <button onClick={() => { setEditingPromo(promo); setIsModalOpen(true); }}><PencilSquareIcon className="w-5 h-5 text-gray-500 hover:text-blue-600"/></button>
+                                    <button onClick={() => onUpdate(promotions.filter(p => p.id !== promo.id))}><TrashIcon className="w-5 h-5 text-gray-500 hover:text-red-600"/></button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            {isModalOpen && (
+                <FormModal title={editingPromo ? 'Edit Promotion' : 'Create Promotion'} onClose={() => setIsModalOpen(false)} onSave={handleSave}>
+                    <div><label>Title</label><input name="title" defaultValue={editingPromo?.title} className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required/></div>
+                    <div><label>Description</label><textarea name="description" defaultValue={editingPromo?.description} className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required/></div>
+                    <div><label>Promo Code</label><input name="code" defaultValue={editingPromo?.code} className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required/></div>
+                    <div><label>Expiry Date</label><input name="expiryDate" type="date" defaultValue={editingPromo?.expiryDate} className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required/></div>
+                </FormModal>
+            )}
+        </div>
+    );
+};
 
 const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ onLogout, theme, setTheme, companyData }) => {
     const [view, setView] = useState('dashboard');
@@ -290,7 +414,7 @@ const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ onLogout, theme, se
              case 'scheduling':
                 return <SchedulingManagement company={company} onUpdate={handleUpdate} />;
             case 'promotions':
-                return <PromotionsManagement company={company} onUpdate={handleUpdate} />;
+                return <PromotionsManagement promotions={company.promotions} onUpdate={(newPromos) => handleUpdate({ promotions: newPromos })} />;
             default:
                  return <div><h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Page Not Found</h1></div>;
         }
