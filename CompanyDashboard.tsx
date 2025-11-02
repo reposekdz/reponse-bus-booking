@@ -1,7 +1,7 @@
 import React, { useState, useMemo, ChangeEvent } from 'react';
 import {
     SunIcon, MoonIcon, BellIcon, UserCircleIcon, CogIcon, UsersIcon, ChartBarIcon, BuildingOfficeIcon,
-    BusIcon, MapIcon, PencilSquareIcon, TrashIcon, PlusIcon, ArrowUpTrayIcon, XIcon
+    BusIcon, MapIcon, PencilSquareIcon, TrashIcon, PlusIcon, ArrowUpTrayIcon, XIcon, SearchIcon
 } from './components/icons';
 
 interface CompanyDashboardProps {
@@ -210,16 +210,69 @@ const FleetManagement = ({ fleet, onUpdate }) => {
     );
 };
 
+const PassengerManagement = ({ passengers }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredPassengers = useMemo(() => {
+        if (!searchTerm) return passengers;
+        return passengers.filter(p => 
+            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.ticketId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.route.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [passengers, searchTerm]);
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Recent Passengers</h1>
+             <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md">
+                <div className="relative mb-4">
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input 
+                        type="text" 
+                        placeholder="Search passengers by name, ticket ID, or route..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th className="px-4 py-3">Name</th>
+                                <th className="px-4 py-3">Route</th>
+                                <th className="px-4 py-3">Ticket ID</th>
+                                <th className="px-4 py-3">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredPassengers.map(p => (
+                                <tr key={p.ticketId} className="border-b dark:border-gray-700">
+                                    <td className="px-4 py-2 font-medium dark:text-white">{p.name}</td>
+                                    <td className="px-4 py-2">{p.route}</td>
+                                    <td className="px-4 py-2 font-mono text-gray-500 dark:text-gray-400">{p.ticketId}</td>
+                                    <td className="px-4 py-2">{p.date}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ onLogout, theme, setTheme, companyData }) => {
     const [view, setView] = useState('dashboard');
     const [company, setCompany] = useState(companyData);
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+    
+    const maxDailyTickets = Math.max(...(company.dailyTickets?.map(d => d.tickets) || [0]));
 
     const handleUpdate = (updatedData) => {
-        // In a real app, this would be an API call to update the data.
-        // For this mock, we just update the state.
         setCompany(prev => ({ ...prev, ...updatedData }));
     };
 
@@ -227,13 +280,25 @@ const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ onLogout, theme, se
         switch (view) {
             case 'dashboard':
                 return (
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Dashboard</h1>
+                    <div className="space-y-6">
+                        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Dashboard</h1>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                            <StatCard title="Total Revenue" value={company.totalRevenue} icon={<ChartBarIcon className="w-6 h-6 text-blue-500" />} />
                            <StatCard title="Total Passengers" value={company.totalPassengers} icon={<UsersIcon className="w-6 h-6 text-blue-500" />} />
                            <StatCard title="Fleet Size" value={company.fleetSize} icon={<BusIcon className="w-6 h-6 text-blue-500" />} />
                            <StatCard title="Active Routes" value={company.routes.length} icon={<MapIcon className="w-6 h-6 text-blue-500" />} />
+                        </div>
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                            <h3 className="font-bold mb-4 dark:text-white">Daily Tickets Sold</h3>
+                             <div className="flex items-end h-40 space-x-2">
+                                {company.dailyTickets.map(data => (
+                                    <div key={data.day} className="flex-1 flex flex-col items-center justify-end group">
+                                        <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">{data.tickets}</div>
+                                        <div className="w-full bg-yellow-200 dark:bg-yellow-800/80 rounded-t-lg hover:bg-yellow-300 dark:hover:bg-yellow-700 transition-colors" style={{height: `${(data.tickets / (maxDailyTickets || 1)) * 100}%`}}></div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{data.day}</div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 );
@@ -241,19 +306,10 @@ const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ onLogout, theme, se
                 return <ProfileManagement company={company} onUpdate={handleUpdate} />;
             case 'fleet':
                 return <FleetManagement fleet={company.fleetDetails} onUpdate={(newFleet) => handleUpdate({ fleetDetails: newFleet, fleetSize: newFleet.length })} />;
-            // Add other views like 'routes', 'passengers' here
+            case 'passengers':
+                return <PassengerManagement passengers={company.recentPassengers} />;
             default:
-                 return (
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Dashboard</h1>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                           <StatCard title="Total Revenue" value={company.totalRevenue} icon={<ChartBarIcon className="w-6 h-6 text-blue-500" />} />
-                           <StatCard title="Total Passengers" value={company.totalPassengers} icon={<UsersIcon className="w-6 h-6 text-blue-500" />} />
-                           <StatCard title="Fleet Size" value={company.fleetSize} icon={<BusIcon className="w-6 h-6 text-blue-500" />} />
-                           <StatCard title="Active Routes" value={company.routes.length} icon={<MapIcon className="w-6 h-6 text-blue-500" />} />
-                        </div>
-                    </div>
-                );
+                 return <div><h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Page Not Found</h1></div>;
         }
     };
 

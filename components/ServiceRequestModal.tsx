@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { XIcon, PaperAirplaneIcon } from './icons';
 
-// Define the shape of a service for type safety
 interface Service {
   title: string;
   icon: React.ElementType;
@@ -31,20 +30,20 @@ const ServiceRequestModal: React.FC<ServiceRequestModalProps> = ({ service, onCl
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="text-sm dark:text-gray-300">Uva</label>
-                            <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Kigali" />
+                            <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Kigali" required/>
                         </div>
                         <div>
                             <label className="text-sm dark:text-gray-300">Ujya</label>
-                            <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Rubavu" />
+                            <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Rubavu" required/>
                         </div>
                     </div>
                     <div>
-                        <label className="text-sm dark:text-gray-300">Itariki</label>
-                        <input type="date" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                        <label className="text-sm dark:text-gray-300">Itariki yo Kugenda</label>
+                        <input type="date" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
                     </div>
                      <div>
                         <label className="text-sm dark:text-gray-300">Umubare w'abantu</label>
-                        <input type="number" min="10" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., 25" />
+                        <input type="number" min="10" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., 25" required/>
                     </div>
                 </>
             );
@@ -54,20 +53,20 @@ const ServiceRequestModal: React.FC<ServiceRequestModalProps> = ({ service, onCl
                     <h3 className="text-2xl font-bold mb-4 dark:text-white">{service.title}</h3>
                     <div>
                         <label className="text-sm dark:text-gray-300">Icyo aribyo</label>
-                        <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Ikarito, Ibikoresho" />
+                        <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Ikarito, Ibikoresho" required/>
                     </div>
                     <div>
                         <label className="text-sm dark:text-gray-300">Ibiro (kg)</label>
-                        <input type="number" min="1" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., 5" />
+                        <input type="number" min="1" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., 5" required/>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div>
                             <label className="text-sm dark:text-gray-300">Aho biva</label>
-                            <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Huye"/>
+                            <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Huye" required/>
                         </div>
                          <div>
                             <label className="text-sm dark:text-gray-300">Aho bijya</label>
-                            <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Musanze"/>
+                            <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Musanze" required/>
                         </div>
                     </div>
                 </>
@@ -78,7 +77,7 @@ const ServiceRequestModal: React.FC<ServiceRequestModalProps> = ({ service, onCl
                     <h3 className="text-2xl font-bold mb-4 dark:text-white">{service.title}</h3>
                     <div>
                         <label className="text-sm dark:text-gray-300">Hitamo Gare</label>
-                        <select className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                        <select className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required>
                             <option>Gare ya Nyabugogo</option>
                             <option>Gare ya Huye</option>
                             <option>Gare ya Rubavu</option>
@@ -86,11 +85,11 @@ const ServiceRequestModal: React.FC<ServiceRequestModalProps> = ({ service, onCl
                     </div>
                     <div>
                         <label className="text-sm dark:text-gray-300">Umubare w'abantu</label>
-                        <input type="number" min="1" max="10" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="1" />
+                        <input type="number" min="1" max="10" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="1" required/>
                     </div>
                     <div>
                         <label className="text-sm dark:text-gray-300">Itariki</label>
-                        <input type="date" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                        <input type="date" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
                     </div>
                 </>
             );
@@ -100,17 +99,59 @@ const ServiceRequestModal: React.FC<ServiceRequestModalProps> = ({ service, onCl
                     <h3 className="text-2xl font-bold mb-4 dark:text-white">{service.title}</h3>
                      <div>
                         <label className="text-sm dark:text-gray-300">Aderesi yo kugushyira</label>
-                        <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Kigali Convention Centre"/>
+                        <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Kigali Convention Centre" required/>
                     </div>
                      <div>
                         <label className="text-sm dark:text-gray-300">Isaha bisi igereyeho</label>
-                        <input type="time" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
+                        <input type="time" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
                     </div>
                     <div>
                         <label className="text-sm dark:text-gray-300">Umubare w'abagenzi</label>
-                        <input type="number" min="1" max="8" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="1"/>
+                        <input type="number" min="1" max="8" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="1" required/>
                     </div>
                 </>
+            );
+        case 'Ingendo z\'Ubucuruzi':
+             return (
+                 <>
+                    <h3 className="text-2xl font-bold mb-4 dark:text-white">{service.title}</h3>
+                    <div>
+                        <label className="text-sm dark:text-gray-300">Izina ry'Ikigo</label>
+                        <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Company Ltd." required/>
+                    </div>
+                     <div>
+                        <label className="text-sm dark:text-gray-300">Umubare w'Abakozi</label>
+                        <input type="number" min="5" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., 50" required/>
+                    </div>
+                    <div>
+                        <label className="text-sm dark:text-gray-300">Ingendo zikenewe</label>
+                        <textarea rows={2} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Kigali - Huye, Musanze - Rubavu" required></textarea>
+                    </div>
+                 </>
+            );
+        case 'Ingendo z\'Ubukerarugendo':
+             return (
+                 <>
+                    <h3 className="text-2xl font-bold mb-4 dark:text-white">{service.title}</h3>
+                    <div>
+                        <label className="text-sm dark:text-gray-300">Hitamo Icyerekezo</label>
+                        <select className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required>
+                            <option>Pariki y'Akagera</option>
+                            <option>Pariki ya Nyungwe</option>
+                            <option>Pariki y'Ibirunga</option>
+                            <option>Ikiyaga cya Kivu</option>
+                            <option>Umujyi wa Kigali</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label className="text-sm dark:text-gray-300">Umubare w'Abantu</label>
+                        <input type="number" min="1" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., 4" required/>
+                    </div>
+                     <div>
+                        <label className="text-sm dark:text-gray-300">Itariki (gutangira)</label>
+                        <input type="date" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
+                    </div>
+                 </>
             );
         default:
             return (
@@ -118,24 +159,43 @@ const ServiceRequestModal: React.FC<ServiceRequestModalProps> = ({ service, onCl
                     <h3 className="text-2xl font-bold mb-4 dark:text-white">{service.title}</h3>
                     <div>
                         <label className="text-sm dark:text-gray-300">Amazina yawe</label>
-                        <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                        <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
                     </div>
                      <div>
                         <label className="text-sm dark:text-gray-300">Imeri</label>
-                        <input type="email" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                        <input type="email" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
                     </div>
                     <div>
                         <label className="text-sm dark:text-gray-300">Ubutumwa</label>
-                        <textarea rows={4} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="Tuvugishe birambuye..."></textarea>
+                        <textarea rows={4} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" placeholder="Tuvugishe birambuye..." required></textarea>
                     </div>
                  </>
             );
     }
   };
 
+  const renderSharedFields = () => (
+    <>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label className="text-sm dark:text-gray-300">Amazina Yuzuye</label>
+                <input type="text" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
+            </div>
+            <div>
+                <label className="text-sm dark:text-gray-300">Telefone</label>
+                <input type="tel" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
+            </div>
+        </div>
+        <div>
+            <label className="text-sm dark:text-gray-300">Imeri</label>
+            <input type="email" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
+        </div>
+    </>
+  );
+
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-lg w-full relative">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-lg w-full relative max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button onClick={onClose} className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-700 dark:hover:text-white"><XIcon className="w-6 h-6"/></button>
             <div className="p-8">
                 {isSubmitted ? (
@@ -147,6 +207,10 @@ const ServiceRequestModal: React.FC<ServiceRequestModalProps> = ({ service, onCl
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {renderForm()}
+                        <div className="pt-4 border-t dark:border-gray-700 space-y-4">
+                            <h3 className="text-lg font-semibold dark:text-white">Amakuru yawe</h3>
+                            {renderSharedFields()}
+                        </div>
                         <div className="pt-4 border-t dark:border-gray-700">
                              <button type="submit" className="w-full flex items-center justify-center p-3 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md">
                                 Ohereza Ubusabe <PaperAirplaneIcon className="w-5 h-5 ml-2" />
