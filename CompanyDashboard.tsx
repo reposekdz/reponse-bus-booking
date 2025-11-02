@@ -1,7 +1,7 @@
 import React, { useState, useMemo, ChangeEvent, FormEvent } from 'react';
 import {
     SunIcon, MoonIcon, BellIcon, UserCircleIcon, CogIcon, UsersIcon, ChartBarIcon, BuildingOfficeIcon,
-    BusIcon, MapIcon, PencilSquareIcon, TrashIcon, PlusIcon, ArrowUpTrayIcon, XIcon, SearchIcon
+    BusIcon, MapIcon, PencilSquareIcon, TrashIcon, PlusIcon, ArrowUpTrayIcon, XIcon, SearchIcon, WalletIcon, ClockIcon
 } from './components/icons';
 
 interface CompanyDashboardProps {
@@ -364,6 +364,41 @@ const PassengerManagement = ({ passengers }) => {
     );
 };
 
+const FinancialsManagement = ({ wallet }) => (
+    <div>
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Financials</h1>
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 rounded-xl shadow-lg mb-6">
+            <p className="text-sm opacity-80">Current Wallet Balance</p>
+            <p className="text-4xl font-bold mt-1">{new Intl.NumberFormat('fr-RW').format(wallet.balance)} <span className="text-2xl font-normal opacity-80">RWF</span></p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+            <h3 className="text-xl font-bold mb-4 dark:text-white">Transaction History</h3>
+             <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th className="px-4 py-3">Date</th>
+                            <th className="px-4 py-3">Description</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3 text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {wallet.transactions.map(tx => (
+                            <tr key={tx.id} className="border-b dark:border-gray-700">
+                                <td className="px-4 py-2">{tx.date}</td>
+                                <td className="px-4 py-2 font-medium dark:text-white">{tx.description}</td>
+                                <td className="px-4 py-2"><span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">{tx.status}</span></td>
+                                <td className={`px-4 py-2 text-right font-semibold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>{new Intl.NumberFormat('fr-RW').format(tx.amount)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+             </div>
+        </div>
+    </div>
+);
+
 
 const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ onLogout, theme, setTheme, companyData }) => {
     const [view, setView] = useState('dashboard');
@@ -411,6 +446,8 @@ const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ onLogout, theme, se
                 return <RouteManagement routes={company.routes} onUpdate={(newRoutes) => handleUpdate({ routes: newRoutes })} />;
             case 'passengers':
                 return <PassengerManagement passengers={company.recentPassengers} />;
+            case 'financials':
+                return <FinancialsManagement wallet={company.wallet} />;
             default:
                  return <div><h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Page Not Found</h1></div>;
         }
@@ -435,6 +472,7 @@ const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ onLogout, theme, se
                     <NavLink viewName="fleet" label="Fleet" icon={BusIcon} />
                     <NavLink viewName="routes" label="Routes" icon={MapIcon} />
                     <NavLink viewName="passengers" label="Passengers" icon={UsersIcon} />
+                    <NavLink viewName="financials" label="Financials" icon={WalletIcon} />
                     <NavLink viewName="settings" label="Settings" icon={CogIcon} />
                 </nav>
             </aside>

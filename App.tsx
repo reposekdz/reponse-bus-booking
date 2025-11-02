@@ -21,8 +21,9 @@ import CompanyDashboard from './CompanyDashboard';
 import ServicesPage from './ServicesPage';
 import LoadingSpinner from './components/LoadingSpinner';
 import { mockCompaniesData } from './AdminDashboard';
+import BookingSearchPage from './BookingSearchPage';
 
-export type Page = 'home' | 'login' | 'register' | 'bookings' | 'companies' | 'help' | 'contact' | 'searchResults' | 'seatSelection' | 'companyProfile' | 'profile' | 'services';
+export type Page = 'home' | 'login' | 'register' | 'bookings' | 'companies' | 'help' | 'contact' | 'searchResults' | 'seatSelection' | 'companyProfile' | 'profile' | 'services' | 'bookingSearch';
 
 const App: React.FC = () => {
   const [page, setPage] = useState<Page>('home');
@@ -146,6 +147,8 @@ const App: React.FC = () => {
         return <ContactPage />;
       case 'services':
         return <ServicesPage />;
+      case 'bookingSearch':
+        return <BookingSearchPage onSearch={handleSearch} />;
       case 'searchResults':
         return <SearchResultsPage onTripSelect={handleTripSelect} />;
       case 'seatSelection':

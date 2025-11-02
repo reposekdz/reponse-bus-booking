@@ -33,6 +33,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
   
   let navItems: NavItem[] = [
     { label: 'Ahabanza', page: 'home' },
+    { label: 'Kata Itike', page: 'bookingSearch' },
     { label: 'Amatike Yanjye', page: 'bookings' },
     { label: 'Ibigo', page: 'companies' },
     { label: 'Serivisi', page: 'services' },
@@ -43,6 +44,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
   if (isLoggedIn) {
       navItems = [
           { label: 'Ahabanza', page: 'home' },
+          { label: 'Kata Itike', page: 'bookingSearch' },
           { label: 'Amatike Yanjye', page: 'bookings' },
           { label: 'Umwirondoro', page: 'profile' },
           { label: 'Ibigo', page: 'companies' },

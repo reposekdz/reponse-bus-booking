@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import React, { useState, useMemo } from 'react';
 import { UserCircleIcon, CogIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon, ChartBarIcon, SearchIcon, BusIcon, BuildingOfficeIcon, MapPinIcon, BriefcaseIcon } from './components/icons';
 import StarRating from './components/StarRating';
@@ -99,7 +93,6 @@ const ProfilePage: React.FC = () => {
     
     // Analytics calculations
     const analytics = useMemo(() => {
-        // FIX: Specify the accumulator type for `reduce` to ensure `companyCounts` is correctly typed as Record<string, number>.
         const companyCounts = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             acc[trip.company] = (acc[trip.company] || 0) + 1;
             return acc;
@@ -107,7 +100,6 @@ const ProfilePage: React.FC = () => {
 
         const favoriteCompany = Object.keys(companyCounts).length > 0 ? Object.keys(companyCounts).reduce((a, b) => companyCounts[a] > companyCounts[b] ? a : b) : 'N/A';
 
-        // FIX: Specify the accumulator type for `reduce` to ensure `destinationCounts` is correctly typed as Record<string, number>.
         const destinationCounts = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             acc[trip.to] = (acc[trip.to] || 0) + 1;
             return acc;
@@ -115,7 +107,6 @@ const ProfilePage: React.FC = () => {
         
         const mostVisitedCity = Object.keys(destinationCounts).length > 0 ? Object.keys(destinationCounts).reduce((a, b) => destinationCounts[a] > destinationCounts[b] ? a : b) : 'N/A';
 
-        // FIX: Specify the accumulator type for `reduce` to fix downstream type errors with `Math.max` and `Intl.NumberFormat`.
         const monthlySpending = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             const month = new Date(trip.date).toLocaleString('default', { month: 'short', year: '2-digit' });
             acc[month] = (acc[month] || 0) + trip.price;
@@ -125,7 +116,8 @@ const ProfilePage: React.FC = () => {
         return { favoriteCompany, mostVisitedCity, monthlySpending };
     }, []);
 
-    const maxSpending = Math.max(...Object.values(analytics.monthlySpending), 0);
+    // FIX: Cast `Object.values` to `number[]` to fix type error with `Math.max`.
+    const maxSpending = Math.max(...(Object.values(analytics.monthlySpending) as number[]), 0);
     
     const filteredHistory = useMemo(() => {
         if (!searchTerm) return travelHistory;
@@ -137,7 +129,6 @@ const ProfilePage: React.FC = () => {
     }, [searchTerm]);
 
     const summaryByCompany = useMemo(() => {
-        // FIX: Specify the complex accumulator type for `reduce` to ensure correct type inference for `summary`.
         const summary = travelHistory.reduce<Record<string, { count: number; totalSpent: number; destinations: Set<string>, logoUrl: string | null }>>((acc, trip) => {
             if (!acc[trip.company]) {
                 acc[trip.company] = { count: 0, totalSpent: 0, destinations: new Set(), logoUrl: trip.logoUrl };
@@ -156,7 +147,6 @@ const ProfilePage: React.FC = () => {
     }, []);
 
      const summaryByDestination = useMemo(() => {
-        // FIX: Specify the complex accumulator type for `reduce` to ensure correct type inference for `summary`.
         const summary = travelHistory.reduce<Record<string, { count: number; companies: Set<string> }>>((acc, trip) => {
             if (!acc[trip.to]) {
                 acc[trip.to] = { count: 0, companies: new Set() };
@@ -218,7 +208,8 @@ const ProfilePage: React.FC = () => {
                                 <h3 className="text-xl font-bold mb-4 dark:text-white">Amafaranga Wakoresheje</h3>
                                 <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
                                     <div className="flex items-end h-48 space-x-2">
-                                        {Object.entries(analytics.monthlySpending).map(([month, amount]) => (
+                                        {/* FIX: Add type `[string, number]` to destructuring to ensure `amount` is a number. */}
+                                        {Object.entries(analytics.monthlySpending).map(([month, amount]: [string, number]) => (
                                             <div key={month} className="flex-1 flex flex-col items-center justify-end group">
                                                 <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     {new Intl.NumberFormat('fr-RW').format(amount)}
