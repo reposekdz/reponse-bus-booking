@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 import Header from './components/Header';
@@ -16,8 +15,8 @@ import ContactPage from './ContactPage';
 import SeatSelectionPage from './SeatSelectionPage';
 import BookingSearchPage from './BookingSearchPage';
 import ProfilePage from './ProfilePage';
-import AdminDashboard, { mockCompaniesData } from './AdminDashboard';
-import CompanyDashboard from './CompanyDashboard';
+import AdminLayout from './admin/AdminLayout';
+import CompanyLayout from './company/CompanyLayout';
 import DriverDashboard from './DriverDashboard';
 import AgentDashboard from './AgentDashboard';
 import ServicesPage from './ServicesPage';
@@ -192,8 +191,8 @@ const App = () => {
             case 'bookingSearch': return <BookingSearchPage onTripSelect={handleTripSelect} />;
             case 'profile': return <ProfilePage walletData={walletData} onWalletUpdate={setWalletData} boardingStatus={boardingStatus} onSearch={handleSearch}/>;
             case 'scheduled': return <ScheduledTripsPage onSearch={handleSearch} />;
-            case 'adminDashboard': return <AdminDashboard />;
-            case 'companyDashboard': return <CompanyDashboard />;
+            case 'adminDashboard': return <AdminLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} />;
+            case 'companyDashboard': return <CompanyLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} />;
             case 'driverDashboard': return <DriverDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} driverData={driverData} allCompanies={[]} onPassengerBoarding={(ticketId) => setBoardingStatus(prev => ({...prev, [ticketId]: 'boarded'}))}/>
             case 'agentDashboard': return <AgentDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} agentData={agentData} onAgentDeposit={handleAgentDeposit} passengerSerialCode={walletData.serialCode} transactions={agentTransactions} />;
             case 'home':

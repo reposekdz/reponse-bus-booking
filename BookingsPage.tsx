@@ -3,7 +3,8 @@ import StarRating from './components/StarRating';
 import AdBanner from './components/AdBanner';
 import { QrCodeIcon, MapIcon, XIcon, ArrowRightIcon, BusIcon, ShareIcon, WalletIcon, CheckCircleIcon } from './components/icons';
 import LiveTrackingModal from './components/LiveTrackingModal';
-import { mockCompaniesData } from './AdminDashboard';
+// FIX: Corrected import path for mockCompaniesData
+import { mockCompaniesData } from './admin/AdminDashboard';
 
 const ReviewModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClose }) => {
   const [rating, setRating] = useState(0);

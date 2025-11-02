@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import StarRating from './components/StarRating';
 import { SearchIcon, ChevronRightIcon, StarIcon, MapPinIcon } from './components/icons';
 import type { Page } from './App';
-import { mockCompaniesData } from './AdminDashboard';
+// FIX: Corrected import path for mockCompaniesData
+import { mockCompaniesData } from './admin/AdminDashboard';
 
 interface CompaniesPageProps {
   onNavigate: (page: Page, data?: any) => void;

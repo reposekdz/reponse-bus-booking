@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Page } from '../App';
 import { XIcon, SearchIcon, BuildingOfficeIcon, ChevronRightIcon } from './icons';
-import { mockCompaniesData } from '../AdminDashboard';
+// FIX: Corrected import path for mockCompaniesData
+import { mockCompaniesData } from '../admin/AdminDashboard';
 import StarRating from './StarRating';
 
 interface CompaniesAsideProps {
