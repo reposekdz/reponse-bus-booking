@@ -3,6 +3,7 @@ import {
     SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, ArrowDownLeftIcon,
     WalletIcon, CreditCardIcon, SearchIcon, XIcon, CheckCircleIcon, PhoneIcon, MapPinIcon
 } from './components/icons';
+import PinModal from './components/PinModal';
 
 interface AgentDashboardProps {
     onLogout: () => void;
@@ -97,7 +98,7 @@ const DashboardView = ({ agentData, transactions }) => {
     );
 };
 
-const DepositView = ({ onAgentDeposit, passengerSerialCode }) => {
+const DepositView = ({ onAgentDeposit, passengerSerialCode, agentPin }) => {
     const [serialCode, setSerialCode] = useState('');
     const [passengerInfo, setPassengerInfo] = useState<{name: string; phone: string; location: string} | null>(null);
     const [amount, setAmount] = useState('');
@@ -105,6 +106,7 @@ const DepositView = ({ onAgentDeposit, passengerSerialCode }) => {
     const [isDepositing, setIsDepositing] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const [isPinModalOpen, setIsPinModalOpen] = useState(false);
 
     const handleFindPassenger = () => {
         setError('');
@@ -129,17 +131,24 @@ const DepositView = ({ onAgentDeposit, passengerSerialCode }) => {
             setIsFinding(false);
         }, 1000);
     };
-
-    const handleDeposit = (e: FormEvent) => {
+    
+    const handleDepositAttempt = (e: FormEvent) => {
         e.preventDefault();
         const numAmount = parseFloat(amount);
         if (isNaN(numAmount) || numAmount <= 0) {
             setError('Shyiramo umubare w\'amafaranga wumvikana.');
             return;
         }
+        setError('');
+        setIsPinModalOpen(true);
+    }
+
+    const handlePinSuccess = () => {
+        setIsPinModalOpen(false);
         setIsDepositing(true);
         setError('');
         setSuccessMessage('');
+        const numAmount = parseFloat(amount);
 
         setTimeout(() => {
             const result = onAgentDeposit(serialCode, numAmount);
@@ -191,7 +200,7 @@ const DepositView = ({ onAgentDeposit, passengerSerialCode }) => {
                          {error && <p className="text-red-500 text-sm">{error}</p>}
                     </div>
                 ) : (
-                    <form onSubmit={handleDeposit} className="space-y-4 animate-fade-in">
+                    <form onSubmit={handleDepositAttempt} className="space-y-4 animate-fade-in">
                         <div className="flex justify-between items-start">
                              <h2 className="font-semibold text-lg dark:text-white">Emeza Umwirondoro & Bika</h2>
                              <button type="button" onClick={resetSearch} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">Shakisha undi</button>
@@ -221,6 +230,15 @@ const DepositView = ({ onAgentDeposit, passengerSerialCode }) => {
                     </form>
                 )}
             </div>
+            {isPinModalOpen && (
+                <PinModal 
+                    onClose={() => setIsPinModalOpen(false)}
+                    onSuccess={handlePinSuccess}
+                    pinToMatch={agentPin}
+                    title="Emeza Igikorwa"
+                    description="Shyiramo PIN yawe y'umukozi kugirango wemeze iki gikorwa."
+                />
+            )}
         </div>
     );
 }
@@ -286,7 +304,7 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ onLogout, theme, setThe
     const renderContent = () => {
         switch (view) {
             case 'dashboard': return <DashboardView agentData={agentData} transactions={transactions} />;
-            case 'deposit': return <DepositView onAgentDeposit={onAgentDeposit} passengerSerialCode={passengerSerialCode} />;
+            case 'deposit': return <DepositView onAgentDeposit={onAgentDeposit} passengerSerialCode={passengerSerialCode} agentPin={agentData.pin} />;
             case 'transactions': return <TransactionsView transactions={transactions} />;
             default: return <DashboardView agentData={agentData} transactions={transactions} />;
         }

@@ -1,16 +1,22 @@
+
 import React, { useState } from 'react';
-import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
+import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon, EyeIcon } from '../components/icons';
+import { Page } from '../../App';
 
 // FIX: Define props interface
 interface ManageDriversProps {
     drivers: any[];
+    companies: any[];
     crudHandlers: any;
+    navigate: (page: Page, data?: any) => void;
 }
 
 // FIX: Use props for data and handlers, remove local state for drivers list
-const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, crudHandlers }) => {
+const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, companies, crudHandlers, navigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
+    const getCompanyName = (companyId: string) => companies.find(c => c.id === companyId)?.name || companyId;
+
     return (
         <div>
             <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Manage Drivers</h1>
@@ -46,16 +52,21 @@ const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, crudHandlers }) 
                         <tbody>
                             {drivers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase())).map(driver => (
                                 <tr key={driver.id} className="border-t dark:border-gray-700">
-                                    <td className="p-3 font-semibold dark:text-white">{driver.name}</td>
-                                    <td>{driver.companyId}</td>
+                                    <td className="p-3 font-semibold dark:text-white">
+                                        <button onClick={() => navigate('driverProfile', driver)} className="hover:underline">
+                                            {driver.name}
+                                        </button>
+                                    </td>
+                                    <td>{getCompanyName(driver.companyId)}</td>
                                     <td>{driver.assignedBusId}</td>
                                     <td>{driver.phone}</td>
                                     <td>
-                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${driver.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${driver.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'}`}>
                                             {driver.status}
                                         </span>
                                     </td>
-                                    <td className="flex space-x-2 p-3">
+                                    <td className="flex space-x-1 p-3">
+                                        <button onClick={() => navigate('driverProfile', driver)} className="p-1 text-gray-500 hover:text-green-600" title="View Profile"><EyeIcon className="w-5 h-5"/></button>
                                         <button className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
                                         <button className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
                                     </td>

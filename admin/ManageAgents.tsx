@@ -1,14 +1,127 @@
-
-import React, { useState } from 'react';
-import { BriefcaseIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
+import React, { useState, useEffect } from 'react';
+import { BriefcaseIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon, EyeIcon, ArrowUpTrayIcon } from '../components/icons';
+import Modal from '../components/Modal';
+import { Page } from '../App';
 
 interface ManageAgentsProps {
     agents: any[];
     crudHandlers: any;
+    navigate: (page: Page, data?: any) => void;
 }
 
-const ManageAgents: React.FC<ManageAgentsProps> = ({ agents, crudHandlers }) => {
+const AgentForm = ({ agent, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        location: '',
+        commissionRate: 0.05,
+        status: 'Active',
+        avatarUrl: '',
+        ...agent
+    });
+    const [avatarPreview, setAvatarPreview] = useState(formData.avatarUrl);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleChange = (e) => {
+        const { name, value, type } = e.target;
+        setFormData(prev => ({ ...prev, [name]: type === 'number' ? parseFloat(value) : value }));
+    };
+    
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                setAvatarPreview(reader.result as string);
+                setFormData(prev => ({ ...prev, avatarUrl: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex items-center space-x-4">
+                <img src={avatarPreview || 'https://via.placeholder.com/100'} alt="Avatar" className="w-20 h-20 rounded-full object-cover bg-gray-200"/>
+                <div>
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="text-sm font-semibold text-blue-600 hover:underline">Upload Photo</button>
+                    <p className="text-xs text-gray-500">PNG or JPG. Max 2MB.</p>
+                </div>
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Agent Name</label>
+                <input type="text" name="name" value={formData.name} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                <input type="text" name="location" value={formData.location} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+            </div>
+             <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Commission Rate (%)</label>
+                <input type="number" name="commissionRate" value={formData.commissionRate * 100} onChange={e => setFormData(prev => ({...prev, commissionRate: parseFloat(e.target.value) / 100}))} step="0.1" className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                <select name="status" value={formData.status} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                    <option>Active</option>
+                    <option>Inactive</option>
+                </select>
+            </div>
+            <div className="flex justify-end space-x-3 pt-4">
+                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-semibold border rounded-lg dark:border-gray-600">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Agent</button>
+            </div>
+        </form>
+    );
+};
+
+const ManageAgents: React.FC<ManageAgentsProps> = ({ agents, crudHandlers, navigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentAgent, setCurrentAgent] = useState<any | null>(null);
+    const [liveStatuses, setLiveStatuses] = useState({});
+
+    useEffect(() => {
+        const statusOptions = ['Online', 'Idle', 'Offline'];
+        const updateStatuses = () => {
+            const newStatuses = {};
+            agents.forEach(agent => {
+                newStatuses[agent.id] = statusOptions[Math.floor(Math.random() * statusOptions.length)];
+            });
+            setLiveStatuses(newStatuses);
+        };
+        updateStatuses();
+        const interval = setInterval(updateStatuses, 15000); // Update every 15s
+        return () => clearInterval(interval);
+    }, [agents]);
+
+    const openModal = (agent = null) => {
+        setCurrentAgent(agent);
+        setIsModalOpen(true);
+    };
+
+    const handleSave = (agentData) => {
+        if (currentAgent) {
+            crudHandlers.updateAgent(agentData);
+        } else {
+            crudHandlers.addAgent(agentData);
+        }
+        setIsModalOpen(false);
+    };
+    
+    const statusIndicator = (status) => {
+        switch(status) {
+            case 'Online': return 'bg-green-500';
+            case 'Idle': return 'bg-yellow-500';
+            case 'Offline': return 'bg-gray-500';
+            default: return 'bg-gray-500';
+        }
+    };
 
     return (
         <div>
@@ -25,7 +138,7 @@ const ManageAgents: React.FC<ManageAgentsProps> = ({ agents, crudHandlers }) => 
                             className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
                         />
                     </div>
-                    <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                    <button onClick={() => openModal()} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
                         <PlusIcon className="w-5 h-5 mr-2" /> Add Agent
                     </button>
                 </div>
@@ -38,25 +151,30 @@ const ManageAgents: React.FC<ManageAgentsProps> = ({ agents, crudHandlers }) => 
                                 <th className="p-3">Location</th>
                                 <th className="p-3">Commission Rate</th>
                                 <th className="p-3">Total Deposits</th>
-                                <th className="p-3">Status</th>
+                                <th className="p-3">Live Status</th>
                                 <th className="p-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {agents.filter(a => a.name.toLowerCase().includes(searchTerm.toLowerCase())).map(agent => (
                                 <tr key={agent.id} className="border-t dark:border-gray-700">
-                                    <td className="p-3 font-semibold dark:text-white">{agent.name}</td>
+                                    <td className="p-3 font-semibold dark:text-white flex items-center">
+                                        <img src={agent.avatarUrl} alt={agent.name} className="w-8 h-8 rounded-full object-cover mr-3"/>
+                                        {agent.name}
+                                    </td>
                                     <td>{agent.location}</td>
                                     <td>{agent.commissionRate * 100}%</td>
                                     <td>{new Intl.NumberFormat('fr-RW').format(agent.totalDeposits)} RWF</td>
                                     <td>
-                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${agent.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                            {agent.status}
-                                        </span>
+                                        <div className="flex items-center space-x-2">
+                                            <div className={`w-2.5 h-2.5 rounded-full ${statusIndicator(liveStatuses[agent.id])}`}></div>
+                                            <span className="text-xs font-medium">{liveStatuses[agent.id]}</span>
+                                        </div>
                                     </td>
-                                    <td className="flex space-x-2 p-3">
-                                        <button className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
+                                    <td className="flex space-x-1 p-3">
+                                        <button onClick={() => navigate('agentProfile', agent)} className="p-1 text-gray-500 hover:text-green-600" title="View Profile"><EyeIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => openModal(agent)} className="p-1 text-gray-500 hover:text-blue-600" title="Edit"><PencilSquareIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => crudHandlers.deleteAgent(agent.id)} className="p-1 text-gray-500 hover:text-red-600" title="Delete"><TrashIcon className="w-5 h-5"/></button>
                                     </td>
                                 </tr>
                             ))}
@@ -64,6 +182,9 @@ const ManageAgents: React.FC<ManageAgentsProps> = ({ agents, crudHandlers }) => 
                     </table>
                 </div>
             </div>
+             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentAgent ? "Edit Agent" : "Add New Agent"}>
+                <AgentForm agent={currentAgent} onSave={handleSave} onCancel={() => setIsModalOpen(false)} />
+            </Modal>
         </div>
     );
 };

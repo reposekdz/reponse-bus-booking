@@ -1,5 +1,6 @@
-import React from 'react';
-import { ChartBarIcon, UsersIcon, BusIcon, MapIcon } from '../components/icons';
+import React, { useState } from 'react';
+import { ChartBarIcon, UsersIcon, BusIcon, MapIcon, WalletIcon } from '../components/icons';
+import PinModal from '../components/PinModal';
 
 const StatCard = ({ title, value, icon }) => (
     <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
@@ -15,17 +16,22 @@ const StatCard = ({ title, value, icon }) => (
     </div>
 );
 
-// FIX: Add props interface
 interface CompanyDashboardProps {
     drivers: any[];
     buses: any[];
     routes: any[];
+    companyPin: string;
 }
 
-// FIX: Make component accept props and calculate stats dynamically
-const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ drivers, buses, routes }) => {
+const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ drivers, buses, routes, companyPin }) => {
+    const [isPinModalOpen, setIsPinModalOpen] = useState(false);
     const activeBuses = buses.filter(b => b.status === 'On Route').length;
     const popularRoute = routes.length > 0 ? `${routes[0].from} - ${routes[0].to}` : 'N/A';
+    
+    const handlePinSuccess = () => {
+        setIsPinModalOpen(false);
+        alert('Payouts Authorized Successfully!');
+    };
 
     return (
         <div>
@@ -36,10 +42,44 @@ const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ drivers, buses, rou
                 <StatCard title="Active Buses" value={`${activeBuses} / ${buses.length}`} icon={<BusIcon />} />
                 <StatCard title="Popular Route" value={popularRoute} icon={<MapIcon />} />
             </div>
-             <div className="mt-8 bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                <h2 className="text-xl font-bold dark:text-white">Live Fleet Status</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-4">A map showing live bus locations will be displayed here...</p>
+             <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                    <h2 className="text-xl font-bold dark:text-white">Live Fleet Status</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mt-4">A map showing live bus locations will be displayed here...</p>
+                    <div className="h-64 bg-gray-200 dark:bg-gray-700/50 mt-4 rounded-lg flex items-center justify-center">
+                        <p className="text-gray-500">Map Area</p>
+                    </div>
+                </div>
+                 <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                     <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center">
+                        <WalletIcon className="w-6 h-6 mr-3 text-green-500"/>
+                        Financials
+                    </h2>
+                    <div className="space-y-4">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Authorize company expenses and payroll securely.</p>
+                         <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <p className="text-sm font-semibold dark:text-gray-200">Pending Payouts</p>
+                            <p className="text-2xl font-bold text-gray-800 dark:text-white">1,850,000 RWF</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">For {drivers.length} drivers (Oct 2024)</p>
+                        </div>
+                        <button 
+                            onClick={() => setIsPinModalOpen(true)}
+                            className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
+                        >
+                            Authorize Payouts
+                        </button>
+                    </div>
+                </div>
             </div>
+            {isPinModalOpen && (
+                <PinModal
+                    onClose={() => setIsPinModalOpen(false)}
+                    onSuccess={handlePinSuccess}
+                    pinToMatch={companyPin}
+                    title="Authorize Financials"
+                    description="Enter your company PIN to authorize this payout."
+                />
+            )}
         </div>
     );
 };

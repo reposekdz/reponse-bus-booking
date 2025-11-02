@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import CompanyDashboard from './CompanyDashboard';
 import CompanyBuses from './CompanyBuses';
@@ -39,12 +40,12 @@ const CompanyLayout: React.FC<CompanyLayoutProps> = ({ onLogout, theme, setTheme
 
     const renderView = () => {
         switch (activeView) {
-            case 'dashboard': return <CompanyDashboard drivers={drivers} buses={buses} routes={routes} />;
+            case 'dashboard': return <CompanyDashboard drivers={drivers} buses={buses} routes={routes} companyPin={companyData.pin} />;
             case 'buses': return <CompanyBuses buses={buses} crudHandlers={{}} />;
             case 'drivers': return <CompanyDrivers drivers={drivers} crudHandlers={{}} />;
             case 'routes': return <CompanyRoutes routes={routes} crudHandlers={crudHandlers} companyId={companyData.id} />;
             case 'passengers': return <CompanyPassengers />;
-            default: return <CompanyDashboard drivers={drivers} buses={buses} routes={routes} />;
+            default: return <CompanyDashboard drivers={drivers} buses={buses} routes={routes} companyPin={companyData.pin} />;
         }
     };
     

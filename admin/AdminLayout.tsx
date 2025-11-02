@@ -6,40 +6,45 @@ import ManageDrivers from './ManageDrivers';
 import ManageAgents from './ManageAgents';
 import ManagePassengers from './ManagePassengers';
 import { ChartBarIcon, BuildingOfficeIcon, UsersIcon, BriefcaseIcon, BusIcon, SunIcon, MoonIcon, CogIcon } from '../components/icons';
+import { Page } from '../App';
 
 // Data
 import { mockCompaniesData } from './AdminDashboard';
 
-const mockDriversData = [
-  { id: 1, name: 'John Doe', companyId: 'volcano', assignedBusId: 'VB01', phone: '0788111222', status: 'Active' },
-  { id: 2, name: 'Peter Jones', companyId: 'ritco', assignedBusId: 'RT01', phone: '0788333444', status: 'Active' },
+const initialDrivers = [
+  { id: 1, name: 'John Doe', companyId: 'volcano', assignedBusId: 'VB01', phone: '0788111222', status: 'Active', email: 'j.doe@volcano.rw', joinDate: '2020-02-15T00:00:00Z', totalTrips: 1240, safetyScore: 98.5, avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1974&auto=format&fit=crop', coverUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop', bio: "Umushoferi w'inararibonye ufite ishyaka ryo gutanga serivisi nziza kandi itekanye.", certifications: [{name: 'License Category D', id: 'D12345', expiry: '2028-12-31'}] },
+  { id: 2, name: 'Peter Jones', companyId: 'ritco', assignedBusId: 'RT01', phone: '0788333444', status: 'Active', email: 'p.jones@ritco.rw', joinDate: '2018-08-01T00:00:00Z', totalTrips: 2500, safetyScore: 99.1, avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop', coverUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop', bio: "Umushoferi w'inararibonye ufite ishyaka ryo gutanga serivisi nziza kandi itekanye.", certifications: [] },
 ];
-const mockAgentsData = [
-    { id: 1, name: 'Jane Smith', location: 'Nyabugogo', commissionRate: 0.05, totalDeposits: 1250000, status: 'Active' },
-    { id: 2, name: 'Chris Lee', location: 'Huye', commissionRate: 0.05, totalDeposits: 850000, status: 'Active' },
+const initialAgents = [
+    { id: 1, name: 'Jane Smith', location: 'Nyabugogo', commissionRate: 0.05, totalDeposits: 1250000, status: 'Active', avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop', phone: '0788555666', email: 'j.smith@agent.rw' },
+    { id: 2, name: 'Chris Lee', location: 'Huye', commissionRate: 0.05, totalDeposits: 850000, status: 'Active', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop', phone: '0788777888', email: 'c.lee@agent.rw'},
 ];
-const mockBusesData = [
-    { id: 'VB01', plate: 'RAD 123 B', companyId: 'volcano', capacity: 55, status: 'On Route' },
-    { id: 'RT01', plate: 'RAE 456 C', companyId: 'ritco', capacity: 70, status: 'Idle' },
+const initialBuses = [
+    { id: 'VB01', plate: 'RAD 123 B', companyId: 'volcano', capacity: 55, status: 'On Route', model: 'Yutong Explorer' },
+    { id: 'RT01', plate: 'RAE 456 C', companyId: 'ritco', capacity: 70, status: 'Idle', model: 'Scania Marcopolo' },
 ];
 
 interface AdminLayoutProps {
     onLogout: () => void;
     theme: 'light' | 'dark';
     setTheme: (theme: 'light' | 'dark') => void;
+    navigate: (page: Page, data?: any) => void;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ onLogout, theme, setTheme }) => {
+const AdminLayout: React.FC<AdminLayoutProps> = ({ onLogout, theme, setTheme, navigate }) => {
     const [activeView, setActiveView] = useState('dashboard');
     const [companies, setCompanies] = useState(mockCompaniesData);
-    const [drivers, setDrivers] = useState(mockDriversData);
-    const [agents, setAgents] = useState(mockAgentsData);
-    const [buses, setBuses] = useState(mockBusesData);
+    const [drivers, setDrivers] = useState(initialDrivers);
+    const [agents, setAgents] = useState(initialAgents);
+    const [buses, setBuses] = useState(initialBuses);
 
     const crudHandlers = {
         addCompany: (data) => setCompanies(prev => [...prev, { ...data, id: Date.now().toString(), totalPassengers: 0, totalRevenue: 0, routes: [] }]),
         updateCompany: (data) => setCompanies(prev => prev.map(c => c.id === data.id ? data : c)),
         deleteCompany: (id) => setCompanies(prev => prev.filter(c => c.id !== id)),
+        addAgent: (data) => setAgents(prev => [...prev, { ...data, id: Date.now(), totalDeposits: 0 }]),
+        updateAgent: (data) => setAgents(prev => prev.map(a => a.id === data.id ? data : a)),
+        deleteAgent: (id) => setAgents(prev => prev.filter(a => a.id !== id)),
     };
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
@@ -48,8 +53,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ onLogout, theme, setTheme }) 
         switch (activeView) {
             case 'dashboard': return <AdminDashboard companies={companies} drivers={drivers} agents={agents} buses={buses} />;
             case 'companies': return <ManageCompanies companies={companies} crudHandlers={crudHandlers} />;
-            case 'drivers': return <ManageDrivers drivers={drivers} crudHandlers={{}} />;
-            case 'agents': return <ManageAgents agents={agents} crudHandlers={{}} />;
+            case 'drivers': return <ManageDrivers drivers={drivers} companies={companies} crudHandlers={{}} navigate={navigate} />;
+            case 'agents': return <ManageAgents agents={agents} crudHandlers={crudHandlers} navigate={navigate} />;
             case 'passengers': return <ManagePassengers />;
             default: return <AdminDashboard companies={companies} drivers={drivers} agents={agents} buses={buses} />;
         }

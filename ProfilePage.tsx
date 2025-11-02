@@ -1,18 +1,10 @@
 
 
+
 import React, { useState, useMemo, useRef, useEffect, FormEvent } from 'react';
 import { UserCircleIcon, CogIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon, ChartBarIcon, SearchIcon, BusIcon, BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, LockClosedIcon, CameraIcon, XIcon, PaperAirplaneIcon } from './components/icons';
 import StarRating from './components/StarRating';
 
-
-const user = {
-    name: 'Kalisa Jean',
-    email: 'kalisa.j@example.com',
-    memberSince: 'Mutarama 2023',
-    walletPin: '1234', // Hardcoded for simulation
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop',
-    coverUrl: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=2070&auto=format&fit=crop'
-};
 
 const userReviews = [
     { id: 1, company: 'Volcano Express', rating: 5, date: '28 Nzeri, 2024', comment: 'Serivisi nziza cyane, bisi zirasukuye kandi zigeze ku gihe. Nzakomeza kubagana!'},
@@ -208,13 +200,14 @@ const WalletActionModal: React.FC<{
 
 // FIX: Added missing props to fix type error from App.tsx
 interface ProfilePageProps {
+    user: any;
     walletData: any;
     onWalletUpdate: (data: any) => void;
     boardingStatus: Record<string, 'booked' | 'boarded'>;
     onSearch: (from?: string, to?: string) => void;
 }
 
-const ProfilePage: React.FC<ProfilePageProps> = ({ walletData, onWalletUpdate, boardingStatus, onSearch }) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ user, walletData, onWalletUpdate, boardingStatus, onSearch }) => {
     const [activeTab, setActiveTab] = useState('analytics');
     const [searchTerm, setSearchTerm] = useState('');
     const [isWalletUnlocked, setIsWalletUnlocked] = useState(false);

@@ -31,6 +31,7 @@ import AdminLayout from './admin/AdminLayout';
 import CompanyLayout from './company/CompanyLayout';
 import DriverProfilePage from './DriverProfilePage';
 import AgentProfilePage from './AgentProfilePage';
+import PackageDeliveryPage from './PackageDeliveryPage';
 
 // Data
 import { mockCompaniesData } from './admin/AdminDashboard';
@@ -54,7 +55,8 @@ export type Page =
   | 'driver'
   | 'agent'
   | 'driverProfile'
-  | 'agentProfile';
+  | 'agentProfile'
+  | 'packageDelivery';
 
 
 const user = {
@@ -202,22 +204,23 @@ const App: React.FC = () => {
     switch (currentPage) {
       case 'login': return <LoginPage onLogin={handleLogin} onNavigate={navigate} />;
       case 'register': return <RegisterPage onNavigate={navigate} />;
-      case 'bookingSearch': return <BookingSearchPage onTripSelect={handleTripSelect} />;
+      case 'bookingSearch': return <BookingSearchPage onTripSelect={handleTripSelect} initialSearch={pageData} />;
       case 'seatSelection': return <SeatSelectionPage tripData={pageData} onConfirm={handleBookingConfirm} navigate={navigate} walletData={walletData} />;
       case 'bookings': return <BookingsPage />;
       case 'companies': return <CompaniesPage onNavigate={navigate} />;
       case 'companyProfile': return <CompanyProfilePage company={pageData} onSelectTrip={handleSearch} />;
-      case 'services': return <ServicesPage />;
+      case 'services': return <ServicesPage onNavigate={navigate} />;
       case 'help': return <HelpPage />;
       case 'contact': return <ContactPage />;
-      case 'profile': return <ProfilePage walletData={walletData} onWalletUpdate={handleWalletUpdate} boardingStatus={boardingStatus} onSearch={handleSearch} />;
+      case 'profile': return <ProfilePage user={user} walletData={walletData} onWalletUpdate={handleWalletUpdate} boardingStatus={boardingStatus} onSearch={handleSearch} />;
       case 'scheduled': return <ScheduledTripsPage onSearch={handleSearch} />;
-      case 'driverProfile': return <DriverProfilePage />;
-      case 'agentProfile': return <AgentProfilePage />;
-      case 'admin': return <AdminLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} />;
-      case 'company': return <CompanyLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} companyData={mockCompaniesData[0]} />;
-      case 'driver': return <DriverDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} driverData={{ id: 1, name: 'John Doe', avatarUrl: user.avatarUrl, assignedBusId: 'VB01' }} allCompanies={mockCompaniesData} onPassengerBoarding={handlePassengerBoarding} navigate={navigate} />;
-      case 'agent': return <AgentDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} agentData={{ id: 1, name: 'Jane Smith', location: 'Nyabugogo' }} onAgentDeposit={handleAgentDeposit} passengerSerialCode={walletData.serialCode} transactions={agentTransactions} />;
+      case 'driverProfile': return <DriverProfilePage driver={pageData || {}} />;
+      case 'agentProfile': return <AgentProfilePage agent={pageData} allTransactions={agentTransactions} />;
+      case 'packageDelivery': return <PackageDeliveryPage onNavigate={navigate} />;
+      case 'admin': return <AdminLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} navigate={navigate} />;
+      case 'company': return <CompanyLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} companyData={{...mockCompaniesData[0], pin: '5678'}} />;
+      case 'driver': return <DriverDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} driverData={{ id: 1, name: 'John Doe', avatarUrl: user.avatarUrl, assignedBusId: 'VB01' }} allCompanies={mockCompaniesData} onPassengerBoarding={handlePassengerBoarding} navigate={(page, data) => navigate(page, data)} />;
+      case 'agent': return <AgentDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} agentData={{ id: 1, name: 'Jane Smith', location: 'Nyabugogo', pin: '9999' }} onAgentDeposit={handleAgentDeposit} passengerSerialCode={walletData.serialCode} transactions={agentTransactions} />;
       case 'home':
       default:
         return (

@@ -1,19 +1,17 @@
 
-
 import React, { useState, useMemo, useEffect } from 'react';
-// FIX: Corrected import to point to the existing BookingForm component
 import BookingForm from './components/BookingForm';
 import { ClockIcon, ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, SparklesIcon, FilterIcon, TruckIcon } from './components/icons';
 import SearchResultSkeleton from './components/SearchResultSkeleton';
 
 const searchResults = [
-  { id: 1, company: 'Volcano Express', departureTime: '07:00 AM', arrivalTime: '10:30 AM', duration: '3h 30m', price: 4500, availableSeats: 23, amenities: ['WiFi', 'AC'], tag: 'Ikunzwe Cyane', busType: 'Luxury' },
-  { id: 2, company: 'Horizon Express', departureTime: '08:30 AM', arrivalTime: '12:15 PM', duration: '3h 45m', price: 4800, availableSeats: 15, amenities: ['AC', 'Charging'], busType: 'Standard' },
-  { id: 3, company: 'RITCO', departureTime: '09:00 AM', arrivalTime: '12:30 PM', duration: '3h 30m', price: 4500, availableSeats: 30, amenities: ['WiFi', 'AC', 'Charging'], tag: 'Byuzuye', busType: 'Standard' },
-  { id: 4, company: 'Volcano Express', departureTime: '11:00 AM', arrivalTime: '02:30 PM', duration: '3h 30m', price: 4500, availableSeats: 5, amenities: ['AC'], busType: 'Standard' },
-  { id: 5, company: 'Volcano Express', departureTime: '14:00 AM', arrivalTime: '17:30 PM', duration: '3h 30m', price: 4500, availableSeats: 18, amenities: ['AC', 'WiFi'], busType: 'Luxury' },
-  { id: 6, company: 'RITCO', departureTime: '16:00 AM', arrivalTime: '19:30 PM', duration: '3h 30m', price: 4500, availableSeats: 40, amenities: ['AC', 'Charging'], busType: 'Standard' },
-  { id: 7, company: 'Night Cruiser', departureTime: '22:00 PM', arrivalTime: '05:30 AM', duration: '7h 30m', price: 9000, availableSeats: 12, amenities: ['WiFi', 'AC', 'Charging'], busType: 'Sleeper' },
+  { id: 1, from: 'Kigali', to: 'Rubavu', company: 'Volcano Express', departureTime: '07:00 AM', arrivalTime: '10:30 AM', duration: '3h 30m', price: 4500, availableSeats: 23, amenities: ['WiFi', 'AC'], tag: 'Ikunzwe Cyane', busType: 'Luxury' },
+  { id: 2, from: 'Kigali', to: 'Rubavu', company: 'Horizon Express', departureTime: '08:30 AM', arrivalTime: '12:15 PM', duration: '3h 45m', price: 4800, availableSeats: 15, amenities: ['AC', 'Charging'], busType: 'Standard' },
+  { id: 3, from: 'Kigali', to: 'Huye', company: 'RITCO', departureTime: '09:00 AM', arrivalTime: '11:30 AM', duration: '2h 30m', price: 3000, availableSeats: 30, amenities: ['WiFi', 'AC', 'Charging'], tag: 'Byuzuye', busType: 'Standard' },
+  { id: 4, from: 'Kigali', to: 'Rubavu', company: 'Volcano Express', departureTime: '11:00 AM', arrivalTime: '02:30 PM', duration: '3h 30m', price: 4500, availableSeats: 5, amenities: ['AC'], busType: 'Standard' },
+  { id: 5, from: 'Kigali', to: 'Musanze', company: 'Volcano Express', departureTime: '14:00 PM', arrivalTime: '16:00 PM', duration: '2h 0m', price: 3500, availableSeats: 18, amenities: ['AC', 'WiFi'], busType: 'Luxury' },
+  { id: 6, from: 'Kigali', to: 'Huye', company: 'RITCO', departureTime: '16:00 PM', arrivalTime: '18:30 PM', duration: '2h 30m', price: 3000, availableSeats: 40, amenities: ['AC', 'Charging'], busType: 'Standard' },
+  { id: 7, from: 'Kigali', to: 'Kampala', company: 'Night Cruiser', departureTime: '22:00 PM', arrivalTime: '05:30 AM', duration: '7h 30m', price: 9000, availableSeats: 12, amenities: ['WiFi', 'AC', 'Charging'], busType: 'Sleeper' },
 ];
 
 const featuredRoutes = [
@@ -22,8 +20,6 @@ const featuredRoutes = [
     { from: 'Kigali', to: 'Musanze', image: 'https://www.andbeyond.com/wp-content/uploads/sites/5/one-of-the-reasons-to-visit-rwanda-gorilla.jpg' },
     { from: 'Kigali', to: 'Nyungwe', image: 'https://nyungwepark.com/wp-content/uploads/2021/04/Nyungwe-Forest-National-Park.jpg' }
 ];
-
-// --- Components moved from SearchResultsPage ---
 
 const AmenityIcon: React.FC<{ amenity: string }> = ({ amenity }) => {
     const iconClass = "w-4 h-4 text-gray-500 dark:text-gray-400";
@@ -49,7 +45,7 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
         <div className="flex items-center space-x-4">
             <div className="text-center">
                 <p className="font-bold text-xl text-gray-800 dark:text-white">{result.departureTime}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Kigali</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{result.from}</p>
             </div>
             <div className="text-center text-gray-400">
                 <p className="text-xs">{result.duration}</p>
@@ -58,7 +54,7 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
             </div>
             <div className="text-center">
                 <p className="font-bold text-xl text-gray-800 dark:text-white">{result.arrivalTime}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Rubavu</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{result.to}</p>
             </div>
         </div>
         <div className="text-center flex-shrink-0">
@@ -80,13 +76,12 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
     </div>
 );
 
-// --- End of moved components ---
-
 interface BookingSearchPageProps {
     onTripSelect: (trip: any) => void;
+    initialSearch?: { from?: string, to?: string };
 }
 
-const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) => {
+const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect, initialSearch }) => {
     const [showResults, setShowResults] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [searchCriteria, setSearchCriteria] = useState<{ from?: string, to?: string }>({});
@@ -97,6 +92,12 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
     const [busTypeFilter, setBusTypeFilter] = useState<string[]>([]);
     const [favoriteTrips, setFavoriteTrips] = useState<number[]>([]);
 
+    useEffect(() => {
+        if (initialSearch?.from || initialSearch?.to) {
+            handleSearch(initialSearch.from, initialSearch.to);
+        }
+    }, [initialSearch]);
+    
     useEffect(() => {
         const storedFavorites = localStorage.getItem('favoriteTrips');
         if (storedFavorites) {
@@ -144,13 +145,21 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
 
     const filteredResults = useMemo(() => {
         return searchResults.filter(result => {
+            if (searchCriteria.from && result.from.toLowerCase() !== searchCriteria.from.toLowerCase()) return false;
+            if (searchCriteria.to && result.to.toLowerCase() !== searchCriteria.to.toLowerCase()) return false;
+
             if (result.price > priceFilter) return false;
 
             if (timeFilter.length > 0) {
                 const hour = parseInt(result.departureTime.split(':')[0]);
-                const isMorning = hour >= 5 && hour < 12;
-                const isAfternoon = hour >= 12 && hour < 18;
-                const isEvening = hour >= 18;
+                const modifier = result.departureTime.slice(-2);
+                let hour24 = hour;
+                if (modifier === 'PM' && hour < 12) hour24 += 12;
+                if (modifier === 'AM' && hour === 12) hour24 = 0;
+
+                const isMorning = hour24 >= 5 && hour24 < 12;
+                const isAfternoon = hour24 >= 12 && hour24 < 18;
+                const isEvening = hour24 >= 18 || hour24 < 5;
                 
                 let matchesTime = false;
                 if (timeFilter.includes('morning') && isMorning) matchesTime = true;
@@ -173,7 +182,7 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
 
             return true;
         });
-    }, [priceFilter, timeFilter, amenitiesFilter, companyFilter, busTypeFilter]);
+    }, [priceFilter, timeFilter, amenitiesFilter, companyFilter, busTypeFilter, searchCriteria]);
 
     return (
         <div className="min-h-full">
@@ -183,7 +192,6 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
                     <aside className="lg:w-1/3 xl:w-1/4">
                         <div className="sticky top-24 space-y-6">
                             <div className="bg-gradient-to-br from-blue-600 to-green-600 dark:from-gray-800 dark:to-gray-900/50 p-6 rounded-2xl shadow-2xl text-white">
-                                {/* FIX: Corrected component usage to BookingForm */}
                                 <BookingForm onSearch={handleSearch} />
                             </div>
                             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
@@ -201,8 +209,8 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
                                     <label className="font-semibold dark:text-gray-200 block mb-2">Igihe cyo Guhaguruka</label>
                                     <div className="flex space-x-2">
                                         {['morning', 'afternoon', 'evening'].map(time => (
-                                            <button key={time} onClick={() => handleTimeFilter(time)} className={`w-full py-2 text-sm rounded-md border-2 transition-colors ${timeFilter.includes(time) ? 'bg-blue-500 text-white border-blue-500' : 'bg-transparent border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                                                {time.charAt(0).toUpperCase() + time.slice(1)}
+                                            <button key={time} onClick={() => handleTimeFilter(time)} className={`w-full py-2 text-xs rounded-md border-2 transition-colors ${timeFilter.includes(time) ? 'bg-blue-500 text-white border-blue-500' : 'bg-transparent border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                                {time === 'morning' ? 'Mbere ya saa sita' : time === 'afternoon' ? 'Nyuma ya saa sita' : 'N\'ijoro'}
                                             </button>
                                         ))}
                                     </div>
@@ -262,7 +270,7 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
                                             <img src={route.image} alt={`View of ${route.to}`} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
                                             <div className="absolute bottom-0 left-0 p-4">
-                                                <p className="font-bold text-white text-lg drop-shadow-md">{route.from} - {route.to}</p>
+                                                <p className="font-bold text-white text-lg drop-shadow-md">{route.from} &rarr; {route.to}</p>
                                             </div>
                                         </button>
                                     ))}
@@ -272,7 +280,9 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
                             <div className="animate-fade-in">
                                 <div className="mb-6">
                                     <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Ibyavuye mu Gushakisha</h1>
-                                    <p className="text-gray-600 dark:text-gray-400">{searchCriteria.from} - {searchCriteria.to} &bull; {!isSearching && `${filteredResults.length} bisi zabonetse`}</p>
+                                    <p className="text-gray-600 dark:text-gray-400">
+                                        {searchCriteria.from && searchCriteria.to ? `${searchCriteria.from} → ${searchCriteria.to}` : 'Ingendo zose'} &bull; {!isSearching && `${filteredResults.length} bisi zabonetse`}
+                                    </p>
                                 </div>
                                 <div className="space-y-6">
                                     {isSearching ? (

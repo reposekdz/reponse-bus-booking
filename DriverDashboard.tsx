@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import {
     SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, BuildingOfficeIcon,
@@ -12,7 +13,7 @@ interface DriverDashboardProps {
     driverData: any;
     allCompanies: any[];
     onPassengerBoarding: (ticketId: string) => void;
-    navigate: (page: Page) => void;
+    navigate: (page: Page, data?: any) => void;
 }
 
 const mockPassengersData = {
@@ -36,6 +37,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
     const [currentTrip, setCurrentTrip] = useState<any>(null);
     const [passengers, setPassengers] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [fullDriverData, setFullDriverData] = useState(null);
 
     useEffect(() => {
         const tripInfo = mockTrips[driverData.assignedBusId];
@@ -43,6 +45,12 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
             setCurrentTrip(tripInfo);
             setPassengers(mockPassengersData[driverData.assignedBusId] || []);
         }
+        // In a real app, you'd fetch this. Here we'll simulate finding it.
+        // This is a mock-up based on data structures in other files.
+        const foundDriver = {
+            id: 1, name: 'John Doe', company: 'Volcano Express', assignedBusId: 'VB01', phone: '0788111222', status: 'Active', email: 'j.doe@volcano.rw', joinDate: '2020-02-15T00:00:00Z', totalTrips: 1240, safetyScore: 98.5, avatarUrl: driverData.avatarUrl, coverUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop', bio: "Umushoferi w'inararibonye ufite ishyaka ryo gutanga serivisi nziza kandi itekanye.", certifications: [{name: 'License Category D', id: 'D12345', expiry: '2028-12-31'}], location: 'Kigali'
+        }
+        setFullDriverData(foundDriver);
     }, [driverData]);
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
@@ -77,7 +85,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
     return (
         <div className={`min-h-screen flex flex-col ${theme} bg-gray-100 dark:bg-gray-900`}>
             <header className="h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm flex items-center justify-between px-6 border-b dark:border-gray-700/50 sticky top-0 z-10">
-                <button onClick={() => navigate('driverProfile')} className="flex items-center space-x-2 group">
+                <button onClick={() => navigate('driverProfile', fullDriverData)} className="flex items-center space-x-2 group">
                     <img src={driverData.avatarUrl} alt={driverData.name} className="w-9 h-9 rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition"/>
                     <div className="font-bold text-gray-800 dark:text-white">Ikaze, {driverData.name}</div>
                 </button>
