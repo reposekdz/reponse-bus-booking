@@ -22,6 +22,7 @@ import ServicesPage from './ServicesPage';
 import LoadingSpinner from './components/LoadingSpinner';
 import { mockCompaniesData } from './AdminDashboard';
 import BookingSearchPage from './BookingSearchPage';
+import CompaniesAside from './components/CompaniesAside';
 
 export type Page = 'home' | 'login' | 'register' | 'bookings' | 'companies' | 'help' | 'contact' | 'searchResults' | 'seatSelection' | 'companyProfile' | 'profile' | 'services' | 'bookingSearch';
 
@@ -36,9 +37,12 @@ const App: React.FC = () => {
   const [showNextTripWidget, setShowNextTripWidget] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [companies, setCompanies] = useState(mockCompaniesData); // State for companies lifted up
+  const [isCompaniesAsideOpen, setIsCompaniesAsideOpen] = useState(false);
 
   const showLoader = () => setIsLoading(true);
   const hideLoader = () => setIsLoading(false);
+  
+  const toggleCompaniesAside = () => setIsCompaniesAsideOpen(!isCompaniesAsideOpen);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -188,6 +192,7 @@ const App: React.FC = () => {
         theme={theme}
         setTheme={setTheme}
         currentPage={page}
+        onToggleCompaniesAside={toggleCompaniesAside}
       />
       <main className="flex-grow pt-16 pb-20 md:pb-0">
         <div key={page} className="animate-fade-in">
@@ -199,6 +204,7 @@ const App: React.FC = () => {
           <NextTripWidget trip={upcomingTripForWidget} onDismiss={() => setShowNextTripWidget(false)} onTrack={() => navigate('bookings')} />
       )}
       <BottomNavigation navigate={navigate} currentPage={page} />
+      <CompaniesAside isOpen={isCompaniesAsideOpen} onClose={toggleCompaniesAside} navigate={navigate} />
     </div>
   );
 };

@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { ArrowRightIcon, CheckCircleIcon, MapIcon, QrCodeIcon, BusIcon, XIcon, WalletIcon, CreditCardIcon } from './components/icons';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { ArrowRightIcon, CheckCircleIcon, MapIcon, QrCodeIcon, BusIcon, XIcon, WalletIcon, CreditCardIcon, LockClosedIcon } from './components/icons';
 import LiveTrackingModal from './components/LiveTrackingModal';
 import { Page } from './App';
 
-type SeatStatus = 'available' | 'occupied' | 'selected';
+type SeatStatus = 'available' | 'occupied' | 'selected' | 'reserved';
 
 interface SeatProps {
   status: SeatStatus;
@@ -18,32 +18,35 @@ const Seat: React.FC<SeatProps> = ({ status, seatNumber, onClick }) => {
     available: "bg-gradient-to-b from-green-300 to-green-500 border-b-4 border-green-700 text-green-900 hover:from-green-400 dark:from-green-600/50 dark:to-green-700/50 dark:border-green-500 dark:text-green-200 dark:hover:from-green-600",
     occupied: "bg-gradient-to-b from-gray-300 to-gray-400 border-b-4 border-gray-600 text-gray-600 cursor-not-allowed dark:from-gray-700 dark:to-gray-800 dark:border-gray-900 dark:text-gray-500",
     selected: "bg-gradient-to-b from-yellow-300 to-yellow-500 border-b-4 border-yellow-700 text-white font-bold transform scale-110 shadow-lg",
+    reserved: "bg-gradient-to-b from-purple-300 to-purple-500 border-b-4 border-purple-700 text-purple-900 cursor-not-allowed dark:from-purple-600/50 dark:to-purple-700/50 dark:border-purple-500 dark:text-purple-200",
   };
+  
+  const tooltipText = {
+    available: `Umwanya ${seatNumber}`,
+    occupied: 'Uyu mwanya wafashwe',
+    selected: `Wahisemo umwanya ${seatNumber}`,
+    reserved: 'Urafashwe n\'undi muntu'
+  }
 
   return (
-    <button onClick={onClick} disabled={status === 'occupied'} className={`${baseClasses} ${statusClasses[status]}`}>
-      {/* Seat back */}
+    <button onClick={onClick} disabled={status === 'occupied' || status === 'reserved'} className={`${baseClasses} ${statusClasses[status]}`}>
       <div className="absolute w-full h-full rounded-t-lg preserve-3d group-hover:rotate-y-10 transition-transform duration-300">
         <div className="absolute inset-0 bg-black/10 dark:bg-black/20 rounded-t-lg"></div>
-        {/* Seat number display */}
         <span className="text-sm font-semibold">{seatNumber}</span>
       </div>
-       {/* Tooltip */}
        <div className="absolute bottom-full z-10 mb-2 w-max px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-        Umwanya {seatNumber}
+        {tooltipText[status]}
       </div>
     </button>
   );
 };
 
-const BusLayout: React.FC<{ seats: any[], selectedSeats: string[], onSeatSelect: (seatId: string) => void }> = ({ seats, selectedSeats, onSeatSelect }) => (
+const BusLayout: React.FC<{ seats: any[], selectedSeats: string[], reservedSeats: string[], onSeatSelect: (seatId: string) => void }> = ({ seats, selectedSeats, reservedSeats, onSeatSelect }) => (
     <div className="bg-gray-200 dark:bg-gray-800 p-4 rounded-3xl border-4 border-gray-300 dark:border-gray-700 shadow-inner">
         <div className="bg-gray-100 dark:bg-gray-900/50 rounded-2xl p-4">
-            {/* Bus front */}
             <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded-t-full mb-8 flex items-center justify-center">
                 <div className="w-24 h-10 bg-gray-400 dark:bg-gray-600 rounded-lg text-center font-bold flex items-center justify-center">Umushoferi</div>
             </div>
-            {/* Seats */}
             <div className="space-y-4">
                 {seats.map((row, rowIndex) => (
                     <div key={`row-${rowIndex}`} className="flex justify-center items-center space-x-2">
@@ -51,10 +54,11 @@ const BusLayout: React.FC<{ seats: any[], selectedSeats: string[], onSeatSelect:
                              if (seat.isAisle) {
                                 return <div key={seat.id} className="w-12"></div>;
                             }
-                            let status: SeatStatus = seat.isOccupied ? 'occupied' : 'available';
-                            if (selectedSeats.includes(seat.id)) {
-                                status = 'selected';
-                            }
+                            let status: SeatStatus = 'available';
+                            if (seat.isOccupied) status = 'occupied';
+                            else if (reservedSeats.includes(seat.id)) status = 'reserved';
+                            else if (selectedSeats.includes(seat.id)) status = 'selected';
+                            
                             return <Seat key={seat.id} status={status} seatNumber={seat.id} onClick={() => onSeatSelect(seat.id)} />
                         })}
                     </div>
@@ -128,19 +132,15 @@ interface SeatSelectionPageProps {
   navigate: (page: Page) => void;
 }
 
-// Generates a more realistic 2-aisle-2 seat layout
 const generateSeats = () => {
     const rows = 12;
     const seats = [];
     const letters = ['A', 'B', 'C', 'D'];
     for (let i = 1; i <= rows; i++) {
         const row = [];
-        // Left side
         row.push({ id: `${letters[0]}${i}`, isOccupied: Math.random() > 0.8 });
         row.push({ id: `${letters[1]}${i}`, isOccupied: Math.random() > 0.7 });
-        // Aisle
         row.push({ id: `aisle-${i}`, isAisle: true });
-        // Right side
         row.push({ id: `${letters[2]}${i}`, isOccupied: Math.random() > 0.6 });
         row.push({ id: `${letters[3]}${i}`, isOccupied: Math.random() > 0.85 });
         seats.push(row);
@@ -151,23 +151,114 @@ const generateSeats = () => {
 
 const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfirm, navigate }) => {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [reservedSeats, setReservedSeats] = useState<string[]>([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('wallet');
   
-  // Mock wallet balance for this page
+  const sessionId = useRef(Date.now().toString(36) + Math.random().toString(36).substring(2));
+  const storageKey = `realtime_seats_trip_${tripData.id}`;
   const walletBalance = 75500;
-
+  
   const seats = useMemo(() => generateSeats(), []);
   const pricePerSeat = parseFloat(tripData.price.replace(/[^0-9.-]+/g,""));
 
+  // Real-time seat synchronization logic
+  useEffect(() => {
+    const updateReservations = () => {
+        try {
+            const rawData = localStorage.getItem(storageKey);
+            if (!rawData) {
+                setReservedSeats([]);
+                return;
+            }
+            const allReservations: Record<string, string> = JSON.parse(rawData);
+            const otherUsersSeats = Object.entries(allReservations)
+                .filter(([seat, id]) => id !== sessionId.current)
+                .map(([seat]) => seat);
+            setReservedSeats(otherUsersSeats);
+        } catch (error) {
+            console.error("Failed to parse seat reservations:", error);
+            setReservedSeats([]);
+        }
+    };
+    
+    updateReservations(); // Initial load
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === storageKey) {
+        updateReservations();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [storageKey]);
+
+  useEffect(() => {
+      const releaseSeats = () => {
+        try {
+            const rawData = localStorage.getItem(storageKey);
+            if (!rawData) return;
+            const allReservations: Record<string, string> = JSON.parse(rawData);
+            const newReservations = { ...allReservations };
+            
+            selectedSeats.forEach(seat => {
+                if (newReservations[seat] === sessionId.current) {
+                    delete newReservations[seat];
+                }
+            });
+            
+            localStorage.setItem(storageKey, JSON.stringify(newReservations));
+        } catch (error) {
+            console.error("Failed to release seats:", error);
+        }
+    };
+
+    window.addEventListener('beforeunload', releaseSeats);
+    
+    return () => {
+        releaseSeats();
+        window.removeEventListener('beforeunload', releaseSeats);
+    };
+  }, [selectedSeats, storageKey]);
+
+
   const handleSeatSelect = (seatId: string) => {
-    setSelectedSeats(prev => 
-      prev.includes(seatId) 
-      ? prev.filter(s => s !== seatId) 
-      : [...prev, seatId]
-    );
+    const isAlreadySelected = selectedSeats.includes(seatId);
+    const newSelectedSeats = isAlreadySelected
+      ? selectedSeats.filter(s => s !== seatId)
+      : [...selectedSeats, seatId];
+      
+    setSelectedSeats(newSelectedSeats);
+
+    // Update localStorage
+    try {
+        const rawData = localStorage.getItem(storageKey);
+        const allReservations: Record<string, string> = rawData ? JSON.parse(rawData) : {};
+        
+        // Remove old selection for this session if it exists
+        if (isAlreadySelected) {
+            delete allReservations[seatId];
+        } else {
+            // Add new selection
+            allReservations[seatId] = sessionId.current;
+        }
+
+        localStorage.setItem(storageKey, JSON.stringify(allReservations));
+
+        // Manually trigger an update for the current tab
+        const otherUsersSeats = Object.entries(allReservations)
+            .filter(([seat, id]) => id !== sessionId.current)
+            .map(([seat]) => seat);
+        setReservedSeats(otherUsersSeats);
+    } catch (error) {
+        console.error("Failed to update seat reservations:", error);
+    }
   };
 
   const totalPrice = selectedSeats.length * pricePerSeat;
@@ -176,10 +267,18 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
   
   const handleConfirmClick = () => {
     onConfirm({ tripData, selectedSeats, totalPrice: formattedTotalPrice });
-    // This timeout simulates the API call duration from App.tsx
     setTimeout(() => {
         setIsConfirmed(true);
         window.scrollTo(0, 0);
+        // On confirmation, permanently remove seats from local storage
+        try {
+            const rawData = localStorage.getItem(storageKey);
+            if (!rawData) return;
+            const allReservations: Record<string, string> = JSON.parse(rawData);
+            selectedSeats.forEach(seat => delete allReservations[seat]);
+            localStorage.setItem(storageKey, JSON.stringify(allReservations));
+        } catch (e) { console.error(e) }
+
     }, 2000);
   };
 
@@ -203,10 +302,11 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
                 <p className="text-gray-500 dark:text-gray-400 mb-8">Kanda ku mwanya ushaka gufata cyangwa kuwukuramo.</p>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
-                    <BusLayout seats={seats} selectedSeats={selectedSeats} onSeatSelect={handleSeatSelect} />
+                    <BusLayout seats={seats} selectedSeats={selectedSeats} reservedSeats={reservedSeats} onSeatSelect={handleSeatSelect} />
                     <div className="flex items-center justify-center flex-wrap gap-x-6 gap-y-2 mt-6 text-sm text-gray-700 dark:text-gray-300">
                         <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-green-400 border border-green-600"></div><span>Ihari</span></div>
                         <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-yellow-400 border border-yellow-600"></div><span>Iyahiswemo</span></div>
+                        <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-purple-400 border border-purple-600"></div><span>Ifashwe n'undi</span></div>
                         <div className="flex items-center space-x-2"><div className="w-4 h-4 rounded-md bg-gray-400 border border-gray-600"></div><span>Yafashwe</span></div>
                     </div>
                 </div>

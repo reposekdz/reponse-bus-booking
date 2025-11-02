@@ -5,6 +5,7 @@ import type { Page } from '../App';
 interface NavItem {
     label: string;
     page: Page;
+    action?: () => void;
     children?: NavItem[];
 }
 
@@ -15,9 +16,10 @@ interface HeaderProps {
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
   currentPage: Page;
+  onToggleCompaniesAside: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, setTheme, currentPage }) => {
+const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, setTheme, currentPage, onToggleCompaniesAside }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -35,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
     { label: 'Ahabanza', page: 'home' },
     { label: 'Kata Itike', page: 'bookingSearch' },
     { label: 'Amatike Yanjye', page: 'bookings' },
-    { label: 'Ibigo', page: 'companies' },
+    { label: 'Ibigo', page: 'companies', action: onToggleCompaniesAside },
     { label: 'Serivisi', page: 'services' },
     { label: 'Ubufasha', page: 'help' },
     { label: 'Twandikire', page: 'contact' },
@@ -47,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
           { label: 'Kata Itike', page: 'bookingSearch' },
           { label: 'Amatike Yanjye', page: 'bookings' },
           { label: 'Umwirondoro', page: 'profile' },
-          { label: 'Ibigo', page: 'companies' },
+          { label: 'Ibigo', page: 'companies', action: onToggleCompaniesAside },
           { label: 'Serivisi', page: 'services' },
           { label: 'Twandikire', page: 'contact' },
       ]
@@ -57,8 +59,12 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
   
-  const handleNavClick = (page: Page) => {
-    navigate(page);
+  const handleNavClick = (item: NavItem) => {
+    if (item.action) {
+        item.action();
+    } else {
+        navigate(item.page);
+    }
     setIsMenuOpen(false);
   };
 
@@ -66,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#0033A0] to-[#0c2461] shadow-lg text-white dark:from-gray-900 dark:to-black">
         <div className="container mx-auto px-6 py-3 flex justify-between items-center">
-          <button onClick={() => handleNavClick('home')} className="flex items-center space-x-2 focus:outline-none">
+          <button onClick={() => navigate('home')} className="flex items-center space-x-2 focus:outline-none">
             <BusIcon className="h-8 w-8 bg-gradient-to-r from-blue-400 to-yellow-300 p-1 rounded" />
             <span className="text-xl font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-yellow-300">
               RWANDA BUS
@@ -78,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
                 item.children ? (
                     <div key={item.page} className="relative group">
                         <button
-                            onClick={() => handleNavClick(item.page)}
+                            onClick={() => handleNavClick(item)}
                             className={`flex items-center relative transition-colors duration-300 ${currentPage === item.page ? 'text-yellow-300' : 'text-gray-200 hover:text-yellow-300'}`}
                         >
                             {item.label}
@@ -88,7 +94,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
                             {item.children.map(child => (
                                 <button 
                                 key={child.label}
-                                onClick={() => handleNavClick(child.page)}
+                                onClick={() => handleNavClick(child)}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                 >
                                 {child.label}
@@ -99,7 +105,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
                 ) : (
                     <button
                         key={item.page}
-                        onClick={() => handleNavClick(item.page)}
+                        onClick={() => handleNavClick(item)}
                         className={`relative group transition-colors duration-300 ${currentPage === item.page ? 'text-yellow-300' : 'text-gray-200 hover:text-yellow-300'}`}
                     >
                         {item.label}
@@ -145,13 +151,13 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
               ) : (
                 <>
                   <button 
-                    onClick={() => handleNavClick('login')}
+                    onClick={() => navigate('login')}
                     className="px-4 py-2 rounded-md border border-blue-400 text-blue-300 hover:bg-blue-400 hover:text-white transition-all duration-300 text-sm font-semibold"
                   >
                     Injira
                   </button>
                   <button 
-                    onClick={() => handleNavClick('register')}
+                    onClick={() => navigate('register')}
                     className="px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md text-sm font-semibold"
                   >
                     Iyandikishe
@@ -183,7 +189,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
             </div>
             <nav className="flex flex-col space-y-1">
               {navItems.map((item) => (
-                <button key={item.page} onClick={() => handleNavClick(item.page)} className={`w-full p-3 rounded-lg text-left transition-colors duration-200 ${currentPage === item.page ? 'bg-yellow-400 text-[#0033A0] font-bold' : 'text-gray-200 hover:bg-white/10'}`}>
+                <button key={item.page} onClick={() => handleNavClick(item)} className={`w-full p-3 rounded-lg text-left transition-colors duration-200 ${currentPage === item.page && !item.action ? 'bg-yellow-400 text-[#0033A0] font-bold' : 'text-gray-200 hover:bg-white/10'}`}>
                 {item.label}
                 </button>
               ))}
@@ -195,10 +201,10 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
                   </button>
                 ) : (
                   <>
-                    <button onClick={() => handleNavClick('login')} className="w-full px-4 py-2 rounded-md border border-blue-400 text-blue-300 text-sm font-semibold">
+                    <button onClick={() => navigate('login')} className="w-full px-4 py-2 rounded-md border border-blue-400 text-blue-300 text-sm font-semibold">
                       Injira
                     </button>
-                    <button onClick={() => handleNavClick('register')} className="w-full px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] text-sm font-semibold">
+                    <button onClick={() => navigate('register')} className="w-full px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] text-sm font-semibold">
                       Iyandikishe
                     </button>
                   </>
