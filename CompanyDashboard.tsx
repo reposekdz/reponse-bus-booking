@@ -43,56 +43,105 @@ const ProfileManagement = ({ company, onUpdate }) => {
     };
 
     const handleSave = () => {
-        onUpdate(formData); // In a real app, this would be an API call
+        onUpdate({ ...formData, logoUrl: logoPreview, coverUrl: coverPreview }); // In a real app, this would be an API call
         alert('Profile updated successfully!');
     };
 
     return (
-        <div className="space-y-8">
-            <div>
-                <h3 className="text-xl font-bold mb-4 dark:text-white">Update Cover Photo</h3>
-                <div className="relative aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg group">
-                    {coverPreview && <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover rounded-lg" />}
-                    <label htmlFor="cover-upload" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                        <ArrowUpTrayIcon className="w-8 h-8 text-white"/>
-                    </label>
-                    <input id="cover-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'cover')} />
-                </div>
-            </div>
-             <div>
-                <h3 className="text-xl font-bold mb-4 dark:text-white">Update Company Logo</h3>
-                <div className="flex items-center space-x-4">
-                    <div className="relative w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full group flex-shrink-0">
-                         {logoPreview && <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover rounded-full" />}
-                         <label htmlFor="logo-upload" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
-                            <ArrowUpTrayIcon className="w-6 h-6 text-white"/>
-                        </label>
-                        <input id="logo-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
-                    </div>
-                     <p className="text-sm text-gray-500">Upload a new logo. Recommended size: 200x200px.</p>
-                </div>
-            </div>
-            <div>
-                <h3 className="text-xl font-bold mb-4 dark:text-white">Company Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-8 max-w-4xl mx-auto">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Manage Profile</h1>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                <div className="space-y-8">
                     <div>
-                        <label className="text-sm font-medium">Company Name</label>
-                        <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
+                        <h3 className="text-xl font-bold mb-4 dark:text-white">Update Cover Photo</h3>
+                        <div className="relative aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg group">
+                            {coverPreview && <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover rounded-lg" />}
+                            <label htmlFor="cover-upload" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                <ArrowUpTrayIcon className="w-8 h-8 text-white"/>
+                            </label>
+                            <input id="cover-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'cover')} />
+                        </div>
                     </div>
-                     <div>
-                        <label className="text-sm font-medium">Contact Email</label>
-                        <input type="email" value={formData.contactEmail} disabled className="w-full mt-1 p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500 cursor-not-allowed"/>
+                    <div>
+                        <h3 className="text-xl font-bold mb-4 dark:text-white">Update Company Logo</h3>
+                        <div className="flex items-center space-x-4">
+                            <div className="relative w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full group flex-shrink-0">
+                                {logoPreview && <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover rounded-full" />}
+                                <label htmlFor="logo-upload" className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
+                                    <ArrowUpTrayIcon className="w-6 h-6 text-white"/>
+                                </label>
+                                <input id="logo-upload" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'logo')} />
+                            </div>
+                            <p className="text-sm text-gray-500">Upload a new logo. Recommended size: 200x200px.</p>
+                        </div>
                     </div>
-                     <div className="md:col-span-2">
-                        <label className="text-sm font-medium">Description</label>
-                        <textarea rows={4} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"></textarea>
+                    <div>
+                        <h3 className="text-xl font-bold mb-4 dark:text-white">Company Details</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-sm font-medium dark:text-gray-300">Company Name</label>
+                                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium dark:text-gray-300">Contact Email</label>
+                                <input type="email" value={formData.contactEmail} disabled className="w-full mt-1 p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500 cursor-not-allowed"/>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="text-sm font-medium dark:text-gray-300">Description</label>
+                                <textarea rows={4} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"></textarea>
+                            </div>
+                        </div>
                     </div>
+                    <button onClick={handleSave} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">Save Changes</button>
                 </div>
             </div>
-            <button onClick={handleSave} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">Save Changes</button>
         </div>
     );
 };
+
+const BusFormModal = ({ bus, onSave, onClose }) => {
+    const [formData, setFormData] = useState(bus);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 max-w-md w-full">
+                <h3 className="text-lg font-bold mb-4 dark:text-white">{bus.id.startsWith('New-') ? 'Add New Bus' : 'Edit Bus Details'}</h3>
+                <form onSubmit={(e) => { e.preventDefault(); onSave(formData); }} className="space-y-4">
+                    <div>
+                        <label className="text-sm dark:text-gray-300">Bus Model</label>
+                        <input name="model" value={formData.model} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                    </div>
+                    <div>
+                        <label className="text-sm dark:text-gray-300">Capacity</label>
+                        <input name="capacity" type="number" value={formData.capacity} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                    </div>
+                    <div>
+                        <label className="text-sm dark:text-gray-300">Status</label>
+                        <select name="status" value={formData.status} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                            <option>Active</option>
+                            <option>Maintenance</option>
+                            <option>Out of Service</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label className="text-sm dark:text-gray-300">Assigned Route</label>
+                        <input name="assignedRoute" value={formData.assignedRoute} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                    </div>
+                    <div className="flex justify-end space-x-4 pt-4 border-t dark:border-gray-700">
+                        <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg dark:border-gray-600">Cancel</button>
+                        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 
 const FleetManagement = ({ fleet, onUpdate }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -120,30 +169,45 @@ const FleetManagement = ({ fleet, onUpdate }) => {
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold dark:text-white">Manage Your Fleet</h3>
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Manage Your Fleet</h1>
                 <button onClick={() => openModal()} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
                     <PlusIcon className="w-5 h-5 mr-2" /> Add Bus
                 </button>
             </div>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
-                 {/* Table for fleet */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th className="px-4 py-3">ID</th>
+                                <th className="px-4 py-3">Model</th>
+                                <th className="px-4 py-3">Capacity</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3">Assigned Route</th>
+                                <th className="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {fleet.map(bus => (
+                                <tr key={bus.id} className="border-b dark:border-gray-700">
+                                    <td className="px-4 py-2 font-medium dark:text-white">{bus.id}</td>
+                                    <td className="px-4 py-2">{bus.model}</td>
+                                    <td className="px-4 py-2">{bus.capacity}</td>
+                                    <td className="px-4 py-2"><span className={`px-2 py-1 text-xs rounded-full ${bus.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{bus.status}</span></td>
+                                    <td className="px-4 py-2">{bus.assignedRoute}</td>
+                                    <td className="px-4 py-2 text-right">
+                                        <button onClick={() => openModal(bus)} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => handleDelete(bus.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             {isModalOpen && <BusFormModal bus={editingBus} onSave={handleSave} onClose={() => setIsModalOpen(false)} />}
         </div>
     );
-}
-const BusFormModal = ({ bus, onSave, onClose }) => {
-    const [formData, setFormData] = useState(bus);
-    return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 max-w-md w-full">
-                <h3 className="text-lg font-bold mb-4">Bus Details</h3>
-                {/* Form fields for model, capacity, status */}
-                <button onClick={() => onSave(formData)}>Save</button>
-                <button onClick={onClose}>Cancel</button>
-            </div>
-        </div>
-    )
 };
 
 
@@ -176,10 +240,20 @@ const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ onLogout, theme, se
             case 'profile':
                 return <ProfileManagement company={company} onUpdate={handleUpdate} />;
             case 'fleet':
-                return <FleetManagement fleet={company.fleetDetails} onUpdate={(newFleet) => handleUpdate({ fleetDetails: newFleet })} />;
+                return <FleetManagement fleet={company.fleetDetails} onUpdate={(newFleet) => handleUpdate({ fleetDetails: newFleet, fleetSize: newFleet.length })} />;
             // Add other views like 'routes', 'passengers' here
             default:
-                return null;
+                 return (
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Dashboard</h1>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                           <StatCard title="Total Revenue" value={company.totalRevenue} icon={<ChartBarIcon className="w-6 h-6 text-blue-500" />} />
+                           <StatCard title="Total Passengers" value={company.totalPassengers} icon={<UsersIcon className="w-6 h-6 text-blue-500" />} />
+                           <StatCard title="Fleet Size" value={company.fleetSize} icon={<BusIcon className="w-6 h-6 text-blue-500" />} />
+                           <StatCard title="Active Routes" value={company.routes.length} icon={<MapIcon className="w-6 h-6 text-blue-500" />} />
+                        </div>
+                    </div>
+                );
         }
     };
 

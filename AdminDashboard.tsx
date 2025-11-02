@@ -84,6 +84,15 @@ export const mockCompaniesData = [
     }
 ];
 
+const mockUsersData = [
+    { id: 1, name: 'Kalisa Jean', email: 'kalisa.j@example.com', role: 'Passenger', joinedDate: '2023-01-15', status: 'Active' },
+    { id: 2, name: 'Umutoni Grace', email: 'grace.u@example.com', role: 'Passenger', joinedDate: '2023-03-22', status: 'Active' },
+    { id: 3, name: 'Volcano Express', email: 'contact@volcano.rw', role: 'Company', joinedDate: '2022-11-01', status: 'Active' },
+    { id: 4, name: 'Mugisha Frank', email: 'frank.m@example.com', role: 'Passenger', joinedDate: '2023-08-10', status: 'Suspended' },
+    { id: 5, name: 'RITCO', email: 'info@ritco.rw', role: 'Company', joinedDate: '2022-10-20', status: 'Active' },
+    { id: 6, name: 'Admin Reponse', email: 'reponse@gmail.com', role: 'Admin', joinedDate: '2022-09-01', status: 'Active' },
+];
+
 const StatCard = ({ title, value, icon, format = true }) => (
     <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md flex items-center space-x-4">
         <div className="p-3 bg-blue-100 dark:bg-gray-700 rounded-lg">
@@ -312,13 +321,6 @@ const CompanyManagement = ({ companies, onSelectCompany, onUpdateCompanies }) =>
     )
 };
 
-const TransactionIcon = ({ type }) => {
-    const baseClasses = "w-8 h-8 rounded-full flex items-center justify-center mr-3";
-    if (type === 'payout') return <div className={`${baseClasses} bg-green-100 dark:bg-green-900/50`}><ArrowUpRightIcon className="w-4 h-4 text-green-500" /></div>;
-    if (type === 'fee') return <div className={`${baseClasses} bg-red-100 dark:bg-red-900/50`}><ArrowDownLeftIcon className="w-4 h-4 text-red-500" /></div>;
-    return <div className={`${baseClasses} bg-gray-100 dark:bg-gray-700`}><WalletIcon className="w-4 h-4 text-gray-500" /></div>;
-}
-
 const CompanyDetails = ({ company, onBack }) => {
     const maxIncome = Math.max(...(company.weeklyIncome?.map(d => d.income) || [0]));
     const maxTickets = Math.max(...(company.dailyTickets?.map(d => d.tickets) || [0]));
@@ -448,6 +450,81 @@ const TransactionsPage = ({ companies }) => {
     );
 };
 
+const UserManagementPage = () => {
+    const [users, setUsers] = useState(mockUsersData);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredUsers = useMemo(() => {
+        return users.filter(user => 
+            user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [users, searchTerm]);
+
+    const handleStatusChange = (userId) => {
+        setUsers(users.map(u => u.id === userId ? {...u, status: u.status === 'Active' ? 'Suspended' : 'Active'} : u));
+    };
+
+    const StatusBadge = ({ status }) => (
+        <span className={`px-2 py-1 text-xs rounded-full font-semibold ${
+            status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+        }`}>
+            {status}
+        </span>
+    );
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">User Management</h1>
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md">
+                <div className="relative mb-4">
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input 
+                        type="text" 
+                        placeholder="Search users by name or email..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th className="px-4 py-3">User</th>
+                                <th className="px-4 py-3">Role</th>
+                                <th className="px-4 py-3">Joined Date</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredUsers.map(user => (
+                                <tr key={user.id} className="border-b dark:border-gray-700">
+                                    <td className="px-4 py-3">
+                                        <p className="font-semibold text-gray-900 dark:text-white">{user.name}</p>
+                                        <p className="text-gray-500 dark:text-gray-400">{user.email}</p>
+                                    </td>
+                                    <td className="px-4 py-3">{user.role}</td>
+                                    <td className="px-4 py-3">{user.joinedDate}</td>
+                                    <td className="px-4 py-3"><StatusBadge status={user.status} /></td>
+                                    <td className="px-4 py-3 text-right">
+                                        <button onClick={() => handleStatusChange(user.id)} className="font-medium text-blue-600 dark:text-blue-400 hover:underline mr-4">
+                                            {user.status === 'Active' ? 'Suspend' : 'Activate'}
+                                        </button>
+                                         <button className="font-medium text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setTheme }) => {
   const [view, setView] = useState('dashboard');
   const [companies, setCompanies] = useState(mockCompaniesData);
@@ -474,7 +551,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
       case 'companyDetails':
           return selectedCompany ? <CompanyDetails company={selectedCompany} onBack={() => setView('companies')} /> : <div>Company not found.</div>;
       case 'users':
-        return <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">User Management</h1>;
+        return <UserManagementPage />;
       case 'settings':
         return <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Settings</h1>;
       default:
