@@ -59,8 +59,8 @@ const TicketModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClo
     );
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full relative">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full relative" onClick={e => e.stopPropagation()}>
                  <button onClick={onClose} className="absolute top-4 right-4 p-1 rounded-full text-gray-500 bg-white/50 hover:bg-white dark:bg-gray-900/50 dark:hover:bg-gray-900 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-20">
                     <XIcon className="w-6 h-6" />
                 </button>
