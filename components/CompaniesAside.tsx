@@ -63,8 +63,8 @@ const CompaniesAside: React.FC<CompaniesAsideProps> = ({ isOpen, onClose, naviga
                             <h3 className="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Iby'Imena</h3>
                             <div className="grid grid-cols-2 gap-3">
                                 {featuredCompanies.map(company => (
-                                    <button key={company.id} onClick={() => handleNavigate('companyProfile', company)} className="group relative block w-full h-24 rounded-lg overflow-hidden text-left">
-                                        <img src={company.coverUrl} alt={company.name} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"/>
+                                    <button key={company.id} onClick={() => handleNavigate('companyProfile', company)} className="group relative block w-full h-24 rounded-lg overflow-hidden text-left shadow-md">
+                                        <img src={company.coverUrl} alt={company.name} className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"/>
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                                         <div className="absolute bottom-2 left-2 text-white">
                                             <p className="font-bold text-sm drop-shadow">{company.name}</p>

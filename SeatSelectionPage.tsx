@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ArrowRightIcon, CheckCircleIcon, MapIcon, QrCodeIcon, BusIcon, XIcon, WalletIcon, CreditCardIcon, LockClosedIcon } from './components/icons';
+import { ArrowRightIcon, CheckCircleIcon, MapIcon, QrCodeIcon, BusIcon, XIcon, WalletIcon, CreditCardIcon, LockClosedIcon, ShareIcon } from './components/icons';
 import LiveTrackingModal from './components/LiveTrackingModal';
 import { Page } from './App';
 
@@ -68,22 +68,53 @@ const BusLayout: React.FC<{ seats: any[], selectedSeats: string[], reservedSeats
     </div>
 );
 
-const TicketModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClose }) => {
+const BoardingPass: React.FC<{
+    trip: any;
+    selection: { selectedSeats: string[], totalPrice: string };
+}> = ({ trip, selection }) => {
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full relative" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 right-4 p-1 rounded-full text-gray-500 bg-white/50 hover:bg-white dark:bg-gray-900/50 dark:hover:bg-gray-900 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-20">
-                    <XIcon className="w-6 h-6" />
-                </button>
-                <div className="p-6 text-center">
-                    <h3 className="text-xl font-bold dark:text-white mb-2">{trip.company}</h3>
-                    <p className="text-gray-600 dark:text-gray-400">Kigali &rarr; Rubavu</p>
-                    <div className="my-6">
-                        <QrCodeIcon className="w-40 h-40 mx-auto text-gray-800 dark:text-gray-200" />
-                    </div>
-                    <p className="font-bold">Imyanya: {trip.seats}</p>
-                    <p className="text-sm">ID y'Itike: {trip.ticketId}</p>
+        <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden relative">
+            {/* Header */}
+            <div className="bg-blue-600 dark:bg-blue-800 p-4 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                    <BusIcon className="w-6 h-6 text-white"/>
+                    <span className="font-bold text-white text-lg">Boarding Pass</span>
                 </div>
+                <img src={trip.logoUrl || 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png'} alt={trip.company} className="h-8 object-contain bg-white/20 p-1 rounded-md"/>
+            </div>
+            
+            {/* Main Content */}
+            <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                    <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">UVA</p>
+                        <p className="text-2xl font-bold text-gray-800 dark:text-white">Kigali</p>
+                    </div>
+                    <ArrowRightIcon className="w-6 h-6 text-gray-400 dark:text-gray-500 flex-shrink-0 mx-4"/>
+                    <div className="text-right">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">UJYA</p>
+                        <p className="text-2xl font-bold text-gray-800 dark:text-white">Rubavu</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm border-t border-b dark:border-gray-700 py-4 my-4">
+                    <div><p className="text-gray-500 dark:text-gray-400">Umugenzi</p><p className="font-semibold dark:text-white">Kalisa Jean</p></div>
+                    <div><p className="text-gray-500 dark:text-gray-400">Itariki</p><p className="font-semibold dark:text-white">28 Ukwakira, 2024</p></div>
+                    <div><p className="text-gray-500 dark:text-gray-400">Guhaguruka</p><p className="font-semibold dark:text-white">{trip.departureTime}</p></div>
+                    <div><p className="text-gray-500 dark:text-gray-400">Imyanya</p><p className="font-bold text-blue-600 dark:text-blue-400 text-base">{selection.selectedSeats.join(', ')}</p></div>
+                </div>
+
+                <div className="text-center">
+                    <QrCodeIcon className="w-32 h-32 mx-auto text-gray-800 dark:text-gray-200" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">ID y'Itike: VK-NEWTKT</p>
+                </div>
+            </div>
+
+            {/* Perforated edge */}
+            <div className="relative h-4 bg-gray-50 dark:bg-gray-800">
+                <div className="absolute inset-0 bg-repeat-x" style={{ backgroundImage: `radial-gradient(circle at 0 0, transparent 0, transparent 4px, #e5e7eb 4px, #e5e7eb 5px)`}}></div>
+                 <div className="absolute inset-0 bg-repeat-x dark:hidden" style={{ backgroundImage: `radial-gradient(circle at 0 0, transparent 0, transparent 4px, white 4px, white 5px)`}}></div>
+                 <div className="hidden dark:block absolute inset-0 bg-repeat-x" style={{ backgroundImage: `radial-gradient(circle at 0 0, transparent 0, transparent 4px, #1f2937 4px, #1f2937 5px)`}}></div>
             </div>
         </div>
     );
@@ -94,25 +125,20 @@ const BookingConfirmationView: React.FC<{
     trip: any;
     selection: { selectedSeats: string[], totalPrice: string };
     onTrack: () => void;
-    onViewTicket: () => void;
+    onShareTicket: () => void;
     onGoToBookings: () => void;
-}> = ({ trip, selection, onTrack, onViewTicket, onGoToBookings }) => {
+}> = ({ trip, selection, onTrack, onShareTicket, onGoToBookings }) => {
     return (
         <div className="text-center max-w-2xl mx-auto py-12 animate-fade-in">
-            <CheckCircleIcon className="w-24 h-24 text-green-500 mx-auto mb-4" />
+            <CheckCircleIcon className="w-20 h-20 text-green-500 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Byemejwe!</h2>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Urugendo rwawe rwo kujya i Rubavu rwakozwe neza. Urakoze kutugirira ikizere.</p>
+            <p className="text-gray-600 dark:text-gray-400 mt-2 mb-8">Urugendo rwawe rwakozwe neza. Dore itike yawe:</p>
             
-            <div className="bg-gray-50 dark:bg-gray-800/50 border dark:border-gray-700/50 rounded-lg p-6 my-8 text-left space-y-3">
-                <p><strong className="text-gray-500 dark:text-gray-400">Ikigo:</strong> {trip.company}</p>
-                <p><strong className="text-gray-500 dark:text-gray-400">Urugendo:</strong> Kigali <ArrowRightIcon className="w-4 h-4 inline-block mx-1" /> Rubavu</p>
-                <p><strong className="text-gray-500 dark:text-gray-400">Imyanya:</strong> <span className="font-semibold">{selection.selectedSeats.join(', ')}</span></p>
-                <p className="text-lg font-bold"><strong className="text-gray-500 dark:text-gray-400">Igiciro Cyose:</strong> <span className="text-green-600 dark:text-green-400">{selection.totalPrice}</span></p>
-            </div>
+            <BoardingPass trip={trip} selection={selection} />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button onClick={onViewTicket} className="w-full flex items-center justify-center p-4 rounded-lg bg-blue-600 text-white font-bold text-lg hover:bg-blue-700 transition-all duration-300 shadow-lg">
-                    <QrCodeIcon className="w-6 h-6 mr-2" /> Reba Itike
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                <button onClick={onShareTicket} className="w-full flex items-center justify-center p-4 rounded-lg bg-blue-600 text-white font-bold text-lg hover:bg-blue-700 transition-all duration-300 shadow-lg">
+                    <ShareIcon className="w-6 h-6 mr-2" /> Sangiza Itike
                 </button>
                 <button onClick={onTrack} className="w-full flex items-center justify-center p-4 rounded-lg bg-green-600 text-white font-bold text-lg hover:bg-green-700 transition-all duration-300 shadow-lg">
                     <MapIcon className="w-6 h-6 mr-2" /> Kurikirana Bisi
@@ -154,7 +180,6 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
   const [reservedSeats, setReservedSeats] = useState<string[]>([]);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
-  const [showTicketModal, setShowTicketModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('wallet');
   
   const sessionId = useRef(Date.now().toString(36) + Math.random().toString(36).substring(2));
@@ -293,7 +318,7 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
                 trip={tripData}
                 selection={finalSelection}
                 onTrack={() => setShowTrackingModal(true)}
-                onViewTicket={() => setShowTicketModal(true)}
+                onShareTicket={() => alert('Sharing ticket...')}
                 onGoToBookings={() => navigate('bookings')}
             />
         ) : (
@@ -368,7 +393,6 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
         )}
       </div>
       {showTrackingModal && <LiveTrackingModal trip={{...tripData, route: 'Kigali - Rubavu'}} onClose={() => setShowTrackingModal(false)} />}
-      {showTicketModal && <TicketModal trip={{...tripData, seats: selectedSeats.join(', '), ticketId: 'VK-NEWTKT'}} onClose={() => setShowTicketModal(false)} />}
     </div>
   );
 };

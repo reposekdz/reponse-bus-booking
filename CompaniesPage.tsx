@@ -1,36 +1,55 @@
 import React, { useState, useMemo } from 'react';
 import StarRating from './components/StarRating';
-import { SearchIcon, ChevronRightIcon, StarIcon } from './components/icons';
+import { SearchIcon, ChevronRightIcon, StarIcon, MapPinIcon } from './components/icons';
 import type { Page } from './App';
+import { mockCompaniesData } from './AdminDashboard';
 
 interface CompaniesPageProps {
   onNavigate: (page: Page, data?: any) => void;
 }
 
-const companies = [
-  { id: 'ritco', name: 'RITCO', rating: 4.5, reviews: 120, logoText: 'RITCO' },
-  { id: 'volcano', name: 'Volcano Express', rating: 4.8, reviews: 250, logoText: 'VOLCANO' },
-  { id: 'horizon', name: 'Horizon Express', rating: 4.2, reviews: 98, logoText: 'HORIZON' },
-  { id: 'onatra', name: 'ONATRACOM', rating: 3.9, reviews: 75, logoText: 'ONATRA' },
-  { id: 'stellart', name: 'STELLART', rating: 4.6, reviews: 150, logoText: 'STELLART' },
-  { id: 'select', name: 'SELECT', rating: 4.1, reviews: 60, logoText: 'SELECT' },
-];
+const FeaturedCompanyCard: React.FC<{ company: any, onSelect: () => void }> = ({ company, onSelect }) => (
+    <button 
+        onClick={onSelect} 
+        className="group relative w-full h-64 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+    >
+        <img src={company.coverUrl} alt={company.name} className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"/>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        <div className="relative h-full flex flex-col justify-end p-5 text-white">
+            <div className="flex items-center space-x-3 mb-2">
+                <img src={company.logoUrl} alt={`${company.name} logo`} className="w-14 h-14 object-contain bg-white/80 dark:bg-gray-900/80 p-1 rounded-full shadow-md border-2 border-white dark:border-gray-700"/>
+                <div>
+                    <h3 className="text-xl font-bold drop-shadow-lg">{company.name}</h3>
+                    <div className="flex items-center space-x-1">
+                        <StarRating rating={4.8} size="small"/>
+                        <span className="text-xs text-yellow-300 font-bold">{(company.totalPassengers / 1_000_000).toFixed(1)}M+ abagenzi</span>
+                    </div>
+                </div>
+            </div>
+            <p className="text-xs text-gray-200 line-clamp-2">{company.description}</p>
+        </div>
+        <div className="absolute top-4 right-4 bg-yellow-400 text-blue-900 text-xs font-bold px-3 py-1 rounded-full shadow-md transform group-hover:scale-110 transition-transform">
+            By'Imena
+        </div>
+    </button>
+);
 
-const CompanyCard: React.FC<{ company: typeof companies[0], onSelect: () => void }> = ({ company, onSelect }) => (
+
+const CompanyCard: React.FC<{ company: any, onSelect: () => void }> = ({ company, onSelect }) => (
     <button 
         onClick={onSelect} 
         className="w-full text-left bg-white dark:bg-gray-800 rounded-xl shadow-md p-5 flex items-center space-x-5 border-2 border-transparent hover:border-blue-500/50 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
     >
-        <div className="flex-shrink-0 h-20 w-20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-gray-700 dark:to-gray-600 rounded-full flex items-center justify-center shadow-inner">
-            <p className="font-bold text-blue-800 dark:text-gray-200 tracking-widest text-base">{company.logoText}</p>
+        <div className="flex-shrink-0 h-20 w-20 bg-white dark:from-gray-700 dark:to-gray-600 rounded-full flex items-center justify-center shadow-inner">
+            <img src={company.logoUrl} alt={`${company.name} logo`} className="h-16 w-16 object-contain p-1"/>
         </div>
         <div className="flex-grow">
             <h3 className="text-xl font-bold text-gray-800 dark:text-white">{company.name}</h3>
             <div className="flex items-center space-x-2 mt-1">
-                <StarRating rating={company.rating} />
-                <span className="text-sm text-yellow-500 font-bold">{company.rating.toFixed(1)}</span>
+                <StarRating rating={4.5} />
+                <span className="text-sm text-yellow-500 font-bold">{(company.totalPassengers / 1_000_000).toFixed(1)}M+</span>
             </div>
-             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{company.reviews} ibitekerezo</p>
+             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{company.routes.length} ingendo</p>
         </div>
         <div className="flex-shrink-0">
             <ChevronRightIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
@@ -43,18 +62,21 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
   const [sortOrder, setSortOrder] = useState('rating_desc');
   const [ratingFilter, setRatingFilter] = useState(0);
 
+  const featuredCompanies = useMemo(() => mockCompaniesData.filter(c => (c.totalPassengers / 1_000_000) >= 2.0), []);
+  const regularCompanies = useMemo(() => mockCompaniesData.filter(c => !featuredCompanies.some(fc => fc.id === c.id)), [featuredCompanies]);
+
   const filteredAndSortedCompanies = useMemo(() => {
-    return companies
+    return regularCompanies
       .filter(company => 
           company.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-          company.rating >= ratingFilter
+          (company.totalRevenue / 1_000_000_000 * 5) >= ratingFilter // Using revenue as a proxy for rating
       )
       .sort((a, b) => {
         switch (sortOrder) {
           case 'rating_desc':
-            return b.rating - a.rating;
+            return b.totalPassengers - a.totalPassengers;
           case 'rating_asc':
-            return a.rating - b.rating;
+            return a.totalPassengers - b.totalPassengers;
           case 'name_asc':
             return a.name.localeCompare(b.name);
           case 'name_desc':
@@ -63,9 +85,8 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
             return 0;
         }
       });
-  }, [searchTerm, sortOrder, ratingFilter]);
+  }, [searchTerm, sortOrder, ratingFilter, regularCompanies]);
   
-  const featuredCompanies = useMemo(() => companies.filter(c => c.rating >= 4.5), []);
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -78,10 +99,21 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
             </div>
         </header>
         <main className="container mx-auto px-6 py-12">
+            
+            <section className="mb-16">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Top Rated & Popular</h2>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {featuredCompanies.map(company => (
+                        <FeaturedCompanyCard key={company.id} company={company} onSelect={() => onNavigate('companyProfile', company)} />
+                    ))}
+                 </div>
+            </section>
+            
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
                  <aside className="lg:w-1/4 xl:w-1/5">
                     <div className="sticky top-24 space-y-6">
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+                             <h3 className="text-lg font-bold mb-4 dark:text-white">Sefa Ibindi Bigo</h3>
                              <div className="relative mb-4">
                                 <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input 
@@ -99,8 +131,8 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
                                     onChange={(e) => setSortOrder(e.target.value)}
                                     className="mt-1 w-full py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
                                 >
-                                    <option value="rating_desc">Ku manota (menshi)</option>
-                                    <option value="rating_asc">Ku manota (make)</option>
+                                    <option value="rating_desc">Ubukunzi (bwinshi)</option>
+                                    <option value="rating_asc">Ubukunzi (buke)</option>
                                     <option value="name_asc">Ku izina (A-Z)</option>
                                     <option value="name_desc">Ku izina (Z-A)</option>
                                 </select>
@@ -121,23 +153,10 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
                                 </div>
                             </div>
                         </div>
-                         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
-                             <h3 className="text-lg font-bold mb-4 dark:text-white">Ibigo by'Imena</h3>
-                             <div className="space-y-3">
-                                {featuredCompanies.map(c => (
-                                    <button key={c.id} onClick={() => onNavigate('companyProfile', c)} className="w-full text-left flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50">
-                                        <div className="w-10 h-10 bg-blue-100 dark:bg-gray-700 rounded-full flex-shrink-0 flex items-center justify-center text-blue-800 dark:text-gray-200 font-bold text-xs">{c.logoText}</div>
-                                        <div>
-                                            <p className="font-semibold text-sm dark:text-gray-200">{c.name}</p>
-                                            <p className="text-xs text-yellow-500">{c.rating} stars</p>
-                                        </div>
-                                    </button>
-                                ))}
-                             </div>
-                         </div>
                     </div>
                  </aside>
                 <section className="lg:w-3/4 xl:w-4/5">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Ibindi Bigo Byose</h2>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {filteredAndSortedCompanies.length > 0 ? (
                         filteredAndSortedCompanies.map(company => (
