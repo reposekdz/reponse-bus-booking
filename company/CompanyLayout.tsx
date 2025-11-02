@@ -9,29 +9,42 @@ import CompanyDrivers from './CompanyDrivers';
 import CompanyRoutes from './CompanyRoutes';
 import CompanyPassengers from './CompanyPassengers';
 
+// FIX: Added data and handler props to align with App.tsx
 interface CompanyLayoutProps {
     onLogout: () => void;
     theme: 'light' | 'dark';
     setTheme: (theme: 'light' | 'dark') => void;
+    drivers: any[];
+    buses: any[];
+    routes: any[];
+    crudHandlers: any;
+    companyId: string;
 }
 
 type CompanyPage = 'dashboard' | 'buses' | 'drivers' | 'routes' | 'passengers';
 
-const CompanyLayout: React.FC<CompanyLayoutProps> = ({ onLogout, theme, setTheme }) => {
+// FIX: Destructure new props
+const CompanyLayout: React.FC<CompanyLayoutProps> = ({ onLogout, theme, setTheme, drivers, buses, routes, crudHandlers, companyId }) => {
     const [currentPage, setCurrentPage] = useState<CompanyPage>('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
+    // FIX: Filter data based on companyId
+    const companyDrivers = drivers.filter(d => d.companyId === companyId);
+    const companyBuses = buses.filter(b => b.companyId === companyId);
+    const companyRoutes = routes.filter(r => r.companyId === companyId);
+
     const renderContent = () => {
+        // FIX: Pass filtered props down to child components
         switch (currentPage) {
-            case 'buses': return <CompanyBuses />;
-            case 'drivers': return <CompanyDrivers />;
-            case 'routes': return <CompanyRoutes />;
+            case 'buses': return <CompanyBuses buses={companyBuses} crudHandlers={crudHandlers} />;
+            case 'drivers': return <CompanyDrivers drivers={companyDrivers} crudHandlers={crudHandlers} />;
+            case 'routes': return <CompanyRoutes routes={companyRoutes} crudHandlers={crudHandlers} />;
             case 'passengers': return <CompanyPassengers />;
             case 'dashboard':
             default:
-                return <CompanyDashboard />;
+                return <CompanyDashboard drivers={companyDrivers} buses={companyBuses} routes={companyRoutes} />;
         }
     };
     

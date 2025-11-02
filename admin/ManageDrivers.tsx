@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 
-const mockDrivers = [
-  { id: 1, name: 'James Gatete', company: 'Volcano Express', bus: 'RAA 123 B', phone: '0788111111', status: 'Active' },
-  { id: 2, name: 'Aline Uwase', company: 'RITCO', bus: 'RAB 456 C', phone: '0788222222', status: 'Active' },
-  { id: 3, name: 'Emmanuel Mugisha', company: 'Horizon Express', bus: 'RAC 789 D', phone: '0788333333', status: 'Inactive' },
-];
+// FIX: Define props interface
+interface ManageDriversProps {
+    drivers: any[];
+    crudHandlers: any;
+}
 
-const ManageDrivers: React.FC = () => {
-    const [drivers, setDrivers] = useState(mockDrivers);
+// FIX: Use props for data and handlers, remove local state for drivers list
+const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, crudHandlers }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
     return (
@@ -47,8 +47,8 @@ const ManageDrivers: React.FC = () => {
                             {drivers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase())).map(driver => (
                                 <tr key={driver.id} className="border-t dark:border-gray-700">
                                     <td className="p-3 font-semibold dark:text-white">{driver.name}</td>
-                                    <td>{driver.company}</td>
-                                    <td>{driver.bus}</td>
+                                    <td>{driver.companyId}</td>
+                                    <td>{driver.assignedBusId}</td>
                                     <td>{driver.phone}</td>
                                     <td>
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${driver.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>

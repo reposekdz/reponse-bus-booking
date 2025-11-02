@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 
-const mockBuses = [
-  { id: 1, plate: 'RAA 123 B', model: 'Yutong Grand', capacity: 65, driver: 'James Gatete', status: 'On Route' },
-  { id: 2, plate: 'RAB 456 C', model: 'Scania Marcopolo', capacity: 70, driver: 'Peter Kalisa', status: 'Idle' },
-  { id: 3, plate: 'RAC 789 D', model: 'Yutong Grand', capacity: 65, driver: 'N/A', status: 'Maintenance' },
-];
+// FIX: Define props interface
+interface CompanyBusesProps {
+    buses: any[];
+    crudHandlers: any;
+}
 
-const CompanyBuses: React.FC = () => {
-    const [buses, setBuses] = useState(mockBuses);
+// FIX: Use props for data and handlers, remove local state for bus list
+const CompanyBuses: React.FC<CompanyBusesProps> = ({ buses, crudHandlers }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
     return (
@@ -49,7 +49,7 @@ const CompanyBuses: React.FC = () => {
                                     <td className="p-3 font-semibold dark:text-white">{bus.plate}</td>
                                     <td>{bus.model}</td>
                                     <td>{bus.capacity}</td>
-                                    <td>{bus.driver}</td>
+                                    <td>{bus.driverId || 'N/A'}</td>
                                     <td>
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                             bus.status === 'On Route' ? 'bg-green-100 text-green-800' :

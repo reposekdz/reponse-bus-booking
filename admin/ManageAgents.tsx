@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { BriefcaseIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 
-const mockAgents = [
-  { id: 1, name: 'Aline Uwase', location: 'Nyabugogo', totalDeposits: '2.5M RWF', commission: '50,000 RWF', status: 'Active' },
-  { id: 2, name: 'Peter Karekezi', location: 'Remera', totalDeposits: '1.8M RWF', commission: '36,000 RWF', status: 'Active' },
-  { id: 3, name: 'Grace Iradukunda', location: 'Huye', totalDeposits: '950,000 RWF', commission: '19,000 RWF', status: 'Probation' },
-];
+// FIX: Define props interface
+interface ManageAgentsProps {
+    agents: any[];
+    crudHandlers: any;
+}
 
-const ManageAgents: React.FC = () => {
-    const [agents, setAgents] = useState(mockAgents);
+// FIX: Use props for data and handlers, remove local state for agents list
+const ManageAgents: React.FC<ManageAgentsProps> = ({ agents, crudHandlers }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
     return (
@@ -48,8 +48,8 @@ const ManageAgents: React.FC = () => {
                                 <tr key={agent.id} className="border-t dark:border-gray-700">
                                     <td className="p-3 font-semibold dark:text-white">{agent.name}</td>
                                     <td>{agent.location}</td>
-                                    <td>{agent.totalDeposits}</td>
-                                    <td>{agent.commission}</td>
+                                    <td>{new Intl.NumberFormat('fr-RW').format(agent.totalDeposits)} RWF</td>
+                                    <td>{new Intl.NumberFormat('fr-RW').format(agent.commission)} RWF</td>
                                     <td>
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${agent.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                             {agent.status}

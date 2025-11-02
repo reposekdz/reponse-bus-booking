@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { BuildingOfficeIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 
-const mockCompanies = [
-  { id: 1, name: 'Volcano Express', passengers: '3.5M+', revenue: '15.7B RWF', routes: 15, status: 'Active' },
-  { id: 2, name: 'RITCO', passengers: '2.1M+', revenue: '9.4B RWF', routes: 25, status: 'Active' },
-  { id: 3, name: 'Horizon Express', passengers: '1.2M+', revenue: '5.4B RWF', routes: 8, status: 'Inactive' },
-];
+// FIX: Define props interface
+interface ManageCompaniesProps {
+    companies: any[];
+    crudHandlers: any;
+}
 
-const ManageCompanies: React.FC = () => {
-    const [companies, setCompanies] = useState(mockCompanies);
+// FIX: Use props for data and handlers, remove local state for company list
+const ManageCompanies: React.FC<ManageCompaniesProps> = ({ companies, crudHandlers }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
     return (
@@ -47,9 +47,9 @@ const ManageCompanies: React.FC = () => {
                             {companies.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase())).map(company => (
                                 <tr key={company.id} className="border-t dark:border-gray-700">
                                     <td className="p-3 font-semibold dark:text-white">{company.name}</td>
-                                    <td>{company.passengers}</td>
-                                    <td>{company.revenue}</td>
-                                    <td>{company.routes}</td>
+                                    <td>{new Intl.NumberFormat().format(company.totalPassengers)}+</td>
+                                    <td>{new Intl.NumberFormat('fr-RW', { notation: 'compact' }).format(company.totalRevenue)} RWF</td>
+                                    <td>{company.routes.length}</td>
                                     <td>
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${company.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                             {company.status}

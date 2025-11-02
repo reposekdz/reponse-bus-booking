@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
     SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, BuildingOfficeIcon,
-    BusIcon, MapIcon, SearchIcon, CheckCircleIcon, ArrowRightIcon
+    BusIcon, MapIcon, SearchIcon, CheckCircleIcon, ArrowRightIcon, UserCircleIcon
 } from './components/icons';
+import { Page } from './App';
 
 interface DriverDashboardProps {
     onLogout: () => void;
@@ -11,6 +12,7 @@ interface DriverDashboardProps {
     driverData: any;
     allCompanies: any[];
     onPassengerBoarding: (ticketId: string) => void;
+    navigate: (page: Page) => void;
 }
 
 const mockPassengersData = {
@@ -30,7 +32,7 @@ const mockTrips = {
     'RT01': { from: 'Kigali', to: 'Huye', time: '08:30' },
 }
 
-const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setTheme, driverData, allCompanies, onPassengerBoarding }) => {
+const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setTheme, driverData, allCompanies, onPassengerBoarding, navigate }) => {
     const [currentTrip, setCurrentTrip] = useState<any>(null);
     const [passengers, setPassengers] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -75,9 +77,12 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
     return (
         <div className={`min-h-screen flex flex-col ${theme} bg-gray-100 dark:bg-gray-900`}>
             <header className="h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm flex items-center justify-between px-6 border-b dark:border-gray-700/50 sticky top-0 z-10">
-                <div className="font-bold text-gray-800 dark:text-white">Ikaze, {driverData.name}</div>
+                <button onClick={() => navigate('driverProfile')} className="flex items-center space-x-2 group">
+                    <img src={driverData.avatarUrl} alt={driverData.name} className="w-9 h-9 rounded-full object-cover border-2 border-transparent group-hover:border-blue-500 transition"/>
+                    <div className="font-bold text-gray-800 dark:text-white">Ikaze, {driverData.name}</div>
+                </button>
                 <div className="flex items-center space-x-4">
-                    <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-400"><MoonIcon className="w-6 h-6"/></button>
+                    <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-400">{theme === 'light' ? <MoonIcon className="w-6 h-6"/> : <SunIcon className="w-6 h-6"/>}</button>
                     <button onClick={onLogout} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Sohoka</button>
                 </div>
             </header>

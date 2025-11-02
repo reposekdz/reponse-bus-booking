@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { MapIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon, ClockIcon, ArrowRightIcon } from '../components/icons';
 
-const mockRoutes = [
-  { id: 1, from: 'Kigali', to: 'Rubavu', duration: '3.5h', basePrice: '4,500 RWF', activeSchedules: 5 },
-  { id: 2, from: 'Kigali', to: 'Musanze', duration: '2h', basePrice: '3,500 RWF', activeSchedules: 3 },
-  { id: 3, from: 'Rubavu', to: 'Kigali', duration: '3.5h', basePrice: '4,500 RWF', activeSchedules: 5 },
-];
+// FIX: Define props interface
+interface CompanyRoutesProps {
+    routes: any[];
+    crudHandlers: any;
+}
 
-const CompanyRoutes: React.FC = () => {
-    const [routes, setRoutes] = useState(mockRoutes);
+// FIX: Use props for data and handlers, remove local state for routes list
+const CompanyRoutes: React.FC<CompanyRoutesProps> = ({ routes, crudHandlers }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
     return (
@@ -49,7 +49,7 @@ const CompanyRoutes: React.FC = () => {
                                         {route.from} <ArrowRightIcon className="w-4 h-4 mx-2 text-gray-400"/> {route.to}
                                     </td>
                                     <td><ClockIcon className="w-4 h-4 inline mr-1 text-gray-400"/>{route.duration}</td>
-                                    <td>{route.basePrice}</td>
+                                    <td>{new Intl.NumberFormat('fr-RW').format(route.basePrice)} RWF</td>
                                     <td>{route.activeSchedules} active</td>
                                     <td className="flex space-x-2 p-3">
                                         <button className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>

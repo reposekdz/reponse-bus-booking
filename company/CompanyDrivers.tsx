@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { UsersIcon, SearchIcon } from '../components/icons';
 
-const mockDrivers = [
-  { id: 1, name: 'James Gatete', bus: 'RAA 123 B', phone: '0788111111', status: 'On Route' },
-  { id: 2, name: 'Peter Kalisa', bus: 'RAB 456 C', phone: '0788222222', status: 'Idle' },
-];
+// FIX: Define props interface
+interface CompanyDriversProps {
+    drivers: any[];
+    crudHandlers: any;
+}
 
-const CompanyDrivers: React.FC = () => {
-    const [drivers, setDrivers] = useState(mockDrivers);
+// FIX: Use props for data and handlers, remove local state for drivers list
+const CompanyDrivers: React.FC<CompanyDriversProps> = ({ drivers, crudHandlers }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
     return (
@@ -39,11 +40,11 @@ const CompanyDrivers: React.FC = () => {
                             {drivers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase())).map(driver => (
                                 <tr key={driver.id} className="border-t dark:border-gray-700">
                                     <td className="p-3 font-semibold dark:text-white">{driver.name}</td>
-                                    <td>{driver.bus}</td>
+                                    <td>{driver.assignedBusId}</td>
                                     <td>{driver.phone}</td>
                                     <td>
                                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                            driver.status === 'On Route' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                                            driver.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                         }`}>
                                             {driver.status}
                                         </span>

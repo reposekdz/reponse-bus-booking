@@ -15,15 +15,26 @@ const StatCard = ({ title, value, icon }) => (
     </div>
 );
 
-const CompanyDashboard: React.FC = () => {
+// FIX: Add props interface
+interface CompanyDashboardProps {
+    drivers: any[];
+    buses: any[];
+    routes: any[];
+}
+
+// FIX: Make component accept props and calculate stats dynamically
+const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ drivers, buses, routes }) => {
+    const activeBuses = buses.filter(b => b.status === 'On Route').length;
+    const popularRoute = routes.length > 0 ? `${routes[0].from} - ${routes[0].to}` : 'N/A';
+
     return (
         <div>
             <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Company Dashboard</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Today's Passengers" value="1,250" icon={<UsersIcon />} />
+                <StatCard title="Total Drivers" value={drivers.length} icon={<UsersIcon />} />
                 <StatCard title="Today's Revenue" value="5.6M RWF" icon={<ChartBarIcon />} />
-                <StatCard title="Active Buses" value="25 / 30" icon={<BusIcon />} />
-                <StatCard title="Popular Route" value="Kigali - Rubavu" icon={<MapIcon />} />
+                <StatCard title="Active Buses" value={`${activeBuses} / ${buses.length}`} icon={<BusIcon />} />
+                <StatCard title="Popular Route" value={popularRoute} icon={<MapIcon />} />
             </div>
              <div className="mt-8 bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
                 <h2 className="text-xl font-bold dark:text-white">Live Fleet Status</h2>

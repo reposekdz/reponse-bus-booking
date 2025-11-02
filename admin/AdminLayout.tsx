@@ -9,29 +9,37 @@ import ManageDrivers from './ManageDrivers';
 import ManageAgents from './ManageAgents';
 import ManagePassengers from './ManagePassengers';
 
+// FIX: Added data and handler props to align with App.tsx
 interface AdminLayoutProps {
     onLogout: () => void;
     theme: 'light' | 'dark';
     setTheme: (theme: 'light' | 'dark') => void;
+    companies: any[];
+    drivers: any[];
+    agents: any[];
+    buses: any[];
+    crudHandlers: any;
 }
 
 type AdminPage = 'dashboard' | 'companies' | 'drivers' | 'agents' | 'passengers';
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ onLogout, theme, setTheme }) => {
+// FIX: Destructure new props
+const AdminLayout: React.FC<AdminLayoutProps> = ({ onLogout, theme, setTheme, companies, drivers, agents, buses, crudHandlers }) => {
     const [currentPage, setCurrentPage] = useState<AdminPage>('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
     const renderContent = () => {
+        // FIX: Pass props down to child components
         switch (currentPage) {
-            case 'companies': return <ManageCompanies />;
-            case 'drivers': return <ManageDrivers />;
-            case 'agents': return <ManageAgents />;
+            case 'companies': return <ManageCompanies companies={companies} crudHandlers={crudHandlers} />;
+            case 'drivers': return <ManageDrivers drivers={drivers} crudHandlers={crudHandlers} />;
+            case 'agents': return <ManageAgents agents={agents} crudHandlers={crudHandlers} />;
             case 'passengers': return <ManagePassengers />;
             case 'dashboard':
             default:
-                return <AdminDashboard />;
+                return <AdminDashboard companies={companies} drivers={drivers} agents={agents} buses={buses} />;
         }
     };
 

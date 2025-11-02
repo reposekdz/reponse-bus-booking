@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useRef, useEffect, FormEvent } from 'react';
 import { UserCircleIcon, CogIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon, ChartBarIcon, SearchIcon, BusIcon, BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, LockClosedIcon, CameraIcon, XIcon, PaperAirplaneIcon } from './components/icons';
 import StarRating from './components/StarRating';
@@ -205,10 +206,10 @@ const WalletActionModal: React.FC<{
     );
 };
 
+// FIX: Added missing props to fix type error from App.tsx
 interface ProfilePageProps {
     walletData: any;
     onWalletUpdate: (data: any) => void;
-    // FIX: Added missing props to fix type error from App.tsx
     boardingStatus: Record<string, 'booked' | 'boarded'>;
     onSearch: (from?: string, to?: string) => void;
 }
