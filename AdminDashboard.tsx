@@ -45,8 +45,8 @@ export const mockCompaniesData = [
             { id: 'V03', model: 'Yutong Grand', capacity: 65, status: 'Maintenance', assignedRoute: '-' },
         ],
         recentPassengers: [
-            { name: 'Mugisha F.', route: 'Kigali - Rubavu', ticketId: 'VK-83AD1', date: '2024-10-28' },
-            { name: 'Keza C.', route: 'Kigali - Musanze', ticketId: 'VK-83AD2', date: '2024-10-28' },
+            { name: 'Mugisha F.', route: 'Kigali - Rubavu', ticketId: 'VK-83AD1', date: '2024-10-28', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop' },
+            { name: 'Keza C.', route: 'Kigali - Musanze', ticketId: 'VK-83AD2', date: '2024-10-28', avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop' },
         ],
         weeklyIncome: [ { day: 'M', income: 4500000 }, { day: 'T', income: 4200000 }, { day: 'W', income: 4800000 }, { day: 'T', income: 4600000 }, { day: 'F', income: 5500000 }, { day: 'S', income: 6200000 }, { day: 'S', income: 5900000 }],
         dailyTickets: [ { day: 'M', tickets: 980 }, { day: 'T', tickets: 920 }, { day: 'W', tickets: 1050 }, { day: 'T', tickets: 1000 }, { day: 'F', tickets: 1250 }, { day: 'S', tickets: 1400 }, { day: 'S', tickets: 1350 }],
@@ -79,7 +79,7 @@ export const mockCompaniesData = [
              { id: 'R02', model: 'Scania Marcopolo', capacity: 70, status: 'Active', assignedRoute: 'Kigali - Nyungwe' },
         ],
         recentPassengers: [
-             { name: 'Umutoni G.', route: 'Kigali - Huye', ticketId: 'RT-98CD3', date: '2024-10-27' },
+             { name: 'Umutoni G.', route: 'Kigali - Huye', ticketId: 'RT-98CD3', date: '2024-10-27', avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop' },
         ],
         weeklyIncome: [ { day: 'M', income: 3200000 }, { day: 'T', income: 3100000 }, { day: 'W', income: 3400000 }, { day: 'T', income: 3300000 }, { day: 'F', income: 4000000 }, { day: 'S', income: 4500000 }, { day: 'S', income: 4300000 }],
         dailyTickets: [ { day: 'M', tickets: 1100 }, { day: 'T', tickets: 1050 }, { day: 'W', tickets: 1150 }, { day: 'T', tickets: 1120 }, { day: 'F', tickets: 1350 }, { day: 'S', tickets: 1500 }, { day: 'S', tickets: 1450 }],
@@ -87,12 +87,12 @@ export const mockCompaniesData = [
 ];
 
 const mockUsersData = [
-    { id: 1, name: 'Kalisa Jean', email: 'kalisa.j@example.com', role: 'Passenger', joinedDate: '2023-01-15', status: 'Active' },
-    { id: 2, name: 'Umutoni Grace', email: 'grace.u@example.com', role: 'Passenger', joinedDate: '2023-03-22', status: 'Active' },
-    { id: 3, name: 'Volcano Express', email: 'contact@volcano.rw', role: 'Company', joinedDate: '2022-11-01', status: 'Active' },
-    { id: 4, name: 'Mugisha Frank', email: 'frank.m@example.com', role: 'Passenger', joinedDate: '2023-08-10', status: 'Suspended' },
-    { id: 5, name: 'RITCO', email: 'info@ritco.rw', role: 'Company', joinedDate: '2022-10-20', status: 'Active' },
-    { id: 6, name: 'Admin Reponse', email: 'reponse@gmail.com', role: 'Admin', joinedDate: '2022-09-01', status: 'Active' },
+    { id: 1, name: 'Kalisa Jean', email: 'kalisa.j@example.com', role: 'Passenger', joinedDate: '2023-01-15', status: 'Active', avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop' },
+    { id: 2, name: 'Umutoni Grace', email: 'grace.u@example.com', role: 'Passenger', joinedDate: '2023-03-22', status: 'Active', avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop' },
+    { id: 3, name: 'Volcano Express', email: 'contact@volcano.rw', role: 'Company', joinedDate: '2022-11-01', status: 'Active', avatarUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png' },
+    { id: 4, name: 'Mugisha Frank', email: 'frank.m@example.com', role: 'Passenger', joinedDate: '2023-08-10', status: 'Suspended', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop' },
+    { id: 5, name: 'RITCO', email: 'info@ritco.rw', role: 'Company', joinedDate: '2022-10-20', status: 'Active', avatarUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg' },
+    { id: 6, name: 'Admin Reponse', email: 'reponse@gmail.com', role: 'Admin', joinedDate: '2022-09-01', status: 'Active', avatarUrl: null },
 ];
 
 const StatCard = ({ title, value, icon, format = true }) => (
@@ -442,7 +442,17 @@ const CompanyDetails = ({ company, onBack }) => {
                      {activeTab === 'passengers' && (
                         <table className="w-full text-sm text-left">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">Name</th><th className="px-4 py-2">Route</th><th className="px-4 py-2">Ticket ID</th><th className="px-4 py-2">Date</th></tr></thead>
-                            <tbody>{company.recentPassengers.map(p => <tr key={p.ticketId} className="border-b dark:border-gray-700"><td className="px-4 py-2 font-medium dark:text-white">{p.name}</td><td className="px-4 py-2">{p.route}</td><td className="px-4 py-2">{p.ticketId}</td><td className="px-4 py-2">{p.date}</td></tr>)}</tbody>
+                            <tbody>{company.recentPassengers.map(p => (
+                                <tr key={p.ticketId} className="border-b dark:border-gray-700">
+                                    <td className="px-4 py-2 font-medium dark:text-white flex items-center space-x-3">
+                                        <img src={p.avatarUrl} alt={p.name} className="w-8 h-8 rounded-full object-cover"/>
+                                        <span>{p.name}</span>
+                                    </td>
+                                    <td className="px-4 py-2">{p.route}</td>
+                                    <td className="px-4 py-2">{p.ticketId}</td>
+                                    <td className="px-4 py-2">{p.date}</td>
+                                </tr>
+                            ))}</tbody>
                         </table>
                     )}
                 </div>
@@ -549,8 +559,13 @@ const UserManagementPage = () => {
                             {filteredUsers.map(user => (
                                 <tr key={user.id} className="border-b dark:border-gray-700">
                                     <td className="px-4 py-3">
-                                        <p className="font-semibold text-gray-900 dark:text-white">{user.name}</p>
-                                        <p className="text-gray-500 dark:text-gray-400">{user.email}</p>
+                                        <div className="flex items-center space-x-3">
+                                            <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full object-cover bg-gray-200 dark:bg-gray-700"/>
+                                            <div>
+                                                <p className="font-semibold text-gray-900 dark:text-white">{user.name}</p>
+                                                <p className="text-gray-500 dark:text-gray-400 text-xs">{user.email}</p>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td className="px-4 py-3">{user.role}</td>
                                     <td className="px-4 py-3">{user.joinedDate}</td>

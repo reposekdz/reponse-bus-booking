@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { UserCircleIcon, CogIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon, ChartBarIcon, SearchIcon, BusIcon, BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, LockClosedIcon } from './components/icons';
+import { UserCircleIcon, CogIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon, ChartBarIcon, SearchIcon, BusIcon, BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, LockClosedIcon, CameraIcon } from './components/icons';
 import StarRating from './components/StarRating';
 
 
@@ -7,7 +7,9 @@ const user = {
     name: 'Kalisa Jean',
     email: 'kalisa.j@example.com',
     memberSince: 'Mutarama 2023',
-    walletPin: '12345' // Hardcoded for simulation
+    walletPin: '12345', // Hardcoded for simulation
+    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop',
+    coverUrl: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=2070&auto=format&fit=crop'
 };
 
 const userWallet = {
@@ -150,6 +152,11 @@ const ProfilePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState('analytics');
     const [searchTerm, setSearchTerm] = useState('');
     const [isWalletUnlocked, setIsWalletUnlocked] = useState(false);
+    const [avatar, setAvatar] = useState(user.avatarUrl);
+    const [cover, setCover] = useState(user.coverUrl);
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+    const coverInputRef = useRef<HTMLInputElement>(null);
+
     const [notificationSettings, setNotificationSettings] = useState({
         promotions: true,
         tripReminders: true,
@@ -169,12 +176,12 @@ const ProfilePage: React.FC = () => {
         }, {});
         const mostVisitedCity = Object.keys(destinationCounts).length > 0 ? Object.keys(destinationCounts).reduce((a, b) => destinationCounts[a] > destinationCounts[b] ? a : b) : 'N/A';
 
-        const monthlySpending = travelHistory.reduce((acc: Record<string, number>, trip) => {
+        // Fix: Changed reduce function to use generic parameter for better type inference.
+        const monthlySpending = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             const month = new Date(trip.date).toLocaleString('default', { month: 'short', year: '2-digit' });
             acc[month] = (acc[month] || 0) + trip.price;
             return acc;
-// FIX: Explicitly type the initial value for reduce to ensure correct type inference for monthlySpending.
-        }, {} as Record<string, number>);
+        }, {});
 
         return { favoriteCompany, mostVisitedCity, monthlySpending };
     }, []);
@@ -230,18 +237,45 @@ const ProfilePage: React.FC = () => {
         setNotificationSettings(prev => ({...prev, [setting]: !prev[setting]}));
     }
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                if (type === 'avatar') setAvatar(reader.result as string);
+                if (type === 'cover') setCover(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     return (
         <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-full py-12">
             <div className="container mx-auto px-6">
-                <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-8">
-                    <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-green-400 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg flex-shrink-0">
-                        KJ
+                 <div className="relative mb-8">
+                    <div className="h-48 bg-gray-300 dark:bg-gray-700 rounded-xl overflow-hidden group">
+                         <img src={cover} alt="Cover" className="w-full h-full object-cover"/>
+                         <button onClick={() => coverInputRef.current?.click()} className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                            <CameraIcon className="w-5 h-5"/>
+                        </button>
                     </div>
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800 dark:text-white text-center sm:text-left">{user.name}</h1>
-                        <p className="text-gray-600 dark:text-gray-400 text-center sm:text-left">{user.email}</p>
+                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
+                        <div className="relative group">
+                            <img src={avatar} alt="Avatar" className="w-28 h-28 rounded-full border-4 border-white dark:border-gray-800 object-cover shadow-lg"/>
+                            <button onClick={() => avatarInputRef.current?.click()} className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                <CameraIcon className="w-6 h-6"/>
+                            </button>
+                        </div>
                     </div>
+                    <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={e => handleFileChange(e, 'cover')} />
+                    <input type="file" ref={avatarInputRef} className="hidden" accept="image/*" onChange={e => handleFileChange(e, 'avatar')} />
                 </div>
+                
+                <div className="text-center pt-14 mb-8">
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{user.name}</h1>
+                    <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
+                </div>
+
 
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
                     <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
@@ -271,9 +305,9 @@ const ProfilePage: React.FC = () => {
                                         {Object.entries(analytics.monthlySpending).map(([month, amount]) => (
                                             <div key={month} className="flex-1 flex flex-col items-center justify-end group">
                                                 <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    {new Intl.NumberFormat('fr-RW').format(amount)}
+                                                    {new Intl.NumberFormat('fr-RW').format(amount as number)}
                                                 </div>
-                                                <div className="w-full bg-blue-200 dark:bg-blue-800/80 rounded-t-lg hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors" style={{height: `${(amount / (maxSpending || 1)) * 100}%`}}></div>
+                                                <div className="w-full bg-blue-200 dark:bg-blue-800/80 rounded-t-lg hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors" style={{height: `${((amount as number) / (maxSpending || 1)) * 100}%`}}></div>
                                                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{month}</div>
                                             </div>
                                         ))}

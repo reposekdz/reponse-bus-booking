@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon, TagIcon, ArchiveBoxIcon } from './components/icons';
+import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon, TagIcon, ArchiveBoxIcon, PhoneIcon } from './components/icons';
 import FleetDetailModal from './components/FleetDetailModal';
 import StarRating from './components/StarRating';
 
@@ -9,6 +9,12 @@ const mockCompanyData: { [key: string]: any } = {
     address: 'Kiyovu, Kigali, Rwanda',
     hours: 'Buri munsi: 05:00 - 22:00',
     contactEmail: 'info@ritco.rw',
+    support: { phone: '+250 788 111 222', email: 'support@ritco.rw' },
+    amenities: ['Air Conditioning', 'Charging Ports', 'On-board Entertainment', 'Luggage Allowance'],
+    safety: { 
+        certifications: ['RURA Certified Operator', 'Annual Vehicle Inspection Passed'], 
+        briefing: 'A brief safety announcement is made by the driver before departure.' 
+    },
     stats: { passengers: '2M+', fleet: 85, routes: 25 },
     description: "RITCO ni ikigo cya Leta gishinzwe gutwara abantu mu buryo bwa rusange, kizwiho kugira imodoka nini kandi zigezweho zitwara abantu mu gihugu hose.",
     fleet: [
@@ -50,6 +56,12 @@ const mockCompanyData: { [key: string]: any } = {
     address: 'Nyabugogo, Kigali, Rwanda',
     hours: 'Buri munsi: 04:30 - 23:00',
     contactEmail: 'contact@volcano.rw',
+    support: { phone: '+250 788 333 444', email: 'support@volcano.rw' },
+    amenities: ['WiFi', 'Air Conditioning', 'Charging Ports', 'Safety Briefing'],
+    safety: { 
+        certifications: ['RURA Certified Operator', 'Certified Professional Drivers'], 
+        briefing: 'Our staff ensures all safety measures are followed before and during the trip.' 
+    },
     stats: { passengers: '3.5M+', fleet: 120, routes: 30 },
     description: "Volcano Express ni kimwe mu bigo bikunzwe cyane mu Rwanda, kizwiho serivisi nziza, isuku, no kugera ku gihe. Bakorera mu mihanda myinshi ikomeye.",
     fleet: [
@@ -96,6 +108,9 @@ const defaultCompanyData = {
     address: 'Amakuru ntazwi',
     hours: 'Amakuru ntazwi',
     contactEmail: 'not-available@example.com',
+    support: { phone: 'N/A', email: 'N/A' },
+    amenities: [],
+    safety: { certifications: [], briefing: 'Nta makuru ahari.' },
     stats: { passengers: 'N/A', fleet: 'N/A', routes: 'N/A' },
     description: "Nta makuru ahagije kuri iki kigo araboneka. Tuzayongeramo vuba.",
     fleet: [],
@@ -262,6 +277,27 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                     <div className="bg-white dark:bg-gray-800/30 p-6 rounded-lg shadow-sm border dark:border-gray-700/50">
                         <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Abo Turi Bo</h3>
                         <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{data.description}</p>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800/30 p-6 rounded-lg shadow-sm border dark:border-gray-700/50">
+                        <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Ibyiza by'imbere & Serivisi</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            {data.amenities.map(amenity => <AmenityIcon key={amenity} amenity={amenity} withText />)}
+                        </div>
+                    </div>
+                     <div className="bg-white dark:bg-gray-800/30 p-6 rounded-lg shadow-sm border dark:border-gray-700/50">
+                        <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white flex items-center"><ShieldCheckIcon className="w-7 h-7 mr-3 text-green-500"/> Umutekano & Ibyemezo</h3>
+                        <div className="space-y-3">
+                            <div>
+                                <h4 className="font-semibold dark:text-gray-200">Ibyemezo</h4>
+                                <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 mt-1 space-y-1">
+                                    {data.safety.certifications.map(cert => <li key={cert}>{cert}</li>)}
+                                </ul>
+                            </div>
+                             <div>
+                                <h4 className="font-semibold dark:text-gray-200">Amabwiriza y'Umutekano</h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{data.safety.briefing}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
               )}
@@ -462,9 +498,19 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                             <ClockIcon className="w-5 h-5 mr-3 mt-1 flex-shrink-0 text-gray-400" />
                             <span className="text-gray-700 dark:text-gray-300">{data.hours}</span>
                         </li>
+                    </ul>
+                </div>
+                
+                 <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 shadow-lg border dark:border-gray-700/50">
+                    <h4 className="text-xl font-bold mb-4 dark:text-white">Ubufasha bw'Abakiriya</h4>
+                     <ul className="space-y-3 text-sm">
+                        <li className="flex items-start">
+                            <PhoneIcon className="w-5 h-5 mr-3 mt-1 flex-shrink-0 text-gray-400" /> 
+                            <span className="text-gray-700 dark:text-gray-300">{data.support.phone}</span>
+                        </li>
                         <li className="flex items-start">
                             <EnvelopeIcon className="w-5 h-5 mr-3 mt-1 flex-shrink-0 text-gray-400" />
-                            <span className="text-gray-700 dark:text-gray-300">{data.contactEmail}</span>
+                            <span className="text-gray-700 dark:text-gray-300">{data.support.email}</span>
                         </li>
                     </ul>
                 </div>
@@ -487,25 +533,6 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                             <p className="text-xs text-gray-500 dark:text-gray-400">Ingendo</p>
                         </div>
                     </div>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 shadow-lg border dark:border-gray-700/50">
-                    <h4 className="text-xl font-bold mb-4 border-b pb-3 dark:border-gray-700 dark:text-white">Ingendo Zikunzwe</h4>
-                    {data.routes.length > 0 ? (
-                        <ul className="space-y-3">
-                            {data.routes.slice(0, 3).map((route: any, index: number) => (
-                                <li key={index}>
-                                    <button onClick={() => { setActiveTab('schedule'); setFromLocation(route.from); setToLocation(route.to); }} className="w-full text-left p-3 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex justify-between items-center group">
-                                        <div>
-                                            <p className="font-semibold text-gray-800 dark:text-gray-200">{route.from} - {route.to}</p>
-                                            <p className="text-sm text-green-600 dark:text-green-400 font-bold">{route.price}</p>
-                                        </div>
-                                        <ChevronRightIcon className="w-5 h-5 text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-transform group-hover:translate-x-1" />
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : <p className="text-gray-500 dark:text-gray-400 text-sm">Nta ngendo zizwi.</p>}
                 </div>
             </div>
           </aside>

@@ -25,7 +25,16 @@ const StatCard = ({ title, value, icon }) => (
     </div>
 );
 
-const FormModal = ({ title, children, onClose, onSave, isSaving = false }) => (
+// Fix: Added explicit props type for FormModal to resolve type inference issues.
+interface FormModalProps {
+    title: string;
+    children: React.ReactNode;
+    onClose: () => void;
+    onSave: (e: React.FormEvent<HTMLFormElement>) => void;
+    isSaving?: boolean;
+}
+
+const FormModal: React.FC<FormModalProps> = ({ title, children, onClose, onSave, isSaving = false }) => (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-4">
@@ -50,11 +59,10 @@ const ProfileManagement = ({ company, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({ ...company });
 
-    // FIX: Add types to event handler
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     
-    // FIX: Add types to event handler to match other usages
-    const handleSave = (e: FormEvent) => {
+    // Fix: Correctly typed the form event to match the FormModal's onSave prop.
+    const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
         onUpdate(formData);
         setIsEditing(false);
     }
@@ -85,8 +93,9 @@ const FleetManagement = ({ fleet, onUpdate }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingBus, setEditingBus] = useState(null);
 
-    const handleSave = (e) => {
-        const formData = new FormData(e.target);
+    // Fix: Correctly typed the form event and used e.currentTarget for FormData.
+    const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+        const formData = new FormData(e.currentTarget);
         const busData = Object.fromEntries(formData.entries());
         if (editingBus) {
             onUpdate(fleet.map(b => b.id === editingBus.id ? {...b, ...busData} : b));
@@ -141,8 +150,9 @@ const RouteManagement = ({ routes, onUpdate }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRoute, setEditingRoute] = useState(null);
 
-    const handleSave = (e) => {
-        const formData = new FormData(e.target);
+    // Fix: Correctly typed the form event and used e.currentTarget for FormData.
+    const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+        const formData = new FormData(e.currentTarget);
         const routeData = Object.fromEntries(formData.entries());
         if (editingRoute) {
             onUpdate(routes.map(r => r.id === editingRoute.id ? { ...r, ...routeData } : r));
@@ -150,6 +160,7 @@ const RouteManagement = ({ routes, onUpdate }) => {
             onUpdate([...routes, { ...routeData, id: `route_${Date.now()}` }]);
         }
         setIsModalOpen(false);
+        setEditingRoute(null);
     };
 
     return (
