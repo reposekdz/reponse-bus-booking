@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { BusIcon, SunIcon, MoonIcon, BellIcon, MenuIcon, XIcon, UserCircleIcon } from './icons';
+import { BusIcon, SunIcon, MoonIcon, BellIcon, MenuIcon, XIcon, UserCircleIcon, ChevronDownIcon } from './icons';
 import type { Page } from '../App';
+
+interface NavItem {
+    label: string;
+    page: Page;
+    children?: NavItem[];
+}
 
 interface HeaderProps {
   navigate: (page: Page) => void;
@@ -14,6 +20,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, setTheme, currentPage }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isServicesMenuOpen, setIsServicesMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -24,12 +31,20 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
+  const servicesSubMenu: NavItem[] = [
+    { label: 'Gukodesha Bisi', page: 'services' },
+    { label: 'Gutwara Ibintu (Cargo)', page: 'services' },
+    { label: 'Ingendo z\'Ubukerarugendo', page: 'services' },
+    { label: 'Ibicuba by\'Agaciro (VIP)', page: 'services' },
+    { label: 'Reba Serivisi Zose', page: 'services' }
+  ];
 
-  let navItems: { label: string; page: Page }[] = [
+  let navItems: NavItem[] = [
     { label: 'Ahabanza', page: 'home' },
     { label: 'Amatike Yanjye', page: 'bookings' },
     { label: 'Ibigo', page: 'companies' },
-    { label: 'Serivisi', page: 'services' },
+    { label: 'Serivisi', page: 'services', children: servicesSubMenu },
     { label: 'Ubufasha', page: 'help' },
     { label: 'Twandikire', page: 'contact' },
   ];
@@ -40,7 +55,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
           { label: 'Amatike Yanjye', page: 'bookings' },
           { label: 'Umwirondoro', page: 'profile' },
           { label: 'Ibigo', page: 'companies' },
-          { label: 'Serivisi', page: 'services' },
+          { label: 'Serivisi', page: 'services', children: servicesSubMenu },
           { label: 'Twandikire', page: 'contact' },
       ]
   }
@@ -67,14 +82,37 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
           
           <nav className="hidden lg:flex items-center space-x-8">
             {navItems.map((item) => (
-              <button
-                key={item.page}
-                onClick={() => handleNavClick(item.page)}
-                className={`relative group transition-colors duration-300 ${currentPage === item.page ? 'text-yellow-300' : 'text-gray-200 hover:text-yellow-300'}`}
-              >
-                {item.label}
-                <span className={`absolute bottom-0 left-0 h-0.5 bg-yellow-300 transition-all duration-300 ${currentPage === item.page ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-              </button>
+                item.children ? (
+                    <div key={item.page} className="relative group">
+                        <button
+                            onClick={() => handleNavClick(item.page)}
+                            className={`flex items-center relative transition-colors duration-300 ${currentPage === item.page ? 'text-yellow-300' : 'text-gray-200 hover:text-yellow-300'}`}
+                        >
+                            {item.label}
+                            <ChevronDownIcon className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:rotate-180" />
+                        </button>
+                        <div className="absolute top-full mt-2 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg py-2 opacity-0 group-hover:opacity-100 transform -translate-y-2 group-hover:translate-y-0 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto z-10">
+                            {item.children.map(child => (
+                                <button 
+                                key={child.label}
+                                onClick={() => handleNavClick(child.page)}
+                                className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                {child.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <button
+                        key={item.page}
+                        onClick={() => handleNavClick(item.page)}
+                        className={`relative group transition-colors duration-300 ${currentPage === item.page ? 'text-yellow-300' : 'text-gray-200 hover:text-yellow-300'}`}
+                    >
+                        {item.label}
+                        <span className={`absolute bottom-0 left-0 h-0.5 bg-yellow-300 transition-all duration-300 ${currentPage === item.page ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                    </button>
+                )
             ))}
           </nav>
 
@@ -150,11 +188,29 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
                     <XIcon className="w-6 h-6" />
                 </button>
             </div>
-            <nav className="flex flex-col space-y-4">
+            <nav className="flex flex-col space-y-1">
               {navItems.map((item) => (
-                <button key={item.page} onClick={() => handleNavClick(item.page)} className={`p-3 rounded-lg text-left transition-colors duration-200 ${currentPage === item.page ? 'bg-yellow-400 text-[#0033A0] font-bold' : 'text-gray-200 hover:bg-white/10'}`}>
-                  {item.label}
-                </button>
+                item.children ? (
+                    <div key={item.page}>
+                        <button onClick={() => setIsServicesMenuOpen(!isServicesMenuOpen)} className="w-full flex justify-between items-center p-3 rounded-lg text-left transition-colors duration-200 text-gray-200 hover:bg-white/10">
+                            <span>{item.label}</span>
+                            <ChevronDownIcon className={`w-5 h-5 transition-transform ${isServicesMenuOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        {isServicesMenuOpen && (
+                            <div className="pl-4 mt-1 space-y-1">
+                                {item.children.map(child => (
+                                    <button key={child.label} onClick={() => handleNavClick(child.page)} className="w-full p-2 rounded-lg text-left text-sm transition-colors duration-200 text-gray-300 hover:bg-white/10 hover:text-white">
+                                        {child.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <button key={item.page} onClick={() => handleNavClick(item.page)} className={`w-full p-3 rounded-lg text-left transition-colors duration-200 ${currentPage === item.page ? 'bg-yellow-400 text-[#0033A0] font-bold' : 'text-gray-200 hover:bg-white/10'}`}>
+                    {item.label}
+                    </button>
+                )
               ))}
             </nav>
             <div className="sm:hidden flex flex-col items-center space-y-4 pt-6 border-t border-gray-700 w-full mt-6">

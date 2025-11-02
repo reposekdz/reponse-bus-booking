@@ -47,8 +47,10 @@ const App: React.FC = () => {
     }
   }, [theme]);
 
+  const protectedPages: Page[] = ['bookings', 'profile'];
+
   const navigate = (targetPage: Page, data?: any) => {
-    if ((targetPage === 'bookings' || targetPage === 'profile') && !isLoggedIn) {
+    if (protectedPages.includes(targetPage) && !isLoggedIn) {
       setPage('login');
       return;
     }
