@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import StarRating from './components/StarRating';
 import AdBanner from './components/AdBanner';
-import { QrCodeIcon, MapIcon, XIcon, ArrowRightIcon, BusIcon, ShareIcon, WalletIcon } from './components/icons';
+import { QrCodeIcon, MapIcon, XIcon, ArrowRightIcon, BusIcon, ShareIcon, WalletIcon, CheckCircleIcon } from './components/icons';
 import LiveTrackingModal from './components/LiveTrackingModal';
 
 const ReviewModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClose }) => {
@@ -51,6 +51,15 @@ const ReviewModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClo
 };
 
 const TicketModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClose }) => {
+    const [isSaved, setIsSaved] = useState(false);
+
+    const handleSaveToWallet = () => {
+        // Simulate API call
+        setTimeout(() => {
+            setIsSaved(true);
+        }, 500);
+    };
+
     const InfoField: React.FC<{label: string, value: string, className?: string}> = ({label, value, className}) => (
         <div className={className}>
             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{label}</p>
@@ -111,8 +120,17 @@ const TicketModal: React.FC<{ trip: any; onClose: () => void }> = ({ trip, onClo
                     </div>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl flex space-x-2">
-                    <button className="w-full flex items-center justify-center py-3 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900 transition-colors font-semibold text-sm">
-                        <WalletIcon className="w-5 h-5 mr-2" /> Bika mu Ikofi
+                    <button 
+                        onClick={handleSaveToWallet} 
+                        disabled={isSaved}
+                        className={`w-full flex items-center justify-center py-3 rounded-lg font-semibold text-sm transition-colors ${
+                            isSaved
+                                ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 cursor-default'
+                                : 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900'
+                        }`}
+                    >
+                        {isSaved ? <CheckCircleIcon className="w-5 h-5 mr-2" /> : <WalletIcon className="w-5 h-5 mr-2" />}
+                        {isSaved ? 'Bikijwe mu Ikofi' : 'Bika mu Ikofi'}
                     </button>
                      <button className="w-full flex items-center justify-center py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold text-sm">
                         <ShareIcon className="w-5 h-5 mr-2" /> Sangiza

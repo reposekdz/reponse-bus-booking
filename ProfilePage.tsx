@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { UserCircleIcon, CogIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon, ChartBarIcon, SearchIcon, BusIcon, BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, LockClosedIcon, CameraIcon } from './components/icons';
+import React, { useState, useMemo, useRef, useEffect, FormEvent } from 'react';
+import { UserCircleIcon, CogIcon, ArrowRightIcon, WalletIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ChatBubbleLeftRightIcon, BellAlertIcon, ChartBarIcon, SearchIcon, BusIcon, BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, LockClosedIcon, CameraIcon, XIcon, PaperAirplaneIcon } from './components/icons';
 import StarRating from './components/StarRating';
 
 
@@ -147,6 +147,66 @@ const WalletPinScreen: React.FC<{ onUnlock: () => void; pinToMatch: string }> = 
     );
 };
 
+const WalletActionModal: React.FC<{
+    action: 'send' | 'deposit';
+    onClose: () => void;
+    onConfirm: (amount: number, recipient?: string) => void;
+    currentBalance: number;
+}> = ({ action, onClose, onConfirm, currentBalance }) => {
+    const [amount, setAmount] = useState('');
+    const [recipient, setRecipient] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        const numAmount = parseFloat(amount);
+        if (isNaN(numAmount) || numAmount <= 0) {
+            setError('Please enter a valid amount.');
+            return;
+        }
+        if (action === 'send') {
+            if (!recipient.trim()) {
+                setError('Please enter a recipient serial code.');
+                return;
+            }
+            if (numAmount > currentBalance) {
+                setError('Insufficient balance.');
+                return;
+            }
+        }
+        onConfirm(numAmount, recipient);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full" onClick={e => e.stopPropagation()}>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                     <div className="flex justify-between items-center">
+                        <h3 className="text-xl font-bold dark:text-white">{action === 'send' ? 'Ohereza Amafaranga' : 'Bika Amafaranga'}</h3>
+                         <button type="button" onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><XIcon className="w-5 h-5 text-gray-500"/></button>
+                    </div>
+                    
+                    {action === 'send' && (
+                        <div>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Serial Code y'Uwakira</label>
+                            <input type="text" value={recipient} onChange={e => setRecipient(e.target.value)} placeholder="e.g., UM1234" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                        </div>
+                    )}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Amafaranga</label>
+                        <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0 RWF" className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                    </div>
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                    <div className="flex justify-end space-x-3 pt-4 border-t dark:border-gray-700">
+                         <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold border rounded-lg dark:border-gray-600">Bireke</button>
+                        <button type="submit" className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">{action === 'send' ? 'Ohereza' : 'Bika'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 
 const ProfilePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState('analytics');
@@ -156,6 +216,8 @@ const ProfilePage: React.FC = () => {
     const [cover, setCover] = useState(user.coverUrl);
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const coverInputRef = useRef<HTMLInputElement>(null);
+    const [walletData, setWalletData] = useState(userWallet);
+    const [modalAction, setModalAction] = useState<'send' | 'deposit' | null>(null);
 
     const [notificationSettings, setNotificationSettings] = useState({
         promotions: true,
@@ -176,7 +238,6 @@ const ProfilePage: React.FC = () => {
         }, {});
         const mostVisitedCity = Object.keys(destinationCounts).length > 0 ? Object.keys(destinationCounts).reduce((a, b) => destinationCounts[a] > destinationCounts[b] ? a : b) : 'N/A';
 
-        // Fix: Changed reduce function to use generic parameter for better type inference.
         const monthlySpending = travelHistory.reduce<Record<string, number>>((acc, trip) => {
             const month = new Date(trip.date).toLocaleString('default', { month: 'short', year: '2-digit' });
             acc[month] = (acc[month] || 0) + trip.price;
@@ -248,6 +309,40 @@ const ProfilePage: React.FC = () => {
             reader.readAsDataURL(file);
         }
     };
+    
+    const handleWalletAction = (amount: number, recipient?: string) => {
+        const now = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric'});
+        if (modalAction === 'send' && recipient) {
+            const newTransaction = {
+                id: Date.now(),
+                type: 'transfer_out',
+                description: `Oherejwe kuri ${recipient}`,
+                amount: -amount,
+                date: now,
+                status: 'completed'
+            };
+            setWalletData(prev => ({
+                ...prev,
+                balance: prev.balance - amount,
+                transactions: [newTransaction, ...prev.transactions]
+            }));
+        } else if (modalAction === 'deposit') {
+            const newTransaction = {
+                id: Date.now(),
+                type: 'deposit',
+                description: 'Agent Deposit',
+                amount: amount,
+                date: now,
+                status: 'completed'
+            };
+             setWalletData(prev => ({
+                ...prev,
+                balance: prev.balance + amount,
+                transactions: [newTransaction, ...prev.transactions]
+            }));
+        }
+        setModalAction(null);
+    };
 
     return (
         <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-full py-12">
@@ -305,6 +400,7 @@ const ProfilePage: React.FC = () => {
                                         {Object.entries(analytics.monthlySpending).map(([month, amount]) => (
                                             <div key={month} className="flex-1 flex flex-col items-center justify-end group">
                                                 <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {/* FIX: Cast amount to number, as it can be inferred as 'unknown' from Object.entries. */}
                                                     {new Intl.NumberFormat('fr-RW').format(amount as number)}
                                                 </div>
                                                 <div className="w-full bg-blue-200 dark:bg-blue-800/80 rounded-t-lg hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors" style={{height: `${((amount as number) / (maxSpending || 1)) * 100}%`}}></div>
@@ -404,25 +500,26 @@ const ProfilePage: React.FC = () => {
                                     <button onClick={() => setIsWalletUnlocked(false)} className="text-xs font-semibold text-red-500 hover:underline">Funga Ikofi</button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                    <div className="md:col-span-2 bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 rounded-xl shadow-lg">
-                                        <p className="text-sm opacity-80">Amafaranga asigaye</p>
-                                        <p className="text-4xl font-bold mt-1 mb-4">{new Intl.NumberFormat('fr-RW').format(userWallet.balance)} <span className="text-2xl font-normal opacity-80">{userWallet.currency}</span></p>
+                                    <div className="md:col-span-2 bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                                        <div>
+                                            <p className="text-sm opacity-80">Amafaranga asigaye</p>
+                                            <p className="text-4xl font-bold mt-1 mb-4">{new Intl.NumberFormat('fr-RW').format(walletData.balance)} <span className="text-2xl font-normal opacity-80">{walletData.currency}</span></p>
+                                        </div>
                                         <div className="flex space-x-2">
-                                            <button className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition">Bitsa</button>
-                                            <button className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition">Ohereza</button>
-                                            <button className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition">Bikuza</button>
+                                            <button onClick={() => setModalAction('deposit')} className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition">Bika Amafaranga</button>
+                                            <button onClick={() => setModalAction('send')} className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition flex items-center justify-center"><PaperAirplaneIcon className="w-4 h-4 mr-2"/>Ohereza Amafaranga</button>
                                         </div>
                                     </div>
                                     <div className="bg-yellow-100 dark:bg-yellow-900/50 p-6 rounded-xl text-center flex flex-col justify-center">
                                         <p className="text-sm text-yellow-800 dark:text-yellow-300 font-semibold">Kode yawe y'umugenzi</p>
-                                        <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-200 tracking-widest my-2">{userWallet.serialCode}</p>
+                                        <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-200 tracking-widest my-2">{walletData.serialCode}</p>
                                         <p className="text-xs text-yellow-700 dark:text-yellow-400">Koresha iyi kode kubitsa amafaranga kuri Agent wemewe.</p>
                                     </div>
                                 </div>
 
                                 <h3 className="text-xl font-bold mb-4 dark:text-white">Ibikorwa bya Vuba</h3>
                                 <ul className="space-y-4">
-                                {userWallet.transactions.map((tx) => (
+                                {walletData.transactions.map((tx) => (
                                         <li key={tx.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                             <div className="flex items-center">
                                                 <TransactionIcon type={tx.type} />
@@ -495,6 +592,7 @@ const ProfilePage: React.FC = () => {
                     )}
                 </div>
             </div>
+            {modalAction && <WalletActionModal action={modalAction} onClose={() => setModalAction(null)} onConfirm={handleWalletAction} currentBalance={walletData.balance} />}
         </div>
     );
 };

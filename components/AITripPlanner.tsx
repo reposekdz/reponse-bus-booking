@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
+// FIX: Removed unused and deprecated HarmCategory and HarmBlockThreshold
+import { GoogleGenAI } from "@google/genai";
 import { XIcon, SparklesIcon, PaperAirplaneIcon } from './icons';
 
 interface AITripPlannerProps {

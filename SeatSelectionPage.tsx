@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowRightIcon, CheckCircleIcon, MapIcon, QrCodeIcon, BusIcon, XIcon } from './components/icons';
+import { ArrowRightIcon, CheckCircleIcon, MapIcon, QrCodeIcon, BusIcon, XIcon, WalletIcon, CreditCardIcon } from './components/icons';
 import LiveTrackingModal from './components/LiveTrackingModal';
 import { Page } from './App';
 
@@ -154,7 +154,11 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('wallet');
   
+  // Mock wallet balance for this page
+  const walletBalance = 75500;
+
   const seats = useMemo(() => generateSeats(), []);
   const pricePerSeat = parseFloat(tripData.price.replace(/[^0-9.-]+/g,""));
 
@@ -168,6 +172,7 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
 
   const totalPrice = selectedSeats.length * pricePerSeat;
   const formattedTotalPrice = new Intl.NumberFormat('fr-RW', { style: 'currency', currency: 'RWF' }).format(totalPrice);
+  const isWalletSufficient = walletBalance >= totalPrice;
   
   const handleConfirmClick = () => {
     onConfirm({ tripData, selectedSeats, totalPrice: formattedTotalPrice });
@@ -223,6 +228,28 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
                                     </div>
                                 ) : <p className="text-gray-500 dark:text-gray-400 text-sm">Nta mwanya wahisemo</p>}
                             </div>
+                            
+                            <div className="border-t dark:border-gray-700 pt-4">
+                                <h3 className="font-semibold mb-2">Uburyo bwo Kwishyura</h3>
+                                <div className="space-y-3">
+                                    <label className={`flex items-center p-3 rounded-lg border-2 transition-all ${paymentMethod === 'wallet' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'} ${!isWalletSufficient ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                                        <input type="radio" name="payment" value="wallet" checked={paymentMethod === 'wallet'} onChange={() => setPaymentMethod('wallet')} disabled={!isWalletSufficient} className="h-4 w-4 text-blue-600 focus:ring-blue-500"/>
+                                        <WalletIcon className="w-6 h-6 mx-3 text-blue-600"/>
+                                        <div className="flex-grow">
+                                            <p className="font-semibold dark:text-gray-200">Ikofi</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Asigaye: {new Intl.NumberFormat('fr-RW').format(walletBalance)} RWF</p>
+                                        </div>
+                                    </label>
+                                     {!isWalletSufficient && selectedSeats.length > 0 && <p className="text-xs text-red-500">Amafaranga ari mu ikofi ntahagije. Ongera ubitsemo.</p>}
+
+                                    <label className={`flex items-center p-3 rounded-lg border-2 transition-all cursor-pointer ${paymentMethod === 'card' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'}`}>
+                                        <input type="radio" name="payment" value="card" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} className="h-4 w-4 text-blue-600 focus:ring-blue-500"/>
+                                        <CreditCardIcon className="w-6 h-6 mx-3 text-gray-600 dark:text-gray-400"/>
+                                        <p className="font-semibold dark:text-gray-200">Ikarita / MoMo</p>
+                                    </label>
+                                </div>
+                            </div>
+
                             <div className="flex justify-between items-center text-gray-800 dark:text-white mt-6">
                                 <span className="text-xl font-medium">Yose Hamwe:</span>
                                 <span className="text-3xl font-bold text-green-600 dark:text-green-400">{formattedTotalPrice}</span>
