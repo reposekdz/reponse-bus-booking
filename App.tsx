@@ -152,7 +152,7 @@ const App: React.FC = () => {
       case 'services':
         return <ServicesPage />;
       case 'bookingSearch':
-        return <BookingSearchPage onSearch={handleSearch} />;
+        return <BookingSearchPage onTripSelect={handleTripSelect} />;
       case 'searchResults':
         return <SearchResultsPage onTripSelect={handleTripSelect} />;
       case 'seatSelection':

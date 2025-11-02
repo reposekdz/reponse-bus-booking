@@ -503,14 +503,14 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company, onSele
                 
                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 shadow-lg border dark:border-gray-700/50">
                     <h4 className="text-xl font-bold mb-4 dark:text-white">Ubufasha bw'Abakiriya</h4>
-                     <ul className="space-y-3 text-sm">
+                     <ul className="space-y-4 text-sm">
                         <li className="flex items-start">
                             <PhoneIcon className="w-5 h-5 mr-3 mt-1 flex-shrink-0 text-gray-400" /> 
-                            <span className="text-gray-700 dark:text-gray-300">{data.support.phone}</span>
+                            <a href={`tel:${data.support.phone}`} className="text-blue-600 dark:text-blue-400 hover:underline">{data.support.phone}</a>
                         </li>
                         <li className="flex items-start">
                             <EnvelopeIcon className="w-5 h-5 mr-3 mt-1 flex-shrink-0 text-gray-400" />
-                            <span className="text-gray-700 dark:text-gray-300">{data.support.email}</span>
+                             <a href={`mailto:${data.support.email}`} className="text-blue-600 dark:text-blue-400 hover:underline">{data.support.email}</a>
                         </li>
                     </ul>
                 </div>
