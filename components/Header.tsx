@@ -17,9 +17,10 @@ interface HeaderProps {
   setTheme: (theme: 'light' | 'dark') => void;
   currentPage: Page;
   onToggleCompaniesAside: () => void;
+  onToggleServicesAside: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, setTheme, currentPage, onToggleCompaniesAside }) => {
+const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, setTheme, currentPage, onToggleCompaniesAside, onToggleServicesAside }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -38,7 +39,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
     { label: 'Kata Itike', page: 'bookingSearch' },
     { label: 'Amatike Yanjye', page: 'bookings' },
     { label: 'Ibigo', page: 'companies', action: onToggleCompaniesAside },
-    { label: 'Serivisi', page: 'services' },
+    { label: 'Serivisi', page: 'services', action: onToggleServicesAside },
     { label: 'Ubufasha', page: 'help' },
     { label: 'Twandikire', page: 'contact' },
   ];
@@ -49,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, 
           { label: 'Kata Itike', page: 'bookingSearch' },
           { label: 'Umwirondoro', page: 'profile' },
           { label: 'Ibigo', page: 'companies', action: onToggleCompaniesAside },
-          { label: 'Serivisi', page: 'services' },
+          { label: 'Serivisi', page: 'services', action: onToggleServicesAside },
           { label: 'Twandikire', page: 'contact' },
       ]
   }

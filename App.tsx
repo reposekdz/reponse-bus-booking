@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 // Components
@@ -11,6 +10,7 @@ import BottomNavigation from './components/BottomNavigation';
 import CompaniesAside from './components/CompaniesAside';
 import NextTripWidget from './components/NextTripWidget';
 import LoadingSpinner from './components/LoadingSpinner';
+import ServicesAside from './components/ServicesAside'; // New Import
 
 // Pages
 import LoginPage from './LoginPage';
@@ -82,6 +82,7 @@ const App: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isLoading, setIsLoading] = useState(true);
   const [showCompaniesAside, setShowCompaniesAside] = useState(false);
+  const [showServicesAside, setShowServicesAside] = useState(false);
   const [showNextTripWidget, setShowNextTripWidget] = useState(true);
   const [selectedTrip, setSelectedTrip] = useState<any>(null);
 
@@ -209,7 +210,7 @@ const App: React.FC = () => {
       case 'bookings': return <BookingsPage />;
       case 'companies': return <CompaniesPage onNavigate={navigate} />;
       case 'companyProfile': return <CompanyProfilePage company={pageData} onSelectTrip={handleSearch} />;
-      case 'services': return <ServicesPage onNavigate={navigate} />;
+      case 'services': return <ServicesPage onNavigate={navigate} onToggleServicesAside={() => setShowServicesAside(true)} />;
       case 'help': return <HelpPage />;
       case 'contact': return <ContactPage />;
       case 'profile': return <ProfilePage user={user} walletData={walletData} onWalletUpdate={handleWalletUpdate} boardingStatus={boardingStatus} onSearch={handleSearch} />;
@@ -246,6 +247,7 @@ const App: React.FC = () => {
         setTheme={setTheme}
         currentPage={currentPage}
         onToggleCompaniesAside={() => setShowCompaniesAside(true)}
+        onToggleServicesAside={() => setShowServicesAside(true)}
       />}
       
       <main className={!isDashboard ? "pt-[68px] pb-20 md:pb-0" : ""}>
@@ -255,6 +257,7 @@ const App: React.FC = () => {
       {!isDashboard && <Footer />}
       {!isDashboard && <BottomNavigation navigate={navigate} currentPage={currentPage} />}
       {!isDashboard && <CompaniesAside isOpen={showCompaniesAside} onClose={() => setShowCompaniesAside(false)} navigate={navigate} />}
+      {!isDashboard && <ServicesAside isOpen={showServicesAside} onClose={() => setShowServicesAside(false)} navigate={navigate} />}
       
       {isLoggedIn && userRole === 'passenger' && showNextTripWidget && currentPage === 'home' && (
         <NextTripWidget 
