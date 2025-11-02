@@ -2,7 +2,7 @@ import React, { useState, useMemo, ChangeEvent, FormEvent, useEffect } from 'rea
 import { 
     SunIcon, MoonIcon, BellIcon, CogIcon, UsersIcon, ChartBarIcon, BuildingOfficeIcon, 
     ArrowLeftIcon, PlusIcon, PencilSquareIcon, TrashIcon, ArrowUpTrayIcon, SearchIcon, MapIcon, BusIcon, XIcon,
-    WalletIcon, CreditCardIcon, TagIcon, ShieldCheckIcon, PaintBrushIcon, LanguageIcon, LockClosedIcon, ClockIcon, BriefcaseIcon
+    WalletIcon, CreditCardIcon, TagIcon, ShieldCheckIcon, PaintBrushIcon, LanguageIcon, LockClosedIcon, ClockIcon, BriefcaseIcon, ArrowDownLeftIcon
 } from './components/icons';
 import ActivityFeed from './components/ActivityFeed';
 
@@ -25,7 +25,7 @@ export const mockAgentsData = [
         totalDeposits: 1250000, 
         commission: 62500, 
         joinDate: '2024-08-01', 
-        avatarUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format&fit=crop' 
+        avatarUrl: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format=fit=crop' 
     },
     { 
         id: 2, 
@@ -37,7 +37,7 @@ export const mockAgentsData = [
         totalDeposits: 875000, 
         commission: 43750, 
         joinDate: '2024-07-15', 
-        avatarUrl: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c3e?q=80&w=1974&auto=format&fit=crop'
+        avatarUrl: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c3e?q=80&w=1974&auto=format=fit=crop'
     },
     { 
         id: 3, 
@@ -49,9 +49,19 @@ export const mockAgentsData = [
         totalDeposits: 250000, 
         commission: 12500, 
         joinDate: '2024-09-01', 
-        avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop'
+        avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format=fit=crop'
     },
 ];
+
+export const mockAgentTransactions = [
+    { id: 101, agentId: 1, passengerName: 'Kalisa Jean', passengerSerial: 'KJ7821', amount: 50000, date: '2024-10-25', commission: 250, status: 'Completed' },
+    { id: 102, agentId: 2, passengerName: 'Mutesi Aline', passengerSerial: 'MA4567', amount: 25000, date: '2024-10-25', commission: 125, status: 'Completed' },
+    { id: 103, agentId: 1, passengerName: 'Gatete Paul', passengerSerial: 'GP1234', amount: 10000, date: '2024-10-24', commission: 50, status: 'Completed' },
+    { id: 104, agentId: 1, passengerName: 'Uwineza Grace', passengerSerial: 'UG7890', amount: 75000, date: '2024-10-24', commission: 375, status: 'Completed' },
+    { id: 105, agentId: 3, passengerName: 'Nshuti Kevin', passengerSerial: 'NK5678', amount: 15000, date: '2024-10-23', commission: 75, status: 'Pending' },
+    { id: 106, agentId: 2, passengerName: 'Byiringiro Eric', passengerSerial: 'BE9012', amount: 30000, date: '2024-10-22', commission: 150, status: 'Completed' },
+];
+
 
 export const mockDriversData = [
     {
@@ -374,6 +384,64 @@ const CompanyCard: React.FC<{
         </div>
     </div>
 );
+
+// FIX: Add RouteManagementPage component to fix compilation error
+const RouteManagementPage = ({ companies, setModal }) => {
+    const allRoutes = useMemo(() => {
+        return companies.flatMap(c => 
+            (c.routes || []).map(r => ({ ...r, companyName: c.name, companyId: c.id, logoUrl: c.logoUrl }))
+        );
+    }, [companies]);
+
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Manage All Routes</h1>
+                <button onClick={() => setModal({ type: 'route', data: {} })} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                    <PlusIcon className="w-5 h-5 mr-2" />Add Route
+                </button>
+            </div>
+            <div className="bg-white dark:bg-gray-800/50 p-4 rounded-xl shadow-md">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th className="px-4 py-3">Company</th>
+                                <th className="px-4 py-3">From</th>
+                                <th className="px-4 py-3">To</th>
+                                <th className="px-4 py-3">Price</th>
+                                <th className="px-4 py-3">Trips/Day</th>
+                                <th className="px-4 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {allRoutes.map(r => (
+                                <tr key={`${r.companyId}-${r.id}`} className="border-b dark:border-gray-700">
+                                    <td className="px-4 py-2 font-medium dark:text-white flex items-center space-x-2">
+                                        <img src={r.logoUrl} alt={r.companyName} className="w-6 h-6 object-contain"/>
+                                        <span>{r.companyName}</span>
+                                    </td>
+                                    <td className="px-4 py-2">{r.from}</td>
+                                    <td className="px-4 py-2">{r.to}</td>
+                                    <td className="px-4 py-2">{r.price}</td>
+                                    <td className="px-4 py-2">{r.tripsToday}</td>
+                                    <td className="px-4 py-2 flex items-center space-x-2">
+                                        <button onClick={() => setModal({ type: 'route', data: { companyId: r.companyId, route: r } })}>
+                                            <PencilSquareIcon className="w-5 h-5 text-gray-500 hover:text-blue-600"/>
+                                        </button>
+                                        <button onClick={() => setModal({ type: 'delete_route', data: { companyId: r.companyId, routeId: r.id } })}>
+                                            <TrashIcon className="w-5 h-5 text-gray-500 hover:text-red-600"/>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const RouteFormModal = ({ route, companies, onSave, onClose, companyId: defaultCompanyId }) => {
     const [formData, setFormData] = useState({
@@ -857,7 +925,7 @@ const AgentFormModal: React.FC<{ agent: any | null; onSave: (agent: any) => void
     );
 };
 
-const AgentManagementPage: React.FC<{ agents: any[]; onUpdateAgents: (agents: any[]) => void }> = ({ agents, onUpdateAgents }) => {
+const AgentManagementPage: React.FC<{ agents: any[]; onUpdateAgents: (agents: any[]) => void, onSelectAgent: (agentId: number) => void }> = ({ agents, onUpdateAgents, onSelectAgent }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAgent, setEditingAgent] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -916,7 +984,7 @@ const AgentManagementPage: React.FC<{ agents: any[]; onUpdateAgents: (agents: an
                         </tr></thead>
                         <tbody>
                             {filteredAgents.map(agent => (
-                                <tr key={agent.id} className="border-t dark:border-gray-700">
+                                <tr key={agent.id} className="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" onClick={() => onSelectAgent(agent.id)}>
                                     <td className="p-3">
                                         <div className="flex items-center space-x-3">
                                             <img src={agent.avatarUrl} alt={agent.name} className="w-10 h-10 rounded-full object-cover"/>
@@ -930,8 +998,8 @@ const AgentManagementPage: React.FC<{ agents: any[]; onUpdateAgents: (agents: an
                                     <td className="font-mono">{new Intl.NumberFormat('fr-RW').format(agent.totalDeposits)} RWF</td>
                                     <td><StatusBadge status={agent.status} /></td>
                                     <td className="flex space-x-2 py-5">
-                                        <button onClick={() => { setEditingAgent(agent); setIsModalOpen(true); }} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button onClick={() => handleDelete(agent.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
+                                        <button onClick={(e) => { e.stopPropagation(); setEditingAgent(agent); setIsModalOpen(true); }} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
+                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(agent.id);}} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
                                     </td>
                                 </tr>
                             ))}
@@ -944,135 +1012,69 @@ const AgentManagementPage: React.FC<{ agents: any[]; onUpdateAgents: (agents: an
     );
 };
 
-const RouteManagementPage = ({ companies, onUpdateCompanies }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingRoute, setEditingRoute] = useState(null);
+const AgentDetails = ({ agent, transactions, onBack }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
-    const allRoutes = useMemo(() => companies.flatMap(company =>
-        (company.routes || []).map(route => ({
-            ...route,
-            companyId: company.id,
-            companyName: company.name,
-            companyLogo: company.logoUrl,
-        }))
-    ), [companies]);
-
-    const filteredRoutes = useMemo(() => allRoutes.filter(route =>
-        route.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        route.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        route.to.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [allRoutes, searchTerm]);
+    const filteredTransactions = useMemo(() => {
+        return transactions.filter(tx =>
+            tx.passengerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            tx.passengerSerial.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [transactions, searchTerm]);
     
-    const stats = useMemo(() => {
-        if (allRoutes.length === 0) return { total: 0, busiest: 'N/A', mostProfitable: 'N/A' };
-        
-        const busiest = allRoutes.reduce((prev, current) => (prev.avgPassengers > current.avgPassengers) ? prev : current);
-        const mostProfitable = allRoutes.reduce((prev, current) => ((prev.price * prev.avgPassengers) > (current.price * current.avgPassengers)) ? prev : current);
-
-        return {
-            total: allRoutes.length,
-            busiest: `${busiest.from} - ${busiest.to} (${busiest.companyName})`,
-            mostProfitable: `${mostProfitable.from} - ${mostProfitable.to} (${mostProfitable.companyName})`,
-        }
-    }, [allRoutes]);
-
-    const handleSave = (routeData) => {
-        const isNew = !editingRoute;
-        const targetCompanyId = routeData.companyId;
-        
-        const updatedCompanies = companies.map(c => {
-            if (c.id === targetCompanyId) {
-                let newRoutes;
-                if (isNew) {
-                    const newRoute = { ...routeData, id: `route_${Date.now()}` };
-                    delete newRoute.companyId;
-                    delete newRoute.companyName;
-                    delete newRoute.companyLogo;
-                    newRoutes = [...(c.routes || []), newRoute];
-                } else {
-                    newRoutes = (c.routes || []).map(r => {
-                        if (r.id === editingRoute.id) {
-                             const updatedRoute = {...routeData};
-                             delete updatedRoute.companyId;
-                             delete updatedRoute.companyName;
-                             delete updatedRoute.companyLogo;
-                            return { ...r, ...updatedRoute };
-                        }
-                        return r;
-                    });
-                }
-                return { ...c, routes: newRoutes };
-            }
-            return c;
-        });
-
-        onUpdateCompanies(updatedCompanies);
-        setIsModalOpen(false);
-        setEditingRoute(null);
-    };
-
-    const handleDelete = (route) => {
-        if (window.confirm('Urifuza koko gusiba uru rugendo?')) {
-            const updatedCompanies = companies.map(c => {
-                if (c.id === route.companyId) {
-                    return { ...c, routes: (c.routes || []).filter(r => r.id !== route.id) };
-                }
-                return c;
-            });
-            onUpdateCompanies(updatedCompanies);
-        }
-    };
+    const totalCommission = transactions.reduce((acc, tx) => acc + tx.commission, 0);
+    const avgDeposit = transactions.length > 0 ? agent.totalDeposits / transactions.length : 0;
 
     return (
-        <div>
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Gucunga Ingendo</h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <StatCard title="Ingendo Zose" value={stats.total} icon={<MapIcon className="w-6 h-6 text-blue-500"/>} format={false} />
-                <StatCard title="Urugendo Rukunzwe Cyane" value={stats.busiest} icon={<UsersIcon className="w-6 h-6 text-blue-500"/>} format={false} />
-                <StatCard title="Urugendo Rwinjiza Cyane" value={stats.mostProfitable} icon={<ChartBarIcon className="w-6 h-6 text-blue-500"/>} format={false} />
+        <div className="space-y-6">
+            <button onClick={onBack} className="flex items-center text-gray-600 dark:text-gray-300 font-semibold hover:text-gray-800 dark:hover:text-white mb-2">
+                <ArrowLeftIcon className="w-5 h-5 mr-2" /> Subira ku Bakozi Bose
+            </button>
+            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <img src={agent.avatarUrl} alt={agent.name} className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white dark:border-gray-800"/>
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">{agent.name}</h1>
+                    <p className="text-gray-500 dark:text-gray-400">{agent.email} &bull; {agent.location}</p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard title="Yose Yabikije" value={agent.totalDeposits} icon={<WalletIcon/>}/>
+                <StatCard title="Komisiyo Yose" value={totalCommission} icon={<TagIcon/>}/>
+                {/* FIX: Changed isCurrency to format to match StatCard prop definition */}
+                <StatCard title="Ibikorwa Byose" value={transactions.length} icon={<UsersIcon/>} format={false}/>
+                <StatCard title="Impuzandengo" value={avgDeposit} icon={<ChartBarIcon/>}/>
             </div>
 
             <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl shadow-md">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-                     <div className="relative w-full sm:w-72">
-                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input type="text" placeholder="Shakisha ingendo..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" />
-                    </div>
-                    <button onClick={() => { setEditingRoute(null); setIsModalOpen(true); }} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-                        <PlusIcon className="w-5 h-5 mr-2"/>Ongeramo Urugendo
-                    </button>
+                 <h3 className="text-xl font-bold mb-4 dark:text-white">Amateka y'Ibikorwa</h3>
+                 <div className="relative mb-4">
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input type="text" placeholder="Shakisha igikorwa..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"/>
                 </div>
-
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                        <thead className="text-left text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr>
-                            <th className="p-3">Ikigo</th><th>Uva</th><th>Ujya</th><th>Igiciro</th><th>Ibyo gukora</th>
-                        </tr></thead>
+                        <thead className="text-left text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr><th className="p-3">Itariki</th><th>Umugenzi</th><th>Kode</th><th>Amafaranga</th><th>Komisiyo</th><th>Uko Byagenze</th></tr>
+                        </thead>
                         <tbody>
-                            {filteredRoutes.map(route => (
-                                <tr key={route.id} className="border-t dark:border-gray-700">
-                                    <td className="p-3 flex items-center space-x-3">
-                                        <img src={route.companyLogo} alt={route.companyName} className="w-8 h-8 object-contain"/>
-                                        <span className="font-semibold dark:text-white">{route.companyName}</span>
-                                    </td>
-                                    <td>{route.from}</td>
-                                    <td>{route.to}</td>
-                                    <td className="font-mono">{new Intl.NumberFormat('fr-RW').format(route.price)}</td>
-                                    <td className="flex space-x-2 py-3">
-                                        <button onClick={() => { setEditingRoute(route); setIsModalOpen(true); }} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button onClick={() => handleDelete(route)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
-                                    </td>
+                            {filteredTransactions.map(tx => (
+                                <tr key={tx.id} className="border-t dark:border-gray-700">
+                                    <td className="p-3">{tx.date}</td>
+                                    <td className="font-semibold dark:text-white">{tx.passengerName}</td>
+                                    <td>{tx.passengerSerial}</td>
+                                    <td className="font-mono">{new Intl.NumberFormat('fr-RW').format(tx.amount)}</td>
+                                    <td className="font-mono text-green-600">{new Intl.NumberFormat('fr-RW').format(tx.commission)}</td>
+                                    <td><span className={`px-2 py-1 text-xs rounded-full ${tx.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{tx.status}</span></td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
             </div>
-            {isModalOpen && <RouteFormModal route={editingRoute} companies={companies} onSave={handleSave} onClose={() => setIsModalOpen(false)} companyId={undefined} />}
         </div>
-    )
-}
+    );
+};
 
 const SettingsCard = ({ title, icon: Icon, children }: React.PropsWithChildren<{ title: string; icon: React.ElementType }>) => (
     <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
@@ -1183,6 +1185,7 @@ const SettingsPage = ({ theme, setTheme }) => {
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setTheme, companies, onUpdateCompanies }) => {
   const [view, setView] = useState('dashboard');
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
   const [modal, setModal] = useState({ type: null, data: null });
   const [agents, setAgents] = useState(mockAgentsData);
 
@@ -1191,6 +1194,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
   };
   
   const selectedCompany = useMemo(() => companies.find(c => c.id === selectedCompanyId), [companies, selectedCompanyId]);
+  const selectedAgent = useMemo(() => agents.find(a => a.id === selectedAgentId), [agents, selectedAgentId]);
+  const agentTransactions = useMemo(() => mockAgentTransactions.filter(tx => tx.agentId === selectedAgentId), [selectedAgentId]);
 
   const handleSave = (type, saveData) => {
     const { companyId, ...data } = saveData;
@@ -1249,6 +1254,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
   };
 
   const renderContent = () => {
+    if (selectedAgentId) {
+        return <AgentDetails agent={selectedAgent} transactions={agentTransactions} onBack={() => setSelectedAgentId(null)} />
+    }
+
     switch (view) {
       case 'dashboard':
         return <DashboardHome companies={companies} />;
@@ -1262,12 +1271,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
         return <TransactionsPage companies={companies} />;
       case 'companyDetails':
           return selectedCompany ? <CompanyDetails company={selectedCompany} onBack={() => setView('companies')} setModal={setModal} /> : <div>Ikigo nticyabonetse.</div>;
+      // FIX: Render RouteManagementPage and pass required props
       case 'routes':
-        return <RouteManagementPage companies={companies} onUpdateCompanies={onUpdateCompanies} />;
+        return <RouteManagementPage companies={companies} setModal={setModal} />;
       case 'users':
         return <UserManagementPage />;
        case 'agents':
-        return <AgentManagementPage agents={agents} onUpdateAgents={setAgents} />;
+        return <AgentManagementPage agents={agents} onUpdateAgents={setAgents} onSelectAgent={setSelectedAgentId} />;
       case 'settings':
         return <SettingsPage theme={theme} setTheme={setTheme} />;
       default:
@@ -1275,13 +1285,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
     }
   };
 
-  const NavLink = ({ viewName, label, icon: Icon }) => (
-      <button onClick={() => setView(viewName)} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative ${view === viewName || (view === 'companyDetails' && viewName === 'companies') ? 'text-white' : 'text-gray-400 hover:text-white'}`}>
-          <div className={`absolute left-0 top-0 h-full w-1 rounded-r-full bg-yellow-400 transition-all duration-300 ${view === viewName || (view === 'companyDetails' && viewName === 'companies') ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-50'}`}></div>
-          <Icon className="w-6 h-6 mr-4 transition-transform duration-300 group-hover:scale-110" />
-          <span className="font-semibold">{label}</span>
-      </button>
-  );
+  const NavLink = ({ viewName, label, icon: Icon }) => {
+      const isActive = view === viewName || 
+                       (view === 'companyDetails' && viewName === 'companies') ||
+                       (selectedAgentId && viewName === 'agents');
+
+      return (
+          <button onClick={() => { setView(viewName); setSelectedAgentId(null); }} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'}`}>
+              <div className={`absolute left-0 top-0 h-full w-1 rounded-r-full bg-yellow-400 transition-all duration-300 ${isActive ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-50'}`}></div>
+              <Icon className="w-6 h-6 mr-4 transition-transform duration-300 group-hover:scale-110" />
+              <span className="font-semibold">{label}</span>
+          </button>
+      );
+  }
 
   return (
     <div className={`min-h-screen flex ${theme}`}>

@@ -11,6 +11,7 @@ interface AgentDashboardProps {
     agentData: any;
     onAgentDeposit: (serialCode: string, amount: number) => { success: boolean, passengerName?: string, message?: string };
     passengerSerialCode: string;
+    transactions: any[];
 }
 
 const StatCard = ({ title, value, icon, isCurrency = true }) => (
@@ -48,22 +49,49 @@ const BarChart = ({ data, dataKey, labelKey, title, colorClass }) => {
 };
 
 
-const DashboardView = ({ agentData }) => {
+const DashboardView = ({ agentData, transactions }) => {
     const dailyDeposits = [
         { day: 'M', amount: 150000 }, { day: 'T', amount: 220000 }, { day: 'W', amount: 180000 },
         { day: 'T', amount: 250000 }, { day: 'F', amount: 350000 }, { day: 'S', amount: 450000 },
         { day: 'S', amount: 320000 }
     ];
 
+    const totalDeposits = transactions.reduce((sum, tx) => sum + tx.amount, 0);
+    const totalCommission = transactions.reduce((sum, tx) => sum + tx.commission, 0);
+
     return (
         <div className="space-y-6">
             <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500 dark:from-blue-400 dark:to-green-300">Imbonerahamwe</h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <StatCard title="Yabikijwe None" value={185000} icon={<ArrowDownLeftIcon/>}/>
-                <StatCard title="Komisiyo ya None" value={9250} icon={<WalletIcon/>}/>
-                <StatCard title="Ibikorwa bya None" value={12} icon={<UsersIcon/>} isCurrency={false}/>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard title="Yose Yabikijwe" value={totalDeposits} icon={<ArrowDownLeftIcon/>}/>
+                <StatCard title="Komisiyo Yose" value={totalCommission} icon={<WalletIcon/>}/>
+                <StatCard title="Ibikorwa Byose" value={transactions.length} icon={<UsersIcon/>} isCurrency={false}/>
+                <StatCard title="Abagenzi Bafashijwe" value={new Set(transactions.map(tx => tx.passengerSerial)).size} icon={<UsersIcon/>} isCurrency={false}/>
             </div>
-            <BarChart data={dailyDeposits} dataKey="amount" labelKey="day" title="Amafaranga Yabikijwe mu Cyumweru" colorClass="bg-blue-300 dark:bg-blue-800/80"/>
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                    <BarChart data={dailyDeposits} dataKey="amount" labelKey="day" title="Amafaranga Yabikijwe mu Cyumweru" colorClass="bg-blue-300 dark:bg-blue-800/80"/>
+                </div>
+                <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                    <h3 className="font-bold mb-4 dark:text-white">Ibikorwa bya Vuba</h3>
+                    <div className="space-y-4 h-[22rem] overflow-y-auto custom-scrollbar">
+                        {transactions.slice(0, 10).map(tx => (
+                            <div key={tx.id} className="flex items-center space-x-3">
+                                <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-full">
+                                    <ArrowDownLeftIcon className="w-5 h-5 text-green-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold dark:text-white">{tx.passengerName}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(tx.date).toLocaleDateString()}</p>
+                                </div>
+                                <p className="ml-auto font-bold text-sm text-green-600 dark:text-green-400">
+                                    +{new Intl.NumberFormat('fr-RW').format(tx.amount)}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
@@ -196,15 +224,70 @@ const DepositView = ({ onAgentDeposit, passengerSerialCode }) => {
     );
 }
 
-const AgentDashboard: React.FC<AgentDashboardProps> = ({ onLogout, theme, setTheme, agentData, onAgentDeposit, passengerSerialCode }) => {
+const TransactionsView = ({ transactions }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredTransactions = useMemo(() => {
+        return transactions.filter(tx =>
+            tx.passengerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            tx.passengerSerial.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [transactions, searchTerm]);
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Amateka y'Ibikorwa</h1>
+            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                <div className="relative mb-4">
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Shakisha igikorwa..."
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="text-left text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th className="p-3">Itariki</th>
+                                <th className="p-3">Umugenzi</th>
+                                <th className="p-3">Kode</th>
+                                <th className="p-3">Amafaranga</th>
+                                <th className="p-3">Komisiyo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredTransactions.map(tx => (
+                                <tr key={tx.id} className="border-t dark:border-gray-700">
+                                    <td className="p-3">{tx.date}</td>
+                                    <td className="font-semibold dark:text-white">{tx.passengerName}</td>
+                                    <td>{tx.passengerSerial}</td>
+                                    <td className="font-mono">{new Intl.NumberFormat('fr-RW').format(tx.amount)}</td>
+                                    <td className="font-mono text-green-600">{new Intl.NumberFormat('fr-RW').format(tx.commission)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+const AgentDashboard: React.FC<AgentDashboardProps> = ({ onLogout, theme, setTheme, agentData, onAgentDeposit, passengerSerialCode, transactions }) => {
     const [view, setView] = useState('dashboard');
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
     const renderContent = () => {
         switch (view) {
-            case 'dashboard': return <DashboardView agentData={agentData} />;
+            case 'dashboard': return <DashboardView agentData={agentData} transactions={transactions} />;
             case 'deposit': return <DepositView onAgentDeposit={onAgentDeposit} passengerSerialCode={passengerSerialCode} />;
-            default: return <DashboardView agentData={agentData} />;
+            case 'transactions': return <TransactionsView transactions={transactions} />;
+            default: return <DashboardView agentData={agentData} transactions={transactions} />;
         }
     };
 

@@ -21,7 +21,7 @@ import DriverDashboard from './DriverDashboard';
 import AgentDashboard from './AgentDashboard';
 import ServicesPage from './ServicesPage';
 import LoadingSpinner from './components/LoadingSpinner';
-import { mockCompaniesData, mockDriversData, mockAgentsData } from './AdminDashboard';
+import { mockCompaniesData, mockDriversData, mockAgentsData, mockAgentTransactions } from './AdminDashboard';
 import BookingSearchPage from './BookingSearchPage';
 import CompaniesAside from './components/CompaniesAside';
 import ScheduledTripsPage from './ScheduledTripsPage';
@@ -55,6 +55,7 @@ const App: React.FC = () => {
   const [walletData, setWalletData] = useState(initialUserWallet);
   const [boardingStatus, setBoardingStatus] = useState<Record<string, 'booked' | 'boarded'>>({});
   const [agents, setAgents] = useState(mockAgentsData);
+  const [agentTransactions, setAgentTransactions] = useState(mockAgentTransactions);
 
 
   const handlePassengerBoarding = (ticketId: string) => {
@@ -76,6 +77,22 @@ const App: React.FC = () => {
             balance: prev.balance + amount,
             transactions: [newTransaction, ...prev.transactions]
         }));
+
+        // Also add to agent's transaction log
+        if (currentUser && userRole === 'agent') {
+            const newAgentTx = {
+                id: Date.now() + 1,
+                agentId: currentUser.id,
+                passengerName: 'Kalisa Jean',
+                passengerSerial: serialCode,
+                amount: amount,
+                date: new Date().toISOString().split('T')[0],
+                commission: amount * 0.05, // 5% commission
+                status: 'Completed'
+            };
+            setAgentTransactions(prev => [newAgentTx, ...prev]);
+        }
+
         return { success: true, passengerName: 'Kalisa Jean' };
     }
     return { success: false, message: 'Umugenzi ufite iyi kode ntago aboneka.' };
@@ -275,6 +292,7 @@ const App: React.FC = () => {
                 />;
       }
       if (userRole === 'agent') {
+          const myTransactions = agentTransactions.filter(tx => tx.agentId === currentUser.id);
           return <AgentDashboard 
                     onLogout={handleLogout} 
                     theme={theme} 
@@ -282,6 +300,7 @@ const App: React.FC = () => {
                     agentData={currentUser}
                     onAgentDeposit={handleAgentDeposit}
                     passengerSerialCode={walletData.serialCode}
+                    transactions={myTransactions}
                 />;
       }
   }
