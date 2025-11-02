@@ -135,7 +135,7 @@ const StatCard = ({ title, value, icon, format = true }) => (
 );
 
 const LiveBookingsFeed = ({ companies }) => {
-    const [bookings, setBookings] = useState([]);
+    const [bookings, setBookings] = useState<any[]>([]);
     const passengerNames = ['Kalisa', 'Umutoni', 'Mugisha', 'Keza', 'Niyonsenga', 'Gatete'];
     
     useEffect(() => {
@@ -181,7 +181,7 @@ const LiveBookingsFeed = ({ companies }) => {
 const DashboardHome = ({ companies }) => (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">Dashboard</h1>
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500 dark:from-blue-400 dark:to-green-300 mb-6">Dashboard</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <StatCard title="Total Revenue" value={companies.reduce((acc, c) => acc + c.totalRevenue, 0)} icon={<ChartBarIcon className="w-6 h-6 text-blue-500" />} />
                 <StatCard title="Total Passengers" value={companies.reduce((acc, c) => acc + c.totalPassengers, 0)} icon={<UsersIcon className="w-6 h-6 text-blue-500" />} />
@@ -286,31 +286,33 @@ const CompanyCard: React.FC<{
     onEdit: (company: any) => void;
     onDelete: (id: any) => void;
 }> = ({ company, onSelect, onEdit, onDelete }) => (
-    <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/50 overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:border-blue-400/50">
-        <div className="relative h-32">
-            <img src={company.coverUrl} alt={`${company.name} cover`} className="w-full h-full object-cover"/>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-            <img src={company.logoUrl} alt={`${company.name} logo`} className="absolute bottom-2 left-4 w-16 h-16 object-contain bg-white/80 dark:bg-gray-900/80 p-1 rounded-full shadow-md border-2 border-white dark:border-gray-700"/>
-        </div>
-        <div className="p-4">
-            <h3 className="text-lg font-bold text-gray-800 dark:text-white truncate">{company.name}</h3>
-            <div className="flex justify-between items-center mt-4">
-                <div className="text-center">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Revenue</p>
-                    <p className="font-bold text-green-600 dark:text-green-400 text-sm">{(company.totalRevenue / 1_000_000_000).toFixed(1)}B</p>
-                </div>
-                <div className="text-center">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Passengers</p>
-                    <p className="font-bold text-blue-600 dark:text-blue-400 text-sm">{(company.totalPassengers / 1_000_000).toFixed(1)}M</p>
-                </div>
-                <div className="flex items-center space-x-1">
-                     <button onClick={(e) => { e.stopPropagation(); onEdit(company); }} className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><PencilSquareIcon className="w-5 h-5"/></button>
-                     <button onClick={(e) => { e.stopPropagation(); onDelete(company.id); }} className="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><TrashIcon className="w-5 h-5"/></button>
+    <div className="group perspective">
+        <div className="relative preserve-3d w-full h-80 rounded-2xl shadow-lg transition-transform duration-500 group-hover:[transform:rotateY(10deg)] bg-gray-200 dark:bg-gray-800">
+            {/* Background Image */}
+            <img src={company.coverUrl} alt={`${company.name} cover`} className="absolute inset-0 w-full h-full object-cover rounded-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-2xl"></div>
+
+            {/* Content */}
+            <div className="relative p-5 h-full flex flex-col justify-end">
+                <img src={company.logoUrl} alt={`${company.name} logo`} className="w-16 h-16 object-contain bg-white/80 dark:bg-gray-900/80 p-1 rounded-full shadow-md border-2 border-white dark:border-gray-700 mb-2"/>
+                <h3 className="text-xl font-bold text-white drop-shadow-lg">{company.name}</h3>
+                
+                <div className="flex justify-between items-end mt-4">
+                    <div className="text-white">
+                        <p className="text-xs opacity-80">Revenue</p>
+                        <p className="font-bold text-lg">{(company.totalRevenue / 1_000_000_000).toFixed(1)}B <span className="font-normal text-sm opacity-80">RWF</span></p>
+                    </div>
+                    <button onClick={() => onSelect(company.id)} className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-semibold rounded-lg hover:bg-white/30 transition-colors">
+                        View Details
+                    </button>
                 </div>
             </div>
-            <button onClick={() => onSelect(company.id)} className="mt-4 w-full text-center py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all text-sm">
-                View Details
-            </button>
+
+            {/* Hover Actions */}
+            <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                 <button onClick={(e) => { e.stopPropagation(); onEdit(company); }} className="p-2 text-white bg-black/40 rounded-full hover:bg-black/60 backdrop-blur-sm"><PencilSquareIcon className="w-5 h-5"/></button>
+                 <button onClick={(e) => { e.stopPropagation(); onDelete(company.id); }} className="p-2 text-white bg-black/40 rounded-full hover:bg-black/60 backdrop-blur-sm"><TrashIcon className="w-5 h-5"/></button>
+            </div>
         </div>
     </div>
 );
@@ -359,13 +361,13 @@ const CompanyManagement = ({ companies, onSelectCompany, onUpdateCompanies }) =>
     return (
     <div>
         <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Manage Companies</h1>
-            <button onClick={handleAdd} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500 dark:from-blue-400 dark:to-green-300">Manage Companies</h1>
+            <button onClick={handleAdd} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg hover:shadow-blue-500/50">
                 <PlusIcon className="w-5 h-5 mr-2" />
                 Add Company
             </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
            {companies.map(company => (
                <CompanyCard 
                 key={company.id} 
@@ -472,13 +474,13 @@ const CompanyDetails = ({ company, onBack }) => {
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"><tr><th className="px-4 py-2">Name</th><th className="px-4 py-2">Route</th><th className="px-4 py-2">Ticket ID</th><th className="px-4 py-2">Date</th></tr></thead>
                             <tbody>{company.recentPassengers.map(p => (
                                 <tr key={p.ticketId} className="border-b dark:border-gray-700">
-                                    <td className="px-4 py-2 font-medium dark:text-white flex items-center space-x-3">
-                                        <img src={p.avatarUrl} alt={p.name} className="w-8 h-8 rounded-full object-cover"/>
+                                    <td className="px-4 py-3 font-medium dark:text-white flex items-center space-x-3">
+                                        <img src={p.avatarUrl} alt={p.name} className="w-10 h-10 rounded-full object-cover shadow-sm"/>
                                         <span>{p.name}</span>
                                     </td>
-                                    <td className="px-4 py-2">{p.route}</td>
-                                    <td className="px-4 py-2">{p.ticketId}</td>
-                                    <td className="px-4 py-2">{p.date}</td>
+                                    <td className="px-4 py-3">{p.route}</td>
+                                    <td className="px-4 py-3">{p.ticketId}</td>
+                                    <td className="px-4 py-3">{p.date}</td>
                                 </tr>
                             ))}</tbody>
                         </table>
@@ -585,7 +587,7 @@ const UserManagementPage = () => {
                         </thead>
                         <tbody>
                             {filteredUsers.map(user => (
-                                <tr key={user.id} className="border-b dark:border-gray-700">
+                                <tr key={user.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center space-x-3">
                                             <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full object-cover bg-gray-200 dark:bg-gray-700"/>
@@ -648,16 +650,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
   };
 
   const NavLink = ({ viewName, label, icon: Icon }) => (
-      <button onClick={() => setView(viewName)} className={`w-full flex items-center px-4 py-3 transition-colors duration-200 ${view === viewName || (view === 'companyDetails' && viewName === 'companies') ? 'text-white bg-gray-900 dark:bg-gray-700' : 'text-gray-400 hover:bg-gray-700/50 hover:text-white'} rounded-md`}>
-          <Icon className="w-5 h-5 mr-3" />
-          <span>{label}</span>
+      <button onClick={() => setView(viewName)} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg ${view === viewName || (view === 'companyDetails' && viewName === 'companies') ? 'text-white bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg' : 'text-gray-400 hover:bg-white/10 hover:text-white'}`}>
+          <Icon className="w-6 h-6 mr-3 transition-transform duration-300 group-hover:scale-110" />
+          <span className="font-semibold">{label}</span>
       </button>
   );
 
   return (
     <div className={`min-h-screen flex ${theme}`}>
-      <aside className="w-64 bg-gray-800 dark:bg-gray-900 text-gray-300 flex-col hidden lg:flex border-r border-gray-700 dark:border-gray-800">
-        <div className="h-16 flex items-center justify-center text-white font-bold text-xl border-b border-gray-700 dark:border-gray-800">
+      <aside className="w-64 bg-gradient-to-b from-gray-800 to-gray-900 dark:from-slate-900 dark:to-black text-gray-300 flex-col hidden lg:flex border-r border-gray-700/50 dark:border-gray-800/50">
+        <div className="h-16 flex items-center justify-center text-white font-bold text-xl border-b border-gray-700/50 dark:border-gray-800/50">
           RWANDA BUS ADMIN
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
@@ -669,8 +671,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, theme, setThe
         </nav>
       </aside>
 
-      <div className="flex-1 flex flex-col bg-gray-100 dark:bg-gray-900">
-        <header className="h-16 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-between lg:justify-end px-6 border-b dark:border-gray-700">
+      <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-100 to-blue-50 dark:from-gray-900 dark:to-blue-900/50">
+        <header className="h-16 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-sm flex items-center justify-between lg:justify-end px-6 border-b dark:border-gray-700/50">
            <div className="lg:hidden text-gray-800 dark:text-white font-bold text-lg">ADMIN</div>
           <div className="flex items-center space-x-4">
             <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">

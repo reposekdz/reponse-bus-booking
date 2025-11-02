@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import SearchForm from './components/SearchForm';
-import { ClockIcon, ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, SparklesIcon } from './components/icons';
+import { ClockIcon, ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, SparklesIcon, FilterIcon } from './components/icons';
 import SearchResultSkeleton from './components/SearchResultSkeleton';
 
 const searchResults = [
@@ -89,6 +89,7 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
     const [priceFilter, setPriceFilter] = useState(5000);
     const [timeFilter, setTimeFilter] = useState<string[]>([]);
     const [amenitiesFilter, setAmenitiesFilter] = useState<string[]>([]);
+    const [companyFilter, setCompanyFilter] = useState<string[]>([]);
     const [favoriteTrips, setFavoriteTrips] = useState<number[]>([]);
 
     useEffect(() => {
@@ -125,6 +126,12 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
         setAmenitiesFilter(prev => prev.includes(amenity) ? prev.filter(a => a !== amenity) : [...prev, amenity]);
     }
 
+    const handleCompanyFilter = (company: string) => {
+        setCompanyFilter(prev => prev.includes(company) ? prev.filter(c => c !== company) : [...prev, company]);
+    };
+
+    const companies = useMemo(() => [...new Set(searchResults.map(r => r.company))], []);
+
     const filteredResults = useMemo(() => {
         return searchResults.filter(result => {
             if (result.price > priceFilter) return false;
@@ -146,9 +153,13 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
                 if (!amenitiesFilter.every(amenity => result.amenities.includes(amenity))) return false;
             }
             
+            if (companyFilter.length > 0) {
+                if (!companyFilter.includes(result.company)) return false;
+            }
+
             return true;
         });
-    }, [priceFilter, timeFilter, amenitiesFilter]);
+    }, [priceFilter, timeFilter, amenitiesFilter, companyFilter]);
 
     return (
         <div className="min-h-full">
@@ -161,7 +172,7 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
                                 <SearchForm onSearch={handleSearch} />
                             </div>
                             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-                                <h3 className="text-xl font-bold mb-4 dark:text-white flex items-center"><SparklesIcon className="w-6 h-6 mr-2 text-yellow-400"/> Akayunguruzo K'imena</h3>
+                                <h3 className="text-xl font-bold mb-4 dark:text-white flex items-center"><FilterIcon className="w-6 h-6 mr-2 text-blue-500"/> Filters</h3>
                                 {/* Price Filter */}
                                 <div className="mb-6">
                                     <label className="font-semibold dark:text-gray-200">Igiciro Ntarenze</label>
@@ -178,6 +189,18 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect }) =
                                             <button key={time} onClick={() => handleTimeFilter(time)} className={`w-full py-2 text-sm rounded-md border-2 transition-colors ${timeFilter.includes(time) ? 'bg-blue-500 text-white border-blue-500' : 'bg-transparent border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                                 {time.charAt(0).toUpperCase() + time.slice(1)}
                                             </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                 {/* Company Filter */}
+                                <div className="mb-6">
+                                    <label className="font-semibold dark:text-gray-200 block mb-2">Ibigo</label>
+                                    <div className="space-y-2">
+                                        {companies.map(company => (
+                                            <label key={company} className="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" checked={companyFilter.includes(company)} onChange={() => handleCompanyFilter(company)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
+                                                <span className="text-sm dark:text-gray-300">{company}</span>
+                                            </label>
                                         ))}
                                     </div>
                                 </div>
