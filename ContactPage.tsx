@@ -1,66 +1,99 @@
 import React from 'react';
-import { MapPinIcon, PhoneIcon, EnvelopeIcon } from './components/icons';
+import { MapPinIcon, PhoneIcon, EnvelopeIcon, FacebookIcon, TwitterIcon, LinkedinIcon, ChatBubbleLeftRightIcon } from './components/icons';
 
 const ContactPage: React.FC = () => {
   return (
-    <div className="py-16 sm:py-24 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Twandikire</h1>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
-                Twishimira kumva icyo udutekerezaho! Niba ufite ikibazo, igitekerezo, cyangwa icyifuzo, itsinda ryacu ryiteguye kugusubiza.
-            </p>
-        </div>
-        
-        <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800/50 rounded-xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
-            <div className="p-8 md:p-12 space-y-8">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Amakuru Rusange</h2>
-                    <div className="space-y-4 text-gray-600 dark:text-gray-300">
-                        <div className="flex items-start">
-                            <MapPinIcon className="w-6 h-6 text-blue-500 mr-4 mt-1 flex-shrink-0" />
-                            <span>KN 4 Ave, Kiyovu, Kigali, Rwanda</span>
-                        </div>
-                        <div className="flex items-center">
-                            <PhoneIcon className="w-6 h-6 text-blue-500 mr-4" />
-                            <span>+250 788 123 456</span>
-                        </div>
-                        <div className="flex items-center">
-                            <EnvelopeIcon className="w-6 h-6 text-blue-500 mr-4" />
-                            <span>contact@rwandabus.rw</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="w-full h-64 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden relative">
-                    <img src="https://www.africa-expert.com/wp-content/uploads/2018/12/kigali-city-rwanda.jpg" alt="Map of Kigali" className="w-full h-full object-cover opacity-30" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <button className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition">Fungura mu Ikarita</button>
-                    </div>
-                </div>
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <header className="bg-white dark:bg-gray-800/50 shadow-sm pt-12 pb-8">
+            <div className="container mx-auto px-6 text-center">
+                <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Twandikire</h1>
+                <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
+                    Twishimira kumva icyo udutekerezaho! Niba ufite ikibazo, igitekerezo, cyangwa icyifuzo, itsinda ryacu ryiteguye kugusubiza.
+                </p>
             </div>
-             <div className="p-8 md:p-12 bg-gray-50 dark:bg-gray-800">
-                 <form className="space-y-6">
-                    <div>
-                        <label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">Amazina Yuzuye</label>
-                        <input type="text" id="name" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" />
+      </header>
+      
+      <main className="container mx-auto px-6 py-12">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+                <aside className="lg:w-1/3 xl:w-1/4">
+                    <div className="sticky top-24 space-y-6">
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md space-y-6">
+                           <div>
+                                <h3 className="font-bold text-lg dark:text-white mb-3">Uburyo bwo Kutuvugisha</h3>
+                                <div className="space-y-4 text-gray-600 dark:text-gray-300">
+                                    <div className="flex items-start">
+                                        <MapPinIcon className="w-5 h-5 text-blue-500 mr-3 mt-1 flex-shrink-0" />
+                                        <span>KN 4 Ave, Kiyovu, Kigali, Rwanda</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <PhoneIcon className="w-5 h-5 text-blue-500 mr-3" />
+                                        <span>+250 788 123 456</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <EnvelopeIcon className="w-5 h-5 text-blue-500 mr-3" />
+                                        <span>contact@rwandabus.rw</span>
+                                    </div>
+                                </div>
+                           </div>
+                           <div className="border-t dark:border-gray-700 pt-6">
+                               <button className="w-full flex items-center justify-center py-3 px-4 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition shadow-lg">
+                                    <ChatBubbleLeftRightIcon className="w-6 h-6 mr-2"/>
+                                    Tangira Ikiganiro
+                               </button>
+                           </div>
+                           <div className="border-t dark:border-gray-700 pt-6">
+                                <h3 className="font-bold text-lg dark:text-white mb-3">Tudukurikire</h3>
+                                <div className="flex space-x-4">
+                                    <a href="#" className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 transition"><FacebookIcon className="h-5 w-5" /></a>
+                                    <a href="#" className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 transition"><TwitterIcon className="h-5 w-5" /></a>
+                                    <a href="#" className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:text-blue-600 transition"><LinkedinIcon className="h-5 w-5" /></a>
+                                </div>
+                           </div>
+                        </div>
+                         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+                            <h3 className="font-bold text-lg dark:text-white mb-3">Amashami yacu</h3>
+                             <div className="w-full h-40 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden relative">
+                                <img src="https://www.africa-expert.com/wp-content/uploads/2018/12/kigali-city-rwanda.jpg" alt="Map of Kigali" className="w-full h-full object-cover opacity-30" />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <button className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-full shadow-lg hover:bg-blue-700 transition">Reba ku Ikarita</button>
+                                </div>
+                            </div>
+                         </div>
                     </div>
-                    <div>
-                        <label htmlFor="email-contact" className="text-sm font-medium text-gray-700 dark:text-gray-300">Imeri</label>
-                        <input type="email" id="email-contact" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" />
+                </aside>
+
+                <section className="lg:w-2/3 xl:w-3/4">
+                     <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Ohereza Ubutumwa</h2>
+                         <form className="space-y-6" onSubmit={(e) => {e.preventDefault(); alert("Ubutumwa bwoherejwe!")}}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">Amazina Yuzuye</label>
+                                    <input type="text" id="name" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" required />
+                                </div>
+                                <div>
+                                    <label htmlFor="email-contact" className="text-sm font-medium text-gray-700 dark:text-gray-300">Imeri</label>
+                                    <input type="email" id="email-contact" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" required />
+                                </div>
+                            </div>
+                            <div>
+                                <label htmlFor="subject" className="text-sm font-medium text-gray-700 dark:text-gray-300">Impamvu</label>
+                                <input type="text" id="subject" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Ikibazo ku itike" required />
+                            </div>
+                            <div>
+                                <label htmlFor="message" className="text-sm font-medium text-gray-700 dark:text-gray-300">Ubutumwa</label>
+                                <textarea id="message" rows={5} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" required></textarea>
+                            </div>
+                            <div>
+                                <button type="submit" className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-[#0033A0] bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-300 shadow-lg">
+                                    Ohereza Ubutumwa
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <div>
-                        <label htmlFor="message" className="text-sm font-medium text-gray-700 dark:text-gray-300">Ubutumwa</label>
-                        <textarea id="message" rows={5} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600"></textarea>
-                    </div>
-                    <div>
-                        <button type="submit" className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-[#0033A0] bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-300">
-                            Ohereza Ubutumwa
-                        </button>
-                    </div>
-                </form>
+                </section>
             </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 };

@@ -204,6 +204,34 @@ const CompanyFormModal = ({ company, onSave, onClose }) => {
                 <button onClick={onClose} className="absolute top-4 right-4 p-1 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"><XIcon className="w-6 h-6" /></button>
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                     <h2 className="text-2xl font-bold dark:text-white">{isNew ? 'Add New Company' : 'Edit Company'}</h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="text-sm font-medium dark:text-gray-300">Company Logo</label>
+                            <div className="mt-1 flex items-center space-x-4">
+                                <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
+                                    {logoPreview ? <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-cover"/> : <span className="text-xs text-gray-500">Preview</span>}
+                                </div>
+                                <label htmlFor="logo-upload" className="cursor-pointer text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline">
+                                    Upload Logo
+                                    <input id="logo-upload" name="logoUrl" type="file" className="sr-only" onChange={(e) => handleFileChange(e, 'logo')} />
+                                </label>
+                            </div>
+                        </div>
+                         <div>
+                            <label className="text-sm font-medium dark:text-gray-300">Cover Image</label>
+                            <div className="mt-1 flex items-center space-x-4">
+                                <div className="w-32 h-20 rounded-md bg-gray-100 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
+                                    {coverPreview ? <img src={coverPreview} alt="Cover Preview" className="w-full h-full object-cover"/> : <span className="text-xs text-gray-500">Preview</span>}
+                                </div>
+                                <label htmlFor="cover-upload" className="cursor-pointer text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline">
+                                    Upload Cover
+                                    <input id="cover-upload" name="coverUrl" type="file" className="sr-only" onChange={(e) => handleFileChange(e, 'cover')} />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                      <div>
                         <label className="text-sm font-medium dark:text-gray-300">Company Name</label>
                         <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
@@ -422,33 +450,35 @@ const TransactionsPage = ({ companies }) => {
         <div>
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-6">All Transactions</h1>
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
-                <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                            <th className="px-4 py-3">Company</th>
-                            <th className="px-4 py-3">Description</th>
-                            <th className="px-4 py-3">Date</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3 text-right">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {allTransactions.map((tx, index) => (
-                            <tr key={index} className="border-b dark:border-gray-700">
-                                <td className="px-4 py-3 font-medium text-gray-900 dark:text-white flex items-center space-x-2">
-                                    <img src={tx.logoUrl} alt={tx.companyName} className="w-6 h-6 object-contain"/>
-                                    <span>{tx.companyName}</span>
-                                </td>
-                                <td className="px-4 py-3">{tx.description}</td>
-                                <td className="px-4 py-3">{tx.date}</td>
-                                <td className="px-4 py-3"><span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">{tx.status}</span></td>
-                                <td className={`px-4 py-3 text-right font-semibold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {new Intl.NumberFormat('fr-RW').format(tx.amount)}
-                                </td>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th className="px-4 py-3">Company</th>
+                                <th className="px-4 py-3">Description</th>
+                                <th className="px-4 py-3">Date</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3 text-right">Amount (RWF)</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {allTransactions.map((tx, index) => (
+                                <tr key={index} className="border-b dark:border-gray-700">
+                                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-white flex items-center space-x-2">
+                                        <img src={tx.logoUrl} alt={tx.companyName} className="w-6 h-6 object-contain"/>
+                                        <span>{tx.companyName}</span>
+                                    </td>
+                                    <td className="px-4 py-3">{tx.description}</td>
+                                    <td className="px-4 py-3">{tx.date}</td>
+                                    <td className="px-4 py-3"><span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">{tx.status}</span></td>
+                                    <td className={`px-4 py-3 text-right font-semibold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        {new Intl.NumberFormat('fr-RW').format(tx.amount)}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

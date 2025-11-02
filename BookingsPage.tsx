@@ -173,10 +173,11 @@ const BookingsPage: React.FC = () => {
   const [trackingTrip, setTrackingTrip] = useState<any | null>(null);
   const [viewingTicket, setViewingTicket] = useState<any | null>(null);
   const [filterCompany, setFilterCompany] = useState<string>('all');
-  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
+  const [sortOption, setSortOption] = useState<string>('date_desc');
 
   const upcomingTrips = [
     { 
+        id: 'upcoming1',
         date: '28 Ukwakira, 2024', 
         from: 'Kigali', 
         to: 'Rubavu',
@@ -192,6 +193,7 @@ const BookingsPage: React.FC = () => {
   ];
   const pastTrips = [
     { 
+        id: 'past1',
         date: '15 Nzeri, 2024', 
         from: 'Huye',
         to: 'Musanze',
@@ -200,12 +202,14 @@ const BookingsPage: React.FC = () => {
         company: 'Horizon Express', 
         seats: 'C2', 
         price: '5,000 FRW', 
+        rawPrice: 5000,
         rawDate: new Date('2024-09-15'),
         ticketId: 'HZ-45BC2',
         busPlate: 'RAE 456 C',
         logoUrl: 'https://media.jobinrwanda.com/logo/horizon-express-ltd-1681284534.png'
     },
     { 
+        id: 'past2',
         date: '02 Kanama, 2024', 
         from: 'Kigali',
         to: 'Nyungwe',
@@ -214,6 +218,7 @@ const BookingsPage: React.FC = () => {
         company: 'RITCO', 
         seats: 'B1, B2', 
         price: '14,000 FRW', 
+        rawPrice: 14000,
         rawDate: new Date('2024-08-02'),
         ticketId: 'RT-98CD3',
         busPlate: 'RAF 789 D',
@@ -224,15 +229,22 @@ const BookingsPage: React.FC = () => {
   const pastTripCompanies = useMemo(() => ['all', ...Array.from(new Set(pastTrips.map(t => t.company)))], [pastTrips]);
 
   const filteredAndSortedPastTrips = useMemo(() => {
-    return pastTrips
+    return [...pastTrips]
       .filter(trip => filterCompany === 'all' || trip.company === filterCompany)
       .sort((a, b) => {
-        if (sortOrder === 'desc') {
-          return b.rawDate.getTime() - a.rawDate.getTime();
-        }
-        return a.rawDate.getTime() - b.rawDate.getTime();
+          switch(sortOption){
+              case 'date_asc':
+                  return a.rawDate.getTime() - b.rawDate.getTime();
+              case 'price_desc':
+                  return b.rawPrice - a.rawPrice;
+              case 'price_asc':
+                  return a.rawPrice - b.rawPrice;
+              case 'date_desc':
+              default:
+                  return b.rawDate.getTime() - a.rawDate.getTime();
+          }
       });
-  }, [pastTrips, filterCompany, sortOrder]);
+  }, [pastTrips, filterCompany, sortOption]);
 
 
   return (
@@ -254,20 +266,25 @@ const BookingsPage: React.FC = () => {
                 
                 {activeTab === 'past' && (
                     <div className="bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg mb-6 flex items-center space-x-4">
+                        <label className="text-sm font-semibold dark:text-gray-300">Sefa:</label>
                         <select value={filterCompany} onChange={(e) => setFilterCompany(e.target.value)} className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:ring-yellow-500 focus:border-yellow-500">
                             {pastTripCompanies.map(company => (
                                 <option key={company} value={company}>{company === 'all' ? 'Ibigo Byose' : company}</option>
                             ))}
                         </select>
-                        <button onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')} className="px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md">
-                            Tondeka: {sortOrder === 'desc' ? 'Bishya mbere' : 'Bishaje mbere'}
-                        </button>
+                         <label className="text-sm font-semibold dark:text-gray-300">Tondeka:</label>
+                        <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:ring-yellow-500 focus:border-yellow-500">
+                            <option value="date_desc">Bishya Mbere</option>
+                            <option value="date_asc">Bishaje Mbere</option>
+                            <option value="price_desc">Igiciro (He-Ha)</option>
+                            <option value="price_asc">Igiciro (Ha-He)</option>
+                        </select>
                     </div>
                 )}
 
                 <div className="space-y-6">
-                  {activeTab === 'upcoming' && (upcomingTrips.length > 0 ? upcomingTrips.map((trip, i) => <BookingCard key={i} trip={trip} onReview={setReviewingTrip} onTrack={setTrackingTrip} onViewTicket={setViewingTicket} />) : <p>Nta ngendo ziteganyijwe.</p>)}
-                  {activeTab === 'past' && (filteredAndSortedPastTrips.length > 0 ? filteredAndSortedPastTrips.map((trip, i) => <BookingCard key={i} trip={trip} isPast onReview={setReviewingTrip} onTrack={setTrackingTrip} onViewTicket={setViewingTicket} />) : <p>Nta ngendo zarangiye zihuye n'ishakisha ryawe.</p>)}
+                  {activeTab === 'upcoming' && (upcomingTrips.length > 0 ? upcomingTrips.map((trip) => <BookingCard key={trip.id} trip={trip} onReview={setReviewingTrip} onTrack={setTrackingTrip} onViewTicket={setViewingTicket} />) : <p>Nta ngendo ziteganyijwe.</p>)}
+                  {activeTab === 'past' && (filteredAndSortedPastTrips.length > 0 ? filteredAndSortedPastTrips.map((trip) => <BookingCard key={trip.id} trip={trip} isPast onReview={setReviewingTrip} onTrack={setTrackingTrip} onViewTicket={setViewingTicket} />) : <p>Nta ngendo zarangiye zihuye n'ishakisha ryawe.</p>)}
                 </div>
             </div>
             <aside className="md:col-span-1">

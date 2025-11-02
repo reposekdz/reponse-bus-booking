@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import StarRating from './components/StarRating';
-import { SearchIcon, ChevronRightIcon } from './components/icons';
+import { SearchIcon, ChevronRightIcon, StarIcon } from './components/icons';
 import type { Page } from './App';
 
 interface CompaniesPageProps {
@@ -41,10 +41,14 @@ const CompanyCard: React.FC<{ company: typeof companies[0], onSelect: () => void
 const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('rating_desc');
+  const [ratingFilter, setRatingFilter] = useState(0);
 
   const filteredAndSortedCompanies = useMemo(() => {
     return companies
-      .filter(company => company.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .filter(company => 
+          company.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          company.rating >= ratingFilter
+      )
       .sort((a, b) => {
         switch (sortOrder) {
           case 'rating_desc':
@@ -59,49 +63,93 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
             return 0;
         }
       });
-  }, [searchTerm, sortOrder]);
+  }, [searchTerm, sortOrder, ratingFilter]);
+  
+  const featuredCompanies = useMemo(() => companies.filter(c => c.rating >= 4.5), []);
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 py-16 sm:py-24">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Ibigo Twizera Dukorana</h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
-            Dukorana n'ibigo bya bisi by'imena mu Rwanda kugira ngo tukwizere urugendo rwiza kandi rutekanye.
-          </p>
-        </div>
-        
-        <div className="max-w-3xl mx-auto bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-4 rounded-xl shadow-md mb-12 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <div className="relative flex-grow w-full">
-                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input 
-                    type="text" 
-                    placeholder="Shakisha ikigo..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
-                />
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+       <header className="bg-white dark:bg-gray-800/50 shadow-sm pt-12 pb-8">
+            <div className="container mx-auto px-6 text-center">
+                <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Ibigo Twizera Dukorana</h1>
+                <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
+                    Dukorana n'ibigo bya bisi by'imena mu Rwanda kugira ngo tukwizere urugendo rwiza kandi rutekanye.
+                </p>
             </div>
-            <div className="flex-shrink-0">
-                <select 
-                    value={sortOrder}
-                    onChange={(e) => setSortOrder(e.target.value)}
-                    className="py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
-                >
-                    <option value="rating_desc">Tondeka ku manota (menshi)</option>
-                    <option value="rating_asc">Tondeka ku manota (make)</option>
-                    <option value="name_asc">Tondeka ku izina (A-Z)</option>
-                    <option value="name_desc">Tondeka ku izina (Z-A)</option>
-                </select>
+        </header>
+        <main className="container mx-auto px-6 py-12">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+                 <aside className="lg:w-1/4 xl:w-1/5">
+                    <div className="sticky top-24 space-y-6">
+                        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+                             <div className="relative mb-4">
+                                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Shakisha ikigo..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-semibold dark:text-gray-300">Tondeka</label>
+                                <select 
+                                    value={sortOrder}
+                                    onChange={(e) => setSortOrder(e.target.value)}
+                                    className="mt-1 w-full py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500"
+                                >
+                                    <option value="rating_desc">Ku manota (menshi)</option>
+                                    <option value="rating_asc">Ku manota (make)</option>
+                                    <option value="name_asc">Ku izina (A-Z)</option>
+                                    <option value="name_desc">Ku izina (Z-A)</option>
+                                </select>
+                            </div>
+                             <div className="mt-4">
+                                <label className="text-sm font-semibold dark:text-gray-300">Amanota (min)</label>
+                                <div className="flex items-center space-x-2 mt-1">
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="5"
+                                        step="0.5"
+                                        value={ratingFilter}
+                                        onChange={(e) => setRatingFilter(parseFloat(e.target.value))}
+                                        className="w-full"
+                                    />
+                                    <span className="font-bold text-blue-600 dark:text-blue-400 text-sm">{ratingFilter.toFixed(1)} <StarIcon className="w-4 h-4 inline-block -mt-1"/></span>
+                                </div>
+                            </div>
+                        </div>
+                         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+                             <h3 className="text-lg font-bold mb-4 dark:text-white">Ibigo by'Imena</h3>
+                             <div className="space-y-3">
+                                {featuredCompanies.map(c => (
+                                    <button key={c.id} onClick={() => onNavigate('companyProfile', c)} className="w-full text-left flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                                        <div className="w-10 h-10 bg-blue-100 dark:bg-gray-700 rounded-full flex-shrink-0 flex items-center justify-center text-blue-800 dark:text-gray-200 font-bold text-xs">{c.logoText}</div>
+                                        <div>
+                                            <p className="font-semibold text-sm dark:text-gray-200">{c.name}</p>
+                                            <p className="text-xs text-yellow-500">{c.rating} stars</p>
+                                        </div>
+                                    </button>
+                                ))}
+                             </div>
+                         </div>
+                    </div>
+                 </aside>
+                <section className="lg:w-3/4 xl:w-4/5">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {filteredAndSortedCompanies.length > 0 ? (
+                        filteredAndSortedCompanies.map(company => (
+                          <CompanyCard key={company.id} company={company} onSelect={() => onNavigate('companyProfile', company)} />
+                        ))
+                      ) : (
+                        <p className="md:col-span-2 text-center text-gray-500 dark:text-gray-400">Nta kigo gihuye n'ishakisha ryawe.</p>
+                      )}
+                    </div>
+                </section>
             </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {filteredAndSortedCompanies.map(company => (
-            <CompanyCard key={company.id} company={company} onSelect={() => onNavigate('companyProfile', company)} />
-          ))}
-        </div>
-      </div>
+        </main>
     </div>
   );
 };

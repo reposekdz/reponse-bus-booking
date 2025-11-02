@@ -1,27 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SearchIcon, TicketIcon, UserCircleIcon, BusIcon, QuestionMarkCircleIcon, ChevronRightIcon } from './components/icons';
 
 const faqData = [
     {
-        category: 'Booking',
+        category: 'Gukata Amatike',
         question: 'Nakata itike nte?',
         answer: 'Ushobora gukata itike ukoresheje ifishi y\'ishakisha ku rupapuro rw\'itangiriro. Hitamo aho uva n\'aho ujya, hitamo itariki, maze ukande "Shakisha Bisi". Uzayoborwa mu guhitamo no kwishyura.',
     },
     {
-        category: 'Booking',
+        category: 'Gukata Amatike',
         question: 'Nshobora guhagarika itike nakase?',
         answer: 'Yego, amabwiriza yo guhagarika itike aratandukanye bitewe n\'ikigo cya bisi. Turakwinginze ngo urebe amabwiriza yo guhagarika itike yawe mu gice cya "Amatike Yanjye" umaze kwinjira.',
     },
     {
-        category: 'Account',
+        category: 'Konti Yanjye',
         question: 'Nabona nte itike yanjye ya elegitoronike?',
         answer: 'Itike yawe ya elegitoronike yoherezwa kuri imeri yawe wandikishije ako kanya nyuma yo kwishyura neza. Ushobora no kuyibona mu gice cya "Amatike Yanjye" ku rubuga rwacu.',
     },
      {
-        category: 'On The Bus',
+        category: 'Muri Bisi',
         question: 'Imizigo yemewe ingana ite?',
         answer: 'Ikigo cya bisi cyose kigira amabwiriza yacyo ku mizigo. Mubisanzwe, umugenzi yemerewe igikapu kimwe kinini n\'agakapu kamwe gato. Turagusaba kubaza ikigo ukoresha mbere y\'urugendo.',
     },
+    {
+        category: 'Konti Yanjye',
+        question: 'Nhindura nte ijambobanga ryanjye?',
+        answer: 'Ushobora guhindura ijambobanga ryawe mu gice cy\'iboneza ry\'umwirondoro wawe. Kanda ku ishusho y\'umwirondoro wawe hejuru iburyo, hanyuma uhitemo "Iboneza".'
+    },
+     {
+        category: 'Ibindi Bibazo',
+        question: 'Murakorana n\'ibigo bya bisi bingahe?',
+        answer: 'Dukorana n\'ibigo byinshi byizewe mu Rwanda hose. Urutonde rwuzuye urusanga ku rupapuro rwa "Ibigo".'
+    }
 ];
 
 const FAQItem: React.FC<{ faq: typeof faqData[0]; isOpen: boolean; onClick: () => void }> = ({ faq, isOpen, onClick }) => (
@@ -41,56 +51,86 @@ const FAQItem: React.FC<{ faq: typeof faqData[0]; isOpen: boolean; onClick: () =
 
 const HelpPage: React.FC = () => {
     const [openFaq, setOpenFaq] = useState<number | null>(0);
+    const [activeCategory, setActiveCategory] = useState('All');
+    const [searchTerm, setSearchTerm] = useState('');
 
     const handleFaqClick = (index: number) => {
         setOpenFaq(openFaq === index ? null : index);
     };
 
     const categories = [
-        { name: 'Gukata Amatike', icon: TicketIcon },
-        { name: 'Konti Yanjye', icon: UserCircleIcon },
-        { name: 'Muri Bisi', icon: BusIcon },
-        { name: 'Ibindi Bibazo', icon: QuestionMarkCircleIcon },
+        { name: 'All', label: 'Ibibazo Byose', icon: QuestionMarkCircleIcon },
+        { name: 'Gukata Amatike', label: 'Gukata Amatike', icon: TicketIcon },
+        { name: 'Konti Yanjye', label: 'Konti Yanjye', icon: UserCircleIcon },
+        { name: 'Muri Bisi', label: 'Muri Bisi', icon: BusIcon },
+        { name: 'Ibindi Bibazo', label: 'Ibindi', icon: QuestionMarkCircleIcon },
     ];
+    
+    const filteredFaqs = useMemo(() => {
+        return faqData.filter(faq => 
+            (activeCategory === 'All' || faq.category === activeCategory) &&
+            (faq.question.toLowerCase().includes(searchTerm.toLowerCase()) || faq.answer.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+    }, [activeCategory, searchTerm]);
 
   return (
-    <div className="py-16 sm:py-24 bg-white dark:bg-gray-900">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">Ikaze mu Kigo cy'Ubufasha</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">Dufite ibisubizo by'ibibazo byawe.</p>
-        </div>
-        
-        <div className="max-w-xl mx-auto mb-12">
-            <div className="relative">
-                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input type="search" placeholder="Shakisha ikibazo cyawe..." className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-yellow-500" />
-            </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-16">
-            {categories.map(category => (
-                <div key={category.name} className="flex flex-col items-center p-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-center hover:bg-blue-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
-                    <category.icon className="w-10 h-10 text-blue-500 mb-3" />
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200">{category.name}</h3>
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <header className="bg-white dark:bg-gray-800/50 shadow-sm pt-12 pb-8">
+            <div className="container mx-auto px-6 text-center">
+                <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Ikaze mu Kigo cy'Ubufasha</h1>
+                <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
+                    Dufite ibisubizo by'ibibazo byawe.
+                </p>
+                 <div className="max-w-xl mx-auto mt-6">
+                    <div className="relative">
+                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input 
+                            type="search" 
+                            placeholder="Shakisha ikibazo cyawe..." 
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-700 focus:ring-2 focus:ring-yellow-500" />
+                    </div>
                 </div>
-            ))}
-        </div>
+            </div>
+        </header>
 
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800 dark:text-white">Ibibazo Bikunze Kubazwa</h2>
-          <div className="bg-white dark:bg-gray-800/50 rounded-lg shadow-md border dark:border-gray-700">
-            {faqData.map((faq, index) => (
-                <FAQItem 
-                    key={index} 
-                    faq={faq} 
-                    isOpen={openFaq === index} 
-                    onClick={() => handleFaqClick(index)}
-                />
-            ))}
-          </div>
-        </div>
-      </div>
+       <main className="container mx-auto px-6 py-12">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+                 <aside className="lg:w-1/4 xl:w-1/5">
+                    <nav className="sticky top-24 space-y-2">
+                        <h3 className="px-3 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wider">Ibyiciro</h3>
+                         {categories.map(category => (
+                            <button
+                                key={category.name}
+                                onClick={() => setActiveCategory(category.name)}
+                                className={`w-full flex items-center p-3 rounded-lg text-left transition-all duration-200 group ${
+                                    activeCategory === category.name 
+                                    ? 'bg-blue-600 text-white shadow-lg' 
+                                    : 'hover:bg-gray-200 dark:hover:bg-gray-700/50'
+                                }`}
+                            >
+                                <category.icon className={`w-6 h-6 mr-3 flex-shrink-0 transition-colors ${activeCategory === category.name ? 'text-white' : 'text-blue-500'}`} />
+                                <span className={`font-semibold ${activeCategory === category.name ? 'text-white' : 'text-gray-800 dark:text-white'}`}>{category.label}</span>
+                            </button>
+                        ))}
+                    </nav>
+                 </aside>
+
+                <section className="lg:w-3/4 xl:w-4/5">
+                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border dark:border-gray-700">
+                        {filteredFaqs.length > 0 ? filteredFaqs.map((faq, index) => (
+                            <FAQItem 
+                                key={index} 
+                                faq={faq} 
+                                isOpen={openFaq === index} 
+                                onClick={() => handleFaqClick(index)}
+                            />
+                        )) : <p className="p-5 text-gray-500 dark:text-gray-400">Nta bisubizo bibonetse bijyanye n'ishakisha ryawe.</p>}
+                      </div>
+                </section>
+            </div>
+        </main>
     </div>
   );
 };
