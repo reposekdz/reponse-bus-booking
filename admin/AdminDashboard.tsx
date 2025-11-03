@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ChartBarIcon, UsersIcon, BusIcon, BriefcaseIcon } from '../components/icons';
 import ActivityFeed from '../components/ActivityFeed';
@@ -123,7 +124,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ companies, drivers, age
                         dataKey="totalRevenue"
                         labelKey="name"
                         colorClass="bg-blue-300 dark:bg-blue-800/80"
-                        format="standard"
+                        format="compact"
                     />
                 </div>
                  <ActivityFeed />
@@ -136,7 +137,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ companies, drivers, age
                         dataKey="passengers"
                         labelKey="month"
                         colorClass="bg-green-300 dark:bg-green-800/80"
-                        format="standard"
+                        format="compact"
                     />
                 </div>
                  <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">

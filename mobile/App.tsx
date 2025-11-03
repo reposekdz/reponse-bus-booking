@@ -1,3 +1,4 @@
+
 // This is a placeholder for a React Native App.
 // It sets up the core navigation and theme providers.
 

@@ -1,73 +1,47 @@
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const mockDrivers = [
-    { id: 1, name: 'John Doe', assignedBusId: 'VB01', phone: '0788111222', status: 'Active', avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1974&auto=format&fit=crop' },
-    { id: 2, name: 'Mike Ross', assignedBusId: 'VB02', phone: '0788333444', status: 'On Leave', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop' },
-    { id: 3, name: 'Sarah Connor', assignedBusId: 'VB03', phone: '0788555666', status: 'Active', avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop' },
-    { id: 4, name: 'Kyle Reese', assignedBusId: 'VB04', phone: '0788777888', status: 'Inactive', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1974&auto=format&fit=crop' },
+    { id: '1', name: 'John Doe', assignedBus: 'RAD 123 B', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop' },
+    { id: '2', name: 'Peter Jones', assignedBus: 'RAE 456 C', avatarUrl: 'https://images.unsplash.com/photo-1639149888905-fb39731f2e6c?q=80&w=1964&auto=format&fit=crop' },
 ];
 
-const statusIndicatorColor = (status: string) => {
-    switch(status) {
-        case 'Online':
-        case 'Active':
-            return '#10B981'; // Green
-        case 'Idle':
-        case 'On Leave':
-            return '#F59E0B'; // Amber
-        case 'Offline':
-        case 'Inactive':
-            return '#EF4444'; // Red
-        default:
-            return '#6B7280'; // Gray
-    }
-}
-
-const DriverCard = ({ driver, liveStatus, onPress }) => (
+const DriverCard = ({ driver, onPress }) => (
     <TouchableOpacity style={styles.card} onPress={onPress}>
         <Image source={{ uri: driver.avatarUrl }} style={styles.avatar} />
         <View style={styles.info}>
             <Text style={styles.name}>{driver.name}</Text>
-            <Text style={styles.details}>Bus: {driver.assignedBusId} | {driver.phone}</Text>
+            <Text style={styles.bus}>Bus: {driver.assignedBus}</Text>
         </View>
-        <View style={styles.statusContainer}>
-             <View style={[styles.statusDot, { backgroundColor: statusIndicatorColor(liveStatus) }]} />
-            <Text style={styles.status}>{liveStatus}</Text>
-        </View>
+        <Text style={styles.arrow}>{'>'}</Text>
     </TouchableOpacity>
 );
 
 export default function ManageDriversScreen({ navigation }) {
-    const [liveStatuses, setLiveStatuses] = useState({});
+     const handleAddDriver = () => {
+        // navigation.navigate('AddEditDriver');
+        alert('Navigate to Add Driver screen');
+    };
 
-    useEffect(() => {
-        const statusOptions = ['Online', 'Idle', 'Offline'];
-        const updateStatuses = () => {
-            const newStatuses = {};
-            mockDrivers.forEach(driver => {
-                newStatuses[driver.id] = statusOptions[Math.floor(Math.random() * statusOptions.length)];
-            });
-            setLiveStatuses(newStatuses);
-        };
-        updateStatuses();
-        const interval = setInterval(updateStatuses, 10000); // Update every 10s
-        return () => clearInterval(interval);
-    }, []);
+    const handleEditDriver = (driver) => {
+        // navigation.navigate('AddEditDriver', { driver });
+        alert(`Navigate to Edit screen for ${driver.name}`);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Manage Drivers</Text>
-                <TouchableOpacity style={styles.addButton}>
+                 <TouchableOpacity style={styles.addButton} onPress={handleAddDriver}>
                     <Text style={styles.addButtonText}>+ Add Driver</Text>
                 </TouchableOpacity>
             </View>
             <FlatList
                 data={mockDrivers}
-                keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => <DriverCard driver={item} liveStatus={liveStatuses[item.id]} onPress={() => alert(`Viewing profile for ${item.name}`)} />}
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => <DriverCard driver={item} onPress={() => handleEditDriver(item)} />}
                 contentContainerStyle={styles.list}
             />
         </SafeAreaView>
@@ -76,40 +50,30 @@ export default function ManageDriversScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F3F4F6' },
-    header: { padding: 20, backgroundColor: 'white', borderBottomWidth: 1, borderBottomColor: '#E5E7EB', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    header: {
+        padding: 20,
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E7EB',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
     headerTitle: { fontSize: 24, fontWeight: 'bold' },
-    addButton: { backgroundColor: '#0033A0', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
-    addButtonText: { color: 'white', fontWeight: '600' },
+    addButton: { backgroundColor: '#0033A0', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8 },
+    addButtonText: { color: 'white', fontWeight: 'bold' },
     list: { padding: 20 },
     card: {
         backgroundColor: 'white',
         borderRadius: 12,
-        padding: 12,
-        marginBottom: 12,
+        padding: 16,
+        marginBottom: 16,
         flexDirection: 'row',
         alignItems: 'center',
     },
-    avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
+    avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 16 },
     info: { flex: 1 },
-    name: { fontSize: 16, fontWeight: 'bold' },
-    details: { color: '#6B7280', fontSize: 12, marginTop: 4 },
-    statusContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
-        backgroundColor: '#F3F4F6'
-    },
-    statusDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        marginRight: 6,
-    },
-    status: { 
-        fontWeight: '600', 
-        fontSize: 12,
-        color: '#374151'
-    },
+    name: { fontSize: 18, fontWeight: 'bold' },
+    bus: { color: '#6B7280', marginTop: 4 },
+    arrow: { fontSize: 24, color: '#D1D5DB' },
 });

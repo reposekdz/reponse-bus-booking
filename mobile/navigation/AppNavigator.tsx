@@ -1,142 +1,156 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
-import { useAuth } from '../hooks/useAuth';
-import { Text, View } from 'react-native';
 
-// Import screens
-import HomeScreen from '../screens/HomeScreen';
-import MyTicketsScreen from '../screens/MyTicketsScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import LiveTrackingScreen from '../screens/LiveTrackingScreen';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+import { useAuth } from '../hooks/useAuth';
+
+// --- Screens ---
+// Auth
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+
+// Common
+import HomeScreen from '../screens/HomeScreen';
+import MyTicketsScreen from '../screens/MyTicketsScreen';
+import ServicesScreen from '../screens/ServicesScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
+
+// Booking Flow
 import SearchResultsScreen from '../screens/SearchResultsScreen';
 import SeatSelectionScreen from '../screens/SeatSelectionScreen';
-import TicketDetailsScreen from '../screens/TicketDetailsScreen';
 import BookingConfirmationScreen from '../screens/BookingConfirmationScreen';
-import BusCharterScreen from '../screens/BusCharterScreen';
-import EditProfileScreen from '../screens/EditProfileScreen';
-import ServicesScreen from '../screens/ServicesScreen';
+import TicketDetailsScreen from '../screens/TicketDetailsScreen';
 
-// Agent screens
+// Services
+import BusCharterScreen from '../screens/BusCharterScreen';
+
+// Driver Role
+import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
+import BoardingScreen from '../screens/driver/BoardingScreen';
+import DriverSettingsScreen from '../screens/driver/DriverSettingsScreen';
+
+// Agent Role
 import AgentDashboardScreen from '../screens/agent/AgentDashboardScreen';
 import AgentDepositScreen from '../screens/agent/AgentDepositScreen';
 import AgentTransactionsScreen from '../screens/agent/AgentTransactionsScreen';
 import AgentProfileScreen from '../screens/agent/AgentProfileScreen';
 
-// Company screens
+// Company Role
 import CompanyDashboardScreen from '../screens/company/CompanyDashboardScreen';
 import ManageFleetScreen from '../screens/company/ManageFleetScreen';
 import ManageDriversScreen from '../screens/company/ManageDriversScreen';
 
-// Driver screens
-import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
-import BoardingScreen from '../screens/driver/BoardingScreen';
-import DriverSettingsScreen from '../screens/driver/DriverSettingsScreen'; // New Import
+// Admin Role
+import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 
 
+const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
 
-// Mock icons
-const Icon = ({ name }) => <Text style={{ fontSize: 18 }}>{name.substring(0,2)}</Text>;
-
-// Fallback screen for roles without a full UI
-const PlaceholderScreen = ({ route }) => (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Under Construction</Text>
-        <Text>{route.params?.role} Dashboard</Text>
-    </View>
+const AuthStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+    </Stack.Navigator>
 );
 
-function PassengerTabs() {
-    return (
-        <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: '#0033A0' }}>
-            <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: () => <Icon name="Home" />}} />
-            <Tab.Screen name="MyTickets" component={MyTicketsScreen} options={{ tabBarIcon: () => <Icon name="Tix" />, title: "Tickets" }} />
-            <Tab.Screen name="Services" component={ServicesScreen} options={{ tabBarIcon: () => <Icon name="Serv" /> }} />
-            <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarIcon: () => <Icon name="User" />}} />
-        </Tab.Navigator>
-    );
-}
+const HomeStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="HomeMain" component={HomeScreen} />
+        <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
+        <Stack.Screen name="SeatSelection" component={SeatSelectionScreen} />
+        <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
+    </Stack.Navigator>
+);
 
-function AgentTabs() {
-     return (
-        <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: '#0033A0' }}>
-            <Tab.Screen name="AgentDashboard" component={AgentDashboardScreen} options={{ tabBarIcon: () => <Icon name="Dash" />, title: "Dashboard" }} />
-            <Tab.Screen name="AgentDeposit" component={AgentDepositScreen} options={{ tabBarIcon: () => <Icon name="Depo" />, title: "Deposit" }} />
-            <Tab.Screen name="AgentTransactions" component={AgentTransactionsScreen} options={{ tabBarIcon: () => <Icon name="Hist" />, title: "History" }} />
-            <Tab.Screen name="AgentProfile" component={AgentProfileScreen} options={{ tabBarIcon: () => <Icon name="User" />, title: "Profile" }} />
-        </Tab.Navigator>
-    );
-}
+const TicketsStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="MyTicketsList" component={MyTicketsScreen} />
+        <Stack.Screen name="TicketDetails" component={TicketDetailsScreen} />
+    </Stack.Navigator>
+);
 
-function CompanyTabs() {
-     return (
-        <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: '#0033A0' }}>
-            <Tab.Screen name="CoDashboard" component={CompanyDashboardScreen} options={{ tabBarIcon: () => <Icon name="Dash" />, title: "Dashboard" }} />
-            <Tab.Screen name="CoFleet" component={ManageFleetScreen} options={{ tabBarIcon: () => <Icon name="Bus" />, title: "Fleet" }} />
-            <Tab.Screen name="CoDrivers" component={ManageDriversScreen} options={{ tabBarIcon: () => <Icon name="Driv" />, title: "Drivers" }} />
-            <Tab.Screen name="CoProfile" component={ProfileScreen} options={{ tabBarIcon: () => <Icon name="Prof" />, title: "Profile" }} />
-        </Tab.Navigator>
-    );
-}
+const ServicesStack = () => (
+     <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="ServicesList" component={ServicesScreen} />
+        <Stack.Screen name="BusCharter" component={BusCharterScreen} />
+    </Stack.Navigator>
+);
 
-function DriverTabs() {
-     return (
-        <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: '#0033A0' }}>
-            <Tab.Screen name="DriverDashboard" component={DriverDashboardScreen} options={{ tabBarIcon: () => <Icon name="Dash" />, title: "Current Trip" }} />
-            <Tab.Screen name="DriverBoarding" component={BoardingScreen} options={{ tabBarIcon: () => <Icon name="Scan" />, title: "Boarding" }} />
-            <Tab.Screen name="DriverProfile" component={ProfileScreen} options={{ tabBarIcon: () => <Icon name="User" />, title: "Profile" }} />
-        </Tab.Navigator>
-    );
-}
+const ProfileStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="ProfileMain" component={ProfileScreen} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+    </Stack.Navigator>
+);
+
+// --- Role-based Tab Navigators ---
+
+const PassengerTabs = () => (
+    <Tab.Navigator>
+        <Tab.Screen name="Home" component={HomeStack} />
+        <Tab.Screen name="MyTickets" component={TicketsStack} />
+        <Tab.Screen name="Services" component={ServicesStack} />
+        <Tab.Screen name="Profile" component={ProfileStack} />
+    </Tab.Navigator>
+);
+
+const DriverTabs = () => (
+    <Tab.Navigator>
+        <Tab.Screen name="DriverDashboard" component={DriverDashboardScreen} />
+        <Tab.Screen name="DriverBoarding" component={BoardingScreen} />
+        <Tab.Screen name="Profile" component={ProfileStack} />
+    </Tab.Navigator>
+);
+
+const AgentTabs = () => (
+    <Tab.Navigator>
+        <Tab.Screen name="AgentDashboard" component={AgentDashboardScreen} />
+        <Tab.Screen name="AgentDeposit" component={AgentDepositScreen} />
+        <Tab.Screen name="AgentTransactions" component={AgentTransactionsScreen} />
+        <Tab.Screen name="Profile" component={ProfileStack} />
+    </Tab.Navigator>
+);
+
+const CompanyTabs = () => (
+    <Tab.Navigator>
+        <Tab.Screen name="CompanyDashboard" component={CompanyDashboardScreen} />
+        <Tab.Screen name="ManageFleet" component={ManageFleetScreen} />
+        <Tab.Screen name="ManageDrivers" component={ManageDriversScreen} />
+        <Tab.Screen name="Profile" component={ProfileStack} />
+    </Tab.Navigator>
+);
+
+const AdminTabs = () => (
+    <Tab.Navigator>
+        <Tab.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+        <Tab.Screen name="Profile" component={ProfileStack} />
+    </Tab.Navigator>
+);
 
 
-function AppStack() {
+const AppNavigator = () => {
     const { user } = useAuth();
-    
-    let MainTabs;
-    switch(user?.role) {
-        case 'passenger': MainTabs = PassengerTabs; break;
-        case 'agent': MainTabs = AgentTabs; break;
-        case 'company': MainTabs = CompanyTabs; break;
-        case 'driver': MainTabs = DriverTabs; break;
-        default: MainTabs = () => <PlaceholderScreen route={{ params: { role: user?.role || 'Unknown' }}} />; break;
+
+    const renderTabsByRole = () => {
+        switch (user?.role) {
+            case 'driver': return <DriverTabs />;
+            case 'agent': return <AgentTabs />;
+            case 'company': return <CompanyTabs />;
+            case 'admin': return <AdminTabs />;
+            case 'passenger':
+            default:
+                return <PassengerTabs />;
+        }
     }
-    
-    return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Main" component={MainTabs} />
-            {/* Common screens accessible by multiple roles */}
-            <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
-            <Stack.Screen name="SeatSelection" component={SeatSelectionScreen} />
-            <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
-            <Stack.Screen name="TicketDetails" component={TicketDetailsScreen} />
-            <Stack.Screen name="BusCharter" component={BusCharterScreen} />
-            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-            <Stack.Screen name="LiveTracking" component={LiveTrackingScreen} />
-            <Stack.Screen name="DriverSettings" component={DriverSettingsScreen} />
-        </Stack.Navigator>
-    );
-}
 
-function AuthStack() {
-    return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-        </Stack.Navigator>
-    );
-}
-
-export default function AppNavigator() {
-    const { user } = useAuth();
     return (
         <NavigationContainer>
-            {user ? <AppStack /> : <AuthStack />}
+            {user ? renderTabsByRole() : <AuthStack />}
         </NavigationContainer>
     );
-}
+};
+
+export default AppNavigator;

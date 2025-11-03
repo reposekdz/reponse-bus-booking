@@ -1,24 +1,32 @@
+
 import React, { useState } from 'react';
 import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 import Modal from '../components/Modal';
+
+interface CompanyBusesProps {
+    buses: any[];
+    crudHandlers: any;
+    companyId: string;
+}
 
 const BusForm = ({ bus, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
         plate: '',
         model: '',
-        capacity: '',
-        status: 'Idle',
+        capacity: 30,
+        status: 'Operational',
+        maintenanceDate: '',
         ...bus
     });
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type } = e.target;
+        setFormData(prev => ({ ...prev, [name]: type === 'number' ? parseInt(value) : value }));
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ ...formData, capacity: parseInt(formData.capacity) });
+        onSave(formData);
     };
 
     return (
@@ -27,21 +35,27 @@ const BusForm = ({ bus, onSave, onCancel }) => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Plate Number</label>
                 <input type="text" name="plate" value={formData.plate} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
             </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Model</label>
+             <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bus Model</label>
                 <input type="text" name="model" value={formData.model} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
             </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Capacity (Seats)</label>
-                <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+             <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Capacity</label>
+                    <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                </div>
+                 <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                    <select name="status" value={formData.status} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                        <option>Operational</option>
+                        <option>On Route</option>
+                        <option>Maintenance</option>
+                    </select>
+                </div>
             </div>
-             <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                <select name="status" value={formData.status} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
-                    <option>Idle</option>
-                    <option>On Route</option>
-                    <option>Maintenance</option>
-                </select>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Next Maintenance</label>
+                <input type="date" name="maintenanceDate" value={formData.maintenanceDate} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
             </div>
             <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-semibold border rounded-lg dark:border-gray-600">Cancel</button>
@@ -51,17 +65,11 @@ const BusForm = ({ bus, onSave, onCancel }) => {
     );
 };
 
-
-interface CompanyBusesProps {
-    buses: any[];
-    crudHandlers: any;
-}
-
-const CompanyBuses: React.FC<CompanyBusesProps> = ({ buses, crudHandlers }) => {
+const CompanyBuses: React.FC<CompanyBusesProps> = ({ buses, crudHandlers, companyId }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentBus, setCurrentBus] = useState<any | null>(null);
-    
+
     const openModal = (bus = null) => {
         setCurrentBus(bus);
         setIsModalOpen(true);
@@ -71,7 +79,7 @@ const CompanyBuses: React.FC<CompanyBusesProps> = ({ buses, crudHandlers }) => {
         if (currentBus) {
             crudHandlers.updateBus(busData);
         } else {
-            crudHandlers.addBus(busData);
+            crudHandlers.addBus({ ...busData, companyId });
         }
         setIsModalOpen(false);
     };
@@ -104,20 +112,22 @@ const CompanyBuses: React.FC<CompanyBusesProps> = ({ buses, crudHandlers }) => {
                                 <th className="p-3">Model</th>
                                 <th className="p-3">Capacity</th>
                                 <th className="p-3">Status</th>
+                                <th className="p-3">Next Maintenance</th>
                                 <th className="p-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {buses.filter(b => b.plate.toLowerCase().includes(searchTerm.toLowerCase()) || b.model.toLowerCase().includes(searchTerm.toLowerCase())).map(bus => (
                                 <tr key={bus.id} className="border-t dark:border-gray-700">
-                                    <td className="p-3 font-semibold dark:text-white">{bus.plate}</td>
+                                    <td className="p-3 font-semibold dark:text-white flex items-center"><BusIcon className="w-5 h-5 mr-3 text-gray-400"/>{bus.plate}</td>
                                     <td>{bus.model}</td>
                                     <td>{bus.capacity} seats</td>
                                     <td>
-                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${bus.status === 'On Route' ? 'bg-blue-100 text-blue-800' : bus.status === 'Maintenance' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${bus.status === 'Operational' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' : bus.status === 'On Route' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'}`}>
                                             {bus.status}
                                         </span>
                                     </td>
+                                    <td>{new Date(bus.maintenanceDate).toLocaleDateString()}</td>
                                     <td className="flex space-x-2 p-3">
                                         <button onClick={() => openModal(bus)} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
                                         <button onClick={() => crudHandlers.deleteBus(bus.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
@@ -128,6 +138,7 @@ const CompanyBuses: React.FC<CompanyBusesProps> = ({ buses, crudHandlers }) => {
                     </table>
                 </div>
             </div>
+
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentBus ? "Edit Bus" : "Add New Bus"}>
                 <BusForm bus={currentBus} onSave={handleSave} onCancel={() => setIsModalOpen(false)} />
             </Modal>
