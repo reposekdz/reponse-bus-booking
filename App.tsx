@@ -71,9 +71,9 @@ const user = {
 };
 
 const agentTransactions = [
-    { id: 1, passengerName: 'Kalisa Jean', passengerSerial: 'UM1234', amount: 30000, commission: 600, date: '2024-10-25T10:00:00Z'},
-    { id: 2, passengerName: 'Mutesi Aline', passengerSerial: 'UM5678', amount: 15000, commission: 300, date: '2024-10-25T11:30:00Z'},
-    { id: 3, passengerName: 'Gatete David', passengerSerial: 'UM9012', amount: 5000, commission: 100, date: '2024-10-24T15:00:00Z'},
+    { id: 1, agentId: 1, passengerName: 'Kalisa Jean', passengerSerial: 'UM1234', amount: 30000, commission: 600, date: '2024-10-25T10:00:00Z'},
+    { id: 2, agentId: 1, passengerName: 'Mutesi Aline', passengerSerial: 'UM5678', amount: 15000, commission: 300, date: '2024-10-25T11:30:00Z'},
+    { id: 3, agentId: 2, passengerName: 'Gatete David', passengerSerial: 'UM9012', amount: 5000, commission: 100, date: '2024-10-24T15:00:00Z'},
 ];
 
 const App: React.FC = () => {
@@ -87,6 +87,7 @@ const App: React.FC = () => {
   const [showServicesAside, setShowServicesAside] = useState(false);
   const [showNextTripWidget, setShowNextTripWidget] = useState(true);
   const [selectedTrip, setSelectedTrip] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const [walletData, setWalletData] = useState({
     balance: 25000,
@@ -109,6 +110,14 @@ const App: React.FC = () => {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
+
+  useEffect(() => {
+    const handleResize = () => {
+        setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Check for persisted session
@@ -269,12 +278,12 @@ const App: React.FC = () => {
         onToggleServicesAside={() => setShowServicesAside(true)}
       />}
       
-      <main className={!isDashboard ? "pt-[68px] pb-20 md:pb-0" : ""}>
+      <main className={!isDashboard ? `pt-[68px] ${isMobile ? 'pb-24' : 'pb-0'}` : ""}>
         {renderPage()}
       </main>
 
       {!isDashboard && <Footer />}
-      {!isDashboard && <BottomNavigation navigate={navigate} currentPage={currentPage} />}
+      {!isDashboard && isMobile && <BottomNavigation navigate={navigate} currentPage={currentPage} />}
       {!isDashboard && <CompaniesAside isOpen={showCompaniesAside} onClose={() => setShowCompaniesAside(false)} navigate={navigate} />}
       {!isDashboard && <ServicesAside isOpen={showServicesAside} onClose={() => setShowServicesAside(false)} navigate={navigate} />}
       

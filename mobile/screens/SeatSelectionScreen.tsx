@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-// FIX: Import SeatStatus type and define a Seat type to ensure correct type inference.
 import BusSeat, { SeatStatus } from '../components/BusSeat';
 
 type Seat = {

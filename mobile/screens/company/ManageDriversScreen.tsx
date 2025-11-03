@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,24 +9,53 @@ const mockDrivers = [
     { id: 4, name: 'Kyle Reese', assignedBusId: 'VB04', phone: '0788777888', status: 'Inactive', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1974&auto=format&fit=crop' },
 ];
 
-const DriverCard = ({ driver, onPress }) => (
+const statusIndicatorColor = (status: string) => {
+    switch(status) {
+        case 'Online':
+        case 'Active':
+            return '#10B981'; // Green
+        case 'Idle':
+        case 'On Leave':
+            return '#F59E0B'; // Amber
+        case 'Offline':
+        case 'Inactive':
+            return '#EF4444'; // Red
+        default:
+            return '#6B7280'; // Gray
+    }
+}
+
+const DriverCard = ({ driver, liveStatus, onPress }) => (
     <TouchableOpacity style={styles.card} onPress={onPress}>
         <Image source={{ uri: driver.avatarUrl }} style={styles.avatar} />
         <View style={styles.info}>
             <Text style={styles.name}>{driver.name}</Text>
-            <Text style={styles.details}>Bus: {driver.assignedBusId} | Phone: {driver.phone}</Text>
+            <Text style={styles.details}>Bus: {driver.assignedBusId} | {driver.phone}</Text>
         </View>
-        <View style={[styles.statusBadge, {
-            backgroundColor: driver.status === 'Active' ? '#DEF7EC' : driver.status === 'On Leave' ? '#FEF3C7' : '#FEE2E2'
-        }]}>
-            <Text style={[styles.status, { 
-                color: driver.status === 'Active' ? '#065F46' : driver.status === 'On Leave' ? '#92400E' : '#991B1B'
-            }]}>{driver.status}</Text>
+        <View style={styles.statusContainer}>
+             <View style={[styles.statusDot, { backgroundColor: statusIndicatorColor(liveStatus) }]} />
+            <Text style={styles.status}>{liveStatus}</Text>
         </View>
     </TouchableOpacity>
 );
 
 export default function ManageDriversScreen({ navigation }) {
+    const [liveStatuses, setLiveStatuses] = useState({});
+
+    useEffect(() => {
+        const statusOptions = ['Online', 'Idle', 'Offline'];
+        const updateStatuses = () => {
+            const newStatuses = {};
+            mockDrivers.forEach(driver => {
+                newStatuses[driver.id] = statusOptions[Math.floor(Math.random() * statusOptions.length)];
+            });
+            setLiveStatuses(newStatuses);
+        };
+        updateStatuses();
+        const interval = setInterval(updateStatuses, 10000); // Update every 10s
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -38,7 +67,7 @@ export default function ManageDriversScreen({ navigation }) {
             <FlatList
                 data={mockDrivers}
                 keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => <DriverCard driver={item} onPress={() => alert(`Viewing profile for ${item.name}`)} />}
+                renderItem={({ item }) => <DriverCard driver={item} liveStatus={liveStatuses[item.id]} onPress={() => alert(`Viewing profile for ${item.name}`)} />}
                 contentContainerStyle={styles.list}
             />
         </SafeAreaView>
@@ -64,13 +93,23 @@ const styles = StyleSheet.create({
     info: { flex: 1 },
     name: { fontSize: 16, fontWeight: 'bold' },
     details: { color: '#6B7280', fontSize: 12, marginTop: 4 },
-    statusBadge: {
+    statusContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 12,
+        backgroundColor: '#F3F4F6'
+    },
+    statusDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: 6,
     },
     status: { 
         fontWeight: '600', 
-        fontSize: 12 
+        fontSize: 12,
+        color: '#374151'
     },
 });

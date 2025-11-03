@@ -1,15 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const Stat = ({ label, value }) => (
-    <View style={styles.stat}>
-        <Text style={styles.statLabel}>{label}</Text>
+const StatCard = ({ label, value, icon }) => (
+    <View style={styles.statCard}>
+        <Text style={styles.statIcon}>{icon}</Text>
         <Text style={styles.statValue}>{value}</Text>
+        <Text style={styles.statLabel}>{label}</Text>
     </View>
 );
 
-export default function DriverDashboardScreen() {
+export default function DriverDashboardScreen({ navigation }) {
     const currentTrip = {
         route: 'Kigali - Rubavu',
         departure: '07:00 AM',
@@ -20,10 +21,18 @@ export default function DriverDashboardScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Current Trip</Text>
-            </View>
-            <View style={styles.content}>
+            <ScrollView contentContainerStyle={styles.content}>
+                <View style={styles.header}>
+                    <Text style={styles.headerTitle}>Driver Dashboard</Text>
+                </View>
+
+                <View style={styles.statsRow}>
+                    <StatCard label="Today's Trips" value="4" icon="🚌" />
+                    <StatCard label="Total Passengers" value="142" icon="👥" />
+                    <StatCard label="Safety Score" value="98%" icon="✅" />
+                </View>
+
+                <Text style={styles.sectionTitle}>Current Trip</Text>
                 <View style={styles.card}>
                     <Text style={styles.route}>{currentTrip.route}</Text>
                     <View style={styles.timeContainer}>
@@ -32,36 +41,83 @@ export default function DriverDashboardScreen() {
                         <Text style={styles.time}>{currentTrip.arrival}</Text>
                     </View>
                     <View style={styles.divider} />
-                    <View style={styles.statsRow}>
-                        <Stat label="Bus Plate" value={currentTrip.busPlate} />
-                        <Stat label="Passengers" value={currentTrip.passengerCount} />
+                    <View style={styles.tripDetailsRow}>
+                        <Text style={styles.detailText}>Plate: {currentTrip.busPlate}</Text>
+                        <Text style={styles.detailText}>Passengers: {currentTrip.passengerCount}</Text>
                     </View>
                 </View>
 
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Notifications</Text>
-                    <Text style={styles.placeholder}>No new notifications.</Text>
-                </View>
-            </View>
+                 <TouchableOpacity style={styles.boardingButton} onPress={() => navigation.navigate('DriverBoarding')}>
+                    <Text style={styles.boardingButtonText}>Start Boarding</Text>
+                </TouchableOpacity>
+
+            </ScrollView>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F3F4F6' },
-    header: { padding: 20, backgroundColor: 'white' },
-    headerTitle: { fontSize: 28, fontWeight: 'bold' },
     content: { padding: 20 },
-    card: { backgroundColor: 'white', borderRadius: 12, padding: 20, marginBottom: 20 },
-    cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8 },
+    header: { marginBottom: 20 },
+    headerTitle: { fontSize: 28, fontWeight: 'bold' },
+    statsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 24,
+    },
+    statCard: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        padding: 16,
+        alignItems: 'center',
+        width: '32%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+        elevation: 2,
+    },
+    statIcon: {
+        fontSize: 24,
+    },
+    statValue: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginVertical: 4,
+    },
+    statLabel: {
+        color: '#6B7280',
+        fontSize: 12,
+        textAlign: 'center',
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 12,
+    },
+    card: { backgroundColor: 'white', borderRadius: 16, padding: 20, marginBottom: 20 },
     route: { fontSize: 24, fontWeight: 'bold', textAlign: 'center' },
     timeContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginVertical: 8 },
     time: { fontSize: 20, color: '#374151' },
     arrow: { fontSize: 20, color: '#9CA3AF', marginHorizontal: 12 },
     divider: { height: 1, backgroundColor: '#E5E7EB', marginVertical: 16 },
-    statsRow: { flexDirection: 'row', justifyContent: 'space-around' },
-    stat: { alignItems: 'center' },
-    statLabel: { color: '#6B7280', fontSize: 12 },
-    statValue: { fontSize: 16, fontWeight: '600', marginTop: 4 },
-    placeholder: { color: '#9CA3AF' },
+    tripDetailsRow: { flexDirection: 'row', justifyContent: 'space-around' },
+    detailText: { fontSize: 14, color: '#374151' },
+    boardingButton: {
+        backgroundColor: '#0033A0',
+        padding: 20,
+        borderRadius: 16,
+        alignItems: 'center',
+        shadowColor: '#0033A0',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    boardingButtonText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
 });

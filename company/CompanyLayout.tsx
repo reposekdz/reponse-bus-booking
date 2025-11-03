@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import CompanyDashboard from './CompanyDashboard';
 import CompanyBuses from './CompanyBuses';
@@ -7,6 +5,14 @@ import CompanyDrivers from './CompanyDrivers';
 import CompanyRoutes from './CompanyRoutes';
 import CompanyPassengers from './CompanyPassengers';
 import { ChartBarIcon, BuildingOfficeIcon, UsersIcon, BusIcon, MapIcon, SunIcon, MoonIcon } from '../components/icons';
+
+const initialDrivers = [
+    { id: 1, name: 'John Doe', assignedBusId: 'VB01', phone: '0788111222', license: 'D12345', status: 'Active' },
+];
+const initialBuses = [
+    { id: 'VB01', plate: 'RAD 123 B', model: 'Yutong Explorer', capacity: 55, status: 'On Route' },
+    { id: 'VB02', plate: 'RAD 124 B', model: 'Coaster Bus', capacity: 30, status: 'Idle' },
+];
 
 interface CompanyLayoutProps {
     onLogout: () => void;
@@ -17,23 +23,26 @@ interface CompanyLayoutProps {
 
 const CompanyLayout: React.FC<CompanyLayoutProps> = ({ onLogout, theme, setTheme, companyData }) => {
     const [activeView, setActiveView] = useState('dashboard');
-    const [drivers, setDrivers] = useState([
-        { id: 1, name: 'John Doe', assignedBusId: 'VB01', phone: '0788111222', license: 'D12345', status: 'Active' },
-    ]);
-    const [buses, setBuses] = useState([
-        { id: 'VB01', plate: 'RAD 123 B', model: 'Yutong Explorer', capacity: 55, status: 'On Route' },
-        { id: 'VB02', plate: 'RAD 124 B', model: 'Coaster Bus', capacity: 30, status: 'Idle' },
-    ]);
+    const [drivers, setDrivers] = useState(initialDrivers);
+    const [buses, setBuses] = useState(initialBuses);
     const [routes, setRoutes] = useState([
         { id: 1, from: 'Kigali', to: 'Rubavu', duration: '3.5h', basePrice: 4500, activeSchedules: 4 },
         { id: 2, from: 'Kigali', to: 'Musanze', duration: '2h', basePrice: 3500, activeSchedules: 2 },
     ]);
 
     const crudHandlers = {
-        // Mock handlers
+        // Route handlers
         addRoute: (data) => setRoutes(prev => [...prev, { ...data, id: Date.now() }]),
         updateRoute: (data) => setRoutes(prev => prev.map(r => r.id === data.id ? data : r)),
         deleteRoute: (id) => setRoutes(prev => prev.filter(r => r.id !== id)),
+        // Bus handlers
+        addBus: (data) => setBuses(prev => [...prev, { ...data, id: `VB${Date.now()}` }]),
+        updateBus: (data) => setBuses(prev => prev.map(b => b.id === data.id ? data : b)),
+        deleteBus: (id) => setBuses(prev => prev.filter(b => b.id !== id)),
+        // Driver handlers
+        addDriver: (data) => setDrivers(prev => [...prev, { ...data, id: Date.now() }]),
+        updateDriver: (data) => setDrivers(prev => prev.map(d => d.id === data.id ? data : d)),
+        deleteDriver: (id) => setDrivers(prev => prev.filter(d => d.id !== id)),
     };
     
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
@@ -41,8 +50,8 @@ const CompanyLayout: React.FC<CompanyLayoutProps> = ({ onLogout, theme, setTheme
     const renderView = () => {
         switch (activeView) {
             case 'dashboard': return <CompanyDashboard drivers={drivers} buses={buses} routes={routes} companyPin={companyData.pin} />;
-            case 'buses': return <CompanyBuses buses={buses} crudHandlers={{}} />;
-            case 'drivers': return <CompanyDrivers drivers={drivers} crudHandlers={{}} />;
+            case 'buses': return <CompanyBuses buses={buses} crudHandlers={crudHandlers} />;
+            case 'drivers': return <CompanyDrivers drivers={drivers} crudHandlers={crudHandlers} />;
             case 'routes': return <CompanyRoutes routes={routes} crudHandlers={crudHandlers} companyId={companyData.id} />;
             case 'passengers': return <CompanyPassengers />;
             default: return <CompanyDashboard drivers={drivers} buses={buses} routes={routes} companyPin={companyData.pin} />;

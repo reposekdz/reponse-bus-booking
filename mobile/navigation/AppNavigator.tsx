@@ -34,6 +34,7 @@ import ManageDriversScreen from '../screens/company/ManageDriversScreen';
 // Driver screens
 import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
 import BoardingScreen from '../screens/driver/BoardingScreen';
+import DriverSettingsScreen from '../screens/driver/DriverSettingsScreen'; // New Import
 
 
 const Tab = createBottomTabNavigator();
@@ -117,6 +118,7 @@ function AppStack() {
             <Stack.Screen name="BusCharter" component={BusCharterScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="LiveTracking" component={LiveTrackingScreen} />
+            <Stack.Screen name="DriverSettings" component={DriverSettingsScreen} />
         </Stack.Navigator>
     );
 }

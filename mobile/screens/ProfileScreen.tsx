@@ -22,7 +22,9 @@ const userProfiles = {
     },
     driver: {
         name: 'Peter Jones', email: 'driver@volcano.rw', role: 'driver',
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop'
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop',
+        company: 'Volcano Express',
+        assignedBus: 'RAD 123 B'
     },
     admin: {
         name: 'Admin User', email: 'admin@rwandabus.rw', role: 'admin',
@@ -56,6 +58,8 @@ export default function ProfileScreen({ navigation }) {
     if (!user) {
         return null; // Should be handled by AppNavigator
     }
+    
+    const isDriver = user.role === 'driver';
 
     return (
         <SafeAreaView style={styles.container}>
@@ -76,9 +80,17 @@ export default function ProfileScreen({ navigation }) {
                         </TouchableOpacity>
                     </View>
                 )}
+
+                {isDriver && (
+                    <View style={styles.driverInfoCard}>
+                        <Text style={styles.driverInfoText}>Company: <Text style={styles.bold}>{user.company}</Text></Text>
+                        <Text style={styles.driverInfoText}>Assigned Bus: <Text style={styles.bold}>{user.assignedBus}</Text></Text>
+                    </View>
+                )}
                 
                 <View style={styles.menu}>
                     <ProfileOption icon="User" label="Edit Profile" onPress={() => handleNavigation('EditProfile')} />
+                    {isDriver && <ProfileOption icon="Cog" label="Settings" onPress={() => handleNavigation('DriverSettings')} />}
                     <ProfileOption icon="Bell" label="Notifications" onPress={() => alert('Notifications')} />
                     <ProfileOption icon="Shield" label="Security" onPress={() => alert('Security')} />
                 </View>
@@ -172,12 +184,26 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: '600',
     },
+    driverInfoCard: {
+        marginHorizontal: 20,
+        marginTop: 20,
+        backgroundColor: 'white',
+        borderRadius: 16,
+        padding: 16,
+    },
+    driverInfoText: {
+        fontSize: 14,
+        color: '#374151',
+    },
+    bold: {
+        fontWeight: '600',
+    },
     menu: {
         marginHorizontal: 20,
         backgroundColor: 'white',
         borderRadius: 16,
         overflow: 'hidden',
-        marginBottom: 20,
+        marginTop: 20,
     },
     option: {
         flexDirection: 'row',
@@ -200,6 +226,7 @@ const styles = StyleSheet.create({
     },
     logoutButton: {
         marginHorizontal: 20,
+        marginVertical: 20,
         backgroundColor: 'white',
         borderRadius: 16,
         padding: 16,

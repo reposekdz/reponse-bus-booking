@@ -15,13 +15,18 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
     const [searchTerm, setSearchTerm] = useState('');
 
     const agentTransactions = useMemo(() => {
-        // In a real app, this would be a filtered API call.
-        // Here we simulate it by using the full transaction list.
-        return allTransactions.filter(tx => 
+        if (!agent) return [];
+        // Filter all transactions to find those associated with the current agent
+        return allTransactions.filter(tx => tx.agentId === agent.id);
+    }, [allTransactions, agent]);
+    
+    const filteredDisplayTransactions = useMemo(() => {
+        if (!searchTerm) return agentTransactions;
+         return agentTransactions.filter(tx => 
             tx.passengerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             tx.passengerSerial.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [allTransactions, searchTerm]);
+    }, [agentTransactions, searchTerm])
 
     if (!agent) {
         return (
@@ -30,6 +35,8 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
             </div>
         )
     }
+    
+    const agentTotalDeposits = agentTransactions.reduce((acc, tx) => acc + tx.amount, 0);
 
     return (
         <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-full py-12">
@@ -61,7 +68,7 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
                                 <div className="border-t dark:border-gray-700 pt-4">
                                     <h4 className="font-semibold dark:text-gray-200 mb-2">Performance Analytics</h4>
                                      <div className="grid grid-cols-2 gap-4">
-                                        <StatCard title="Total Deposits" value={agent.totalDeposits} />
+                                        <StatCard title="Total Deposits" value={agentTotalDeposits} />
                                         <StatCard title="Commission Rate" value={`${agent.commissionRate * 100}%`} format="string" />
                                     </div>
                                 </div>
@@ -80,7 +87,7 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
                                 />
                             </div>
                              <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
-                                {agentTransactions.map((tx) => (
+                                {filteredDisplayTransactions.map((tx) => (
                                     <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                                         <div className="flex items-center space-x-3">
                                             <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-full">

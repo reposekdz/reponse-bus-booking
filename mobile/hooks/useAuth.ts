@@ -6,6 +6,9 @@ interface User {
   role: 'passenger' | 'company' | 'admin' | 'agent' | 'driver';
   avatarUrl: string;
   walletBalance?: number;
+  // FIX: Add optional properties used for driver roles to resolve type errors.
+  company?: string;
+  assignedBus?: string;
 }
 
 interface AuthContextType {

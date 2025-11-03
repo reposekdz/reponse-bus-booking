@@ -1,7 +1,5 @@
-
-
 import React from 'react';
-import { PhoneIcon, EnvelopeIcon, MapPinIcon, CalendarIcon, BriefcaseIcon, ArrowRightIcon } from './components/icons';
+import { PhoneIcon, EnvelopeIcon, MapPinIcon, CalendarIcon, BriefcaseIcon, ArrowRightIcon, ShieldCheckIcon } from './components/icons';
 
 interface DriverProfilePageProps {
     driver: any;
@@ -30,7 +28,7 @@ const DriverProfilePage: React.FC<DriverProfilePageProps> = ({ driver }) => {
                             <p className="text-gray-600 dark:text-gray-400">{driver.company}</p>
                         </div>
                         <div className="mt-6 flex justify-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
-                            <span className="flex items-center"><MapPinIcon className="w-4 h-4 mr-1.5"/>{driver.location}</span>
+                            <span className="flex items-center"><MapPinIcon className="w-4 h-4 mr-1.5"/>{driver.location || 'Kigali'}</span>
                             <span className="flex items-center"><CalendarIcon className="w-4 h-4 mr-1.5"/>Yinjiye muri {memberSince}</span>
                         </div>
                     </div>
@@ -63,9 +61,26 @@ const DriverProfilePage: React.FC<DriverProfilePageProps> = ({ driver }) => {
                             <div className="text-gray-700 dark:text-gray-300 space-y-2 text-sm">
                                  <p className="flex items-center"><PhoneIcon className="w-4 h-4 mr-2 text-gray-400"/> {driver.phone}</p>
                                  <p className="flex items-center"><EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400"/> {driver.email}</p>
-                                <p className="flex items-center"><BriefcaseIcon className="w-4 h-4 mr-2 text-gray-400"/> Assigned Bus: {driver.assignedBus}</p>
+                                <p className="flex items-center"><BriefcaseIcon className="w-4 h-4 mr-2 text-gray-400"/> Assigned Bus: {driver.assignedBusId}</p>
                             </div>
                         </div>
+
+                        {driver.certifications && driver.certifications.length > 0 && (
+                            <div>
+                                <h3 className="font-bold text-lg dark:text-white mb-2">Certifications</h3>
+                                <div className="space-y-3">
+                                    {driver.certifications.map((cert: any) => (
+                                        <div key={cert.id} className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg flex items-center space-x-3">
+                                            <ShieldCheckIcon className="w-6 h-6 text-green-500 flex-shrink-0" />
+                                            <div>
+                                                <p className="font-semibold text-sm dark:text-white">{cert.name}</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">ID: {cert.id} | Expires: {new Date(cert.expiry).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

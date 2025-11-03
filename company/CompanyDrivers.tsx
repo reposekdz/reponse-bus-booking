@@ -1,6 +1,60 @@
-
 import React, { useState } from 'react';
 import { UsersIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
+import Modal from '../components/Modal';
+
+const DriverForm = ({ driver, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        phone: '',
+        license: '',
+        assignedBusId: '',
+        status: 'Active',
+        ...driver
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
+                <input type="text" name="name" value={formData.name} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">License No.</label>
+                <input type="text" name="license" value={formData.license} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Assigned Bus ID</label>
+                <input type="text" name="assignedBusId" value={formData.assignedBusId} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+            </div>
+             <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                <select name="status" value={formData.status} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                    <option>Active</option>
+                    <option>Inactive</option>
+                    <option>On Leave</option>
+                </select>
+            </div>
+            <div className="flex justify-end space-x-3 pt-4">
+                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-semibold border rounded-lg dark:border-gray-600">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Driver</button>
+            </div>
+        </form>
+    );
+};
 
 interface CompanyDriversProps {
     drivers: any[];
@@ -9,6 +63,22 @@ interface CompanyDriversProps {
 
 const CompanyDrivers: React.FC<CompanyDriversProps> = ({ drivers, crudHandlers }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentDriver, setCurrentDriver] = useState<any | null>(null);
+    
+    const openModal = (driver = null) => {
+        setCurrentDriver(driver);
+        setIsModalOpen(true);
+    };
+
+    const handleSave = (driverData) => {
+        if (currentDriver) {
+            crudHandlers.updateDriver(driverData);
+        } else {
+            crudHandlers.addDriver(driverData);
+        }
+        setIsModalOpen(false);
+    };
     
     return (
         <div>
@@ -25,7 +95,7 @@ const CompanyDrivers: React.FC<CompanyDriversProps> = ({ drivers, crudHandlers }
                             className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
                         />
                     </div>
-                    <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                    <button onClick={() => openModal()} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
                         <PlusIcon className="w-5 h-5 mr-2" /> Add Driver
                     </button>
                 </div>
@@ -55,8 +125,8 @@ const CompanyDrivers: React.FC<CompanyDriversProps> = ({ drivers, crudHandlers }
                                         </span>
                                     </td>
                                     <td className="flex space-x-2 p-3">
-                                        <button className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => openModal(driver)} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => crudHandlers.deleteDriver(driver.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
                                     </td>
                                 </tr>
                             ))}
@@ -64,6 +134,9 @@ const CompanyDrivers: React.FC<CompanyDriversProps> = ({ drivers, crudHandlers }
                     </table>
                 </div>
             </div>
+             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentDriver ? "Edit Driver" : "Add New Driver"}>
+                <DriverForm driver={currentDriver} onSave={handleSave} onCancel={() => setIsModalOpen(false)} />
+            </Modal>
         </div>
     );
 };
