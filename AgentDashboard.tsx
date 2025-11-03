@@ -10,7 +10,7 @@ interface AgentDashboardProps {
     theme: 'light' | 'dark';
     setTheme: (theme: 'light' | 'dark') => void;
     agentData: any;
-    onAgentDeposit: (serialCode: string, amount: number) => { success: boolean, passengerName?: string, message?: string };
+    onAgentDeposit: (serialCode: string, amount: number) => { success: boolean, passengerName?: string, commission?: number, message?: string };
     passengerSerialCode: string;
     transactions: any[];
 }
@@ -53,8 +53,8 @@ const BarChart = ({ data, dataKey, labelKey, title, colorClass }) => {
 const DashboardView = ({ agentData, transactions }) => {
     const dailyDeposits = [
         { day: 'M', amount: 150000 }, { day: 'T', amount: 220000 }, { day: 'W', amount: 180000 },
-        { day: 'T', amount: 250000 }, { day: 'F', amount: 350000 }, { day: 'S', amount: 450000 },
-        { day: 'S', amount: 320000 }
+        { day: 'Th', amount: 250000 }, { day: 'F', amount: 350000 }, { day: 'Sa', amount: 450000 },
+        { day: 'Su', amount: 320000 }
     ];
 
     const totalDeposits = transactions.reduce((sum, tx) => sum + tx.amount, 0);
@@ -153,7 +153,7 @@ const DepositView = ({ onAgentDeposit, passengerSerialCode, agentPin }) => {
         setTimeout(() => {
             const result = onAgentDeposit(serialCode, numAmount);
             if(result.success) {
-                setSuccessMessage(`${new Intl.NumberFormat('fr-RW').format(numAmount)} RWF yoherejwe neza kuri ${result.passengerName}.`);
+                setSuccessMessage(`${new Intl.NumberFormat('fr-RW').format(numAmount)} RWF yoherejwe neza kuri ${result.passengerName}. Komisiyo yawe: ${new Intl.NumberFormat('fr-RW').format(result.commission || 0)} RWF.`);
                 setPassengerInfo(null);
                 setSerialCode('');
                 setAmount('');
@@ -274,18 +274,18 @@ const TransactionsView = ({ transactions }) => {
                                 <th className="p-3">Itariki</th>
                                 <th className="p-3">Umugenzi</th>
                                 <th className="p-3">Kode</th>
-                                <th className="p-3">Amafaranga</th>
-                                <th className="p-3">Komisiyo</th>
+                                <th className="p-3 text-right">Amafaranga</th>
+                                <th className="p-3 text-right">Komisiyo</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredTransactions.map(tx => (
                                 <tr key={tx.id} className="border-t dark:border-gray-700">
-                                    <td className="p-3">{new Date(tx.date).toLocaleDateString()}</td>
+                                    <td className="p-3 whitespace-nowrap">{new Date(tx.date).toLocaleString()}</td>
                                     <td className="font-semibold dark:text-white">{tx.passengerName}</td>
                                     <td>{tx.passengerSerial}</td>
-                                    <td className="font-mono">{new Intl.NumberFormat('fr-RW').format(tx.amount)}</td>
-                                    <td className="font-mono text-green-600">{new Intl.NumberFormat('fr-RW').format(tx.commission)}</td>
+                                    <td className="font-mono text-right">{new Intl.NumberFormat('fr-RW').format(tx.amount)}</td>
+                                    <td className="font-mono text-green-600 dark:text-green-400 text-right">+{new Intl.NumberFormat('fr-RW').format(tx.commission)}</td>
                                 </tr>
                             ))}
                         </tbody>

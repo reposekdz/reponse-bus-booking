@@ -2,12 +2,27 @@
 // It showcases a typical layout with a hero image, search form, and featured content.
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// In a real app, these would be proper components and icons
-const SearchForm = () => <View style={styles.searchForm}><Text style={styles.formText}>Search Form Placeholder</Text></View>;
-const Icon = ({ name }) => <Text>{name}</Text>;
+// Mock Form Component
+const SearchForm = ({ onSearch }) => {
+    const [from, setFrom] = React.useState('Kigali');
+    const [to, setTo] = React.useState('Rubavu');
+    return (
+        <View style={styles.searchForm}>
+            <TextInput placeholder="From" style={styles.input} value={from} onChangeText={setFrom} />
+            <TextInput placeholder="To" style={styles.input} value={to} onChangeText={setTo} />
+            <View style={styles.row}>
+                <TouchableOpacity style={styles.dateInput}><Text>Oct 28</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.passengersInput}><Text>1 Passenger</Text></TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.searchButton} onPress={() => onSearch(from, to)}>
+                <Text style={styles.searchButtonText}>Search Buses</Text>
+            </TouchableOpacity>
+        </View>
+    );
+};
 
 const featuredRoutes = [
     { from: 'Kigali', to: 'Rubavu', image: 'https://images.unsplash.com/photo-1590632313655-e9c5220c4273?q=80&w=2070&auto=format&fit=crop' },
@@ -16,9 +31,8 @@ const featuredRoutes = [
 
 export default function HomeScreen({ navigation }) {
   const handleSearch = (from, to) => {
-    // In a real app, you would navigate to the search results screen
     // navigation.navigate('SearchResults', { from, to });
-    alert(`Searching for buses from ${from} to ${to}`);
+    alert(`Navigating to search results for ${from} to ${to}`);
   };
 
   return (
@@ -81,7 +95,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   formContainer: {
-    marginTop: -50,
+    marginTop: -80,
     paddingHorizontal: 20,
   },
   searchForm: {
@@ -94,7 +108,42 @@ const styles = StyleSheet.create({
       shadowRadius: 10,
       elevation: 5,
   },
-  formText: { color: '#333' },
+  input: {
+      backgroundColor: '#F3F4F6',
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 12,
+  },
+  row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+  },
+  dateInput: {
+      flex: 1,
+      backgroundColor: '#F3F4F6',
+      padding: 12,
+      borderRadius: 8,
+      marginRight: 8,
+  },
+  passengersInput: {
+      flex: 1,
+      backgroundColor: '#F3F4F6',
+      padding: 12,
+      borderRadius: 8,
+      marginLeft: 8,
+  },
+  searchButton: {
+      backgroundColor: '#FBBF24',
+      padding: 16,
+      borderRadius: 8,
+      alignItems: 'center',
+  },
+  searchButtonText: {
+      color: '#0033A0',
+      fontWeight: 'bold',
+      fontSize: 16,
+  },
   content: { marginTop: 20, paddingHorizontal: 20 },
   sectionTitle: {
     fontSize: 20,

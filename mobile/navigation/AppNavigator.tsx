@@ -10,7 +10,6 @@ import { View, Text } from 'react-native';
 
 
 // Mock placeholder components since we can't import real ones.
-// FIX: Update mock components to accept all props to resolve type errors.
 const NavigationContainer = (props: any) => <View>{props.children}</View>;
 const createBottomTabNavigator = () => ({ Navigator: (props: any) => <View>{props.children}</View>, Screen: (props: any) => null });
 const createNativeStackNavigator = () => ({ Navigator: (props: any) => <View>{props.children}</View>, Screen: (props: any) => null });
@@ -24,6 +23,7 @@ import SearchResultsScreen from '../screens/SearchResultsScreen';
 import SeatSelectionScreen from '../screens/SeatSelectionScreen';
 import BookingConfirmationScreen from '../screens/BookingConfirmationScreen';
 import LiveTrackingScreen from '../screens/LiveTrackingScreen';
+import TicketDetailsScreen from '../screens/TicketDetailsScreen';
 
 // Mock Icons
 const Icon = ({ name }) => <Text>{name}</Text>;
@@ -81,6 +81,7 @@ export default function AppNavigator() {
         <Stack.Screen name="SeatSelection" component={SeatSelectionScreen} />
         <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
         <Stack.Screen name="LiveTracking" component={LiveTrackingScreen} />
+        <Stack.Screen name="TicketDetails" component={TicketDetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

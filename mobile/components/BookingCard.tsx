@@ -1,40 +1,40 @@
-// Placeholder for a reusable BookingCard component in React Native.
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 // Mock Icon
-const Icon = ({ name }) => <Text style={{ color: '#6B7280', fontSize: 10 }}>{name}</Text>;
+const Icon = ({ name, style }) => <Text style={[{ color: '#6B7280', fontSize: 10 }, style]}>{name}</Text>;
 
-export default function BookingCard({ ticket, isPast }) {
+export default function BookingCard({ ticket, isPast, onPress }) {
   return (
-    <TouchableOpacity style={styles.card}>
-      <View style={styles.header}>
-        <Text style={styles.company}>{ticket.company}</Text>
-        <Text style={isPast ? styles.statusPast : styles.statusUpcoming}>{isPast ? 'Completed' : 'Upcoming'}</Text>
+    <TouchableOpacity style={styles.card} onPress={onPress} disabled={!onPress}>
+      <View style={styles.topRow}>
+          <View style={styles.logoPlaceholder} />
+          <View style={styles.routeContainer}>
+            <Text style={styles.location}>{ticket.from}</Text>
+            <Icon name="-->" style={styles.arrowIcon}/>
+            <Text style={styles.location}>{ticket.to}</Text>
+          </View>
       </View>
-      <View style={styles.routeContainer}>
-        <Text style={styles.location}>{ticket.from}</Text>
-        <Icon name="-->" />
-        <Text style={styles.location}>{ticket.to}</Text>
-      </View>
+      <Text style={styles.company}>{ticket.company}</Text>
+
       <View style={styles.detailsContainer}>
         <View style={styles.detailItem}>
-          <Icon name="Date" />
-          <Text style={styles.detailText}>{ticket.date}</Text>
+            <Text style={styles.detailLabel}>Date</Text>
+            <Text style={styles.detailText}>{ticket.date}</Text>
+        </View>
+         <View style={styles.detailItem}>
+            <Text style={styles.detailLabel}>Time</Text>
+            <Text style={styles.detailText}>{ticket.time}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Icon name="Time" />
-          <Text style={styles.detailText}>{ticket.time}</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Icon name="Seat" />
-          <Text style={styles.detailText}>{ticket.seats}</Text>
+            <Text style={styles.detailLabel}>Seats</Text>
+            <Text style={styles.detailText}>{ticket.seats}</Text>
         </View>
       </View>
+      
       {!isPast && (
         <View style={styles.qrCodePlaceholder}>
-          <Text style={styles.qrCodeText}>QR</Text>
+          <Text style={styles.qrCodeText}>SCAN</Text>
         </View>
       )}
     </TouchableOpacity>
@@ -52,47 +52,40 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 4,
+    position: 'relative',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+  topRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 4,
   },
-  company: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  statusUpcoming: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#059669',
-    backgroundColor: '#D1FAE5',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  statusPast: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4B5563',
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    overflow: 'hidden',
+  logoPlaceholder: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: '#F3F4F6',
+      marginRight: 12,
   },
   routeContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
   },
   location: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0033A0',
+    color: '#1F2937',
+  },
+  arrowIcon: {
+      marginHorizontal: 8,
+      fontSize: 14,
+      color: '#9CA3AF'
+  },
+  company: {
+      fontSize: 14,
+      color: '#6B7280',
+      marginLeft: 44, // Align with route text
+      marginBottom: 12,
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -102,26 +95,37 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   detailItem: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
+  },
+  detailLabel: {
+      fontSize: 10,
+      color: '#9CA3AF',
+      textTransform: 'uppercase'
   },
   detailText: {
-    fontSize: 12,
-    color: '#4B5563',
-    marginTop: 4,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginTop: 2,
   },
   qrCodePlaceholder: {
     position: 'absolute',
-    right: 16,
-    top: 60,
-    width: 40,
-    height: 40,
-    backgroundColor: '#F3F4F6',
+    right: 0,
+    top: 0,
+    width: 60,
+    height: '100%',
+    backgroundColor: '#F9FAFB',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 4,
+    borderTopRightRadius: 16,
+    borderBottomRightRadius: 16,
+    borderLeftWidth: 1,
+    borderLeftColor: '#E5E7EB'
   },
   qrCodeText: {
       fontWeight: 'bold',
-      color: '#9CA3AF'
+      color: '#9CA3AF',
+      transform: [{ rotate: '270deg'}],
+      fontSize: 12,
   }
 });

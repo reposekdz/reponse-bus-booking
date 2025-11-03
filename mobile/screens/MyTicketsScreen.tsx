@@ -9,11 +9,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BookingCard from '../components/BookingCard';
 
 const mockUpcomingTickets = [
-  { id: '1', company: 'Volcano Express', from: 'Kigali', to: 'Rubavu', date: '28 Oct, 2024', time: '07:00 AM', seats: 'A5, A6' },
+  { id: '1', company: 'Volcano Express', from: 'Kigali', to: 'Rubavu', date: '28 Oct, 2024', time: '07:00 AM', seats: 'A5, A6', qrValue: 'VK-83AD1' },
 ];
 
 const mockPastTickets = [
-  { id: '2', company: 'RITCO', from: 'Kigali', to: 'Huye', date: '15 Sep, 2024', time: '09:30 AM', seats: 'C1' },
+  { id: '2', company: 'RITCO', from: 'Kigali', to: 'Huye', date: '15 Sep, 2024', time: '09:30 AM', seats: 'C1', qrValue: 'RT-98CD3' },
 ];
 
 export default function MyTicketsScreen({ navigation }) {
@@ -24,24 +24,16 @@ export default function MyTicketsScreen({ navigation }) {
   // and then fetching fresh data from an API.
   useEffect(() => {
     const loadTickets = async () => {
-      // 1. Try to load cached tickets from AsyncStorage for instant display
-      // const cachedTickets = await AsyncStorage.getItem('@upcoming_tickets');
-      // if (cachedTickets) {
-      //   setTickets(JSON.parse(cachedTickets));
-      // }
-      
-      // 2. Fetch fresh data from API
       const fetchedTickets = activeTab === 'Upcoming' ? mockUpcomingTickets : mockPastTickets;
       setTickets(fetchedTickets);
-
-      // 3. If it's upcoming tickets, cache them for offline use
-      // if (activeTab === 'Upcoming') {
-      //   await AsyncStorage.setItem('@upcoming_tickets', JSON.stringify(fetchedTickets));
-      // }
     };
 
     loadTickets();
   }, [activeTab]);
+  
+  const handleTicketPress = (ticket) => {
+      navigation.navigate('TicketDetails', { ticket });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -60,7 +52,13 @@ export default function MyTicketsScreen({ navigation }) {
       <FlatList
         data={tickets}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <BookingCard ticket={item} isPast={activeTab === 'Past'} />}
+        renderItem={({ item }) => (
+            <BookingCard 
+                ticket={item} 
+                isPast={activeTab === 'Past'} 
+                onPress={() => handleTicketPress(item)}
+            />
+        )}
         contentContainerStyle={styles.list}
         ListHeaderComponent={() => (
           activeTab === 'Upcoming' && <Text style={styles.offlineNotice}>Your upcoming tickets are available offline.</Text>
