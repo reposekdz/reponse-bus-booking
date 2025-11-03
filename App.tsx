@@ -32,6 +32,7 @@ import CompanyLayout from './company/CompanyLayout';
 import DriverProfilePage from './DriverProfilePage';
 import AgentProfilePage from './AgentProfilePage';
 import PackageDeliveryPage from './PackageDeliveryPage';
+import BusCharterPage from './BusCharterPage';
 
 // Data
 import { mockCompaniesData } from './admin/AdminDashboard';
@@ -56,7 +57,8 @@ export type Page =
   | 'agent'
   | 'driverProfile'
   | 'agentProfile'
-  | 'packageDelivery';
+  | 'packageDelivery'
+  | 'busCharter';
 
 
 const user = {
@@ -109,7 +111,16 @@ const App: React.FC = () => {
   }, [theme]);
 
   useEffect(() => {
-    // Simulate initial loading
+    // Check for persisted session
+    try {
+        const session = localStorage.getItem('rwandaBusSession');
+        if (session) {
+            const { email } = JSON.parse(session);
+            handleLogin({ email }, false); // Don't navigate on auto-login
+        }
+    } catch (error) {
+        console.error("Could not parse session data", error);
+    }
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
@@ -122,7 +133,7 @@ const App: React.FC = () => {
     setTimeout(() => setIsLoading(false), 300);
   };
   
-  const handleLogin = (credentials) => {
+  const handleLogin = (credentials, rememberMe = false, shouldNavigate = true) => {
     setIsLoggedIn(true);
     // Simple role check based on email
     if (credentials.email?.includes('driver')) setUserRole('driver');
@@ -130,13 +141,20 @@ const App: React.FC = () => {
     else if (credentials.email?.includes('company')) setUserRole('company');
     else if (credentials.email?.includes('admin')) setUserRole('admin');
     else setUserRole('passenger');
+
+    if (rememberMe) {
+        localStorage.setItem('rwandaBusSession', JSON.stringify({ email: credentials.email }));
+    }
     
-    navigate(credentials.email?.includes('driver') ? 'driver' : credentials.email?.includes('agent') ? 'agent' : credentials.email?.includes('company') ? 'company' : credentials.email?.includes('admin') ? 'admin' : 'home');
+    if (shouldNavigate) {
+        navigate(credentials.email?.includes('driver') ? 'driver' : credentials.email?.includes('agent') ? 'agent' : credentials.email?.includes('company') ? 'company' : credentials.email?.includes('admin') ? 'admin' : 'home');
+    }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserRole('passenger');
+    localStorage.removeItem('rwandaBusSession');
     navigate('home');
   };
   
@@ -218,6 +236,7 @@ const App: React.FC = () => {
       case 'driverProfile': return <DriverProfilePage driver={pageData || {}} />;
       case 'agentProfile': return <AgentProfilePage agent={pageData} allTransactions={agentTransactions} />;
       case 'packageDelivery': return <PackageDeliveryPage onNavigate={navigate} />;
+      case 'busCharter': return <BusCharterPage onNavigate={navigate} />;
       case 'admin': return <AdminLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} navigate={navigate} />;
       case 'company': return <CompanyLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} companyData={{...mockCompaniesData[0], pin: '5678'}} />;
       case 'driver': return <DriverDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} driverData={{ id: 1, name: 'John Doe', avatarUrl: user.avatarUrl, assignedBusId: 'VB01' }} allCompanies={mockCompaniesData} onPassengerBoarding={handlePassengerBoarding} navigate={(page, data) => navigate(page, data)} />;

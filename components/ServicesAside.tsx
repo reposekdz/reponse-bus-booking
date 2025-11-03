@@ -14,6 +14,7 @@ const allServices = [
       title: 'Ohereza Ipaki',
       description: 'Ohereza cyangwa wakire imizigo yawe mu buryo bwizewe.',
       icon: ArchiveBoxIcon,
+      page: 'packageDelivery',
       isFeatured: true,
     },
     {
@@ -21,6 +22,8 @@ const allServices = [
       title: 'Kodesha Imodoka',
       description: 'Tegura urugendo rwihariye rw\'itsinda ryawe.',
       icon: BusIcon,
+      page: 'busCharter',
+      isFeatured: true,
     },
     {
       id: 'corporate-travel',
@@ -51,14 +54,14 @@ const allServices = [
 
 const ServicesAside: React.FC<ServicesAsideProps> = ({ isOpen, onClose, navigate }) => {
 
-    const handleServiceClick = (serviceId: string, title: string) => {
+    const handleServiceClick = (service: typeof allServices[0]) => {
         onClose();
         // Add a delay to allow the closing animation to finish
         setTimeout(() => {
-            if (serviceId === 'cargo-logistics') {
-                navigate('packageDelivery');
+            if (service.page) {
+                navigate(service.page as Page);
             } else {
-                alert(`Serivisi ya "${title}" izaza vuba!`);
+                alert(`Serivisi ya "${service.title}" izaza vuba!`);
             }
         }, 300);
     };
@@ -85,7 +88,7 @@ const ServicesAside: React.FC<ServicesAsideProps> = ({ isOpen, onClose, navigate
                          {allServices.map(service => (
                             <button 
                                 key={service.id} 
-                                onClick={() => handleServiceClick(service.id, service.title)}
+                                onClick={() => handleServiceClick(service)}
                                 className={`w-full p-4 rounded-xl text-left flex items-center space-x-4 group transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${service.isFeatured ? 'bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 border-2 border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/80'}`}
                             >
                                 <div className={`flex-shrink-0 p-3 rounded-lg ${service.isFeatured ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-gray-200 dark:bg-gray-700'}`}>

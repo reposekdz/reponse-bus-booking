@@ -46,6 +46,20 @@ const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate, onToggleService
                         </div>
                     </div>
 
+                    {/* Featured Service: Bus Charter */}
+                    <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-8 rounded-2xl shadow-xl flex flex-col md:flex-row items-center gap-8">
+                        <div className="flex-shrink-0">
+                             <BusIcon className="w-24 h-24 text-white/50" />
+                        </div>
+                        <div>
+                            <h2 className="text-3xl font-bold">Kodesha Imodoka</h2>
+                            <p className="mt-2 mb-4 text-yellow-100">Ukeneye imodoka yihariye ku itsinda ryawe, urugendo rw'ubukerarugendo, cyangwa ibirori? Dufite imodoka zigezweho ziteguye kugutwara.</p>
+                            <button onClick={() => onNavigate('busCharter')} className="px-6 py-3 bg-white text-yellow-800 font-bold rounded-lg hover:bg-gray-100 transition shadow-md">
+                                Saba Gukodesha
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Track Package */}
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
                         <h2 className="text-xl font-bold dark:text-white mb-2 flex items-center"><TruckIcon className="w-6 h-6 mr-3 text-blue-500" /> Kurikirana Ipaki Yawe</h2>

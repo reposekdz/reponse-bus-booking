@@ -3,7 +3,7 @@ import type { Page } from './App';
 import { EyeIcon, EyeOffIcon, LockClosedIcon, GoogleIcon, FacebookIcon } from './components/icons';
 
 interface LoginPageProps {
-  onLogin: (credentials: { email?: string, password?: string }) => void;
+  onLogin: (credentials: { email?: string, password?: string }, rememberMe: boolean) => void;
   onNavigate: (page: Page) => void;
 }
 
@@ -11,10 +11,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onNavigate }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin({ email, password });
+    onLogin({ email, password }, rememberMe);
   };
 
   return (
@@ -37,6 +38,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onNavigate }) => {
                   id="email-address" 
                   name="email" 
                   type="email" 
+                  autoComplete="email"
                   required 
                   className="w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition" 
                   placeholder="Imeri" 
@@ -53,6 +55,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onNavigate }) => {
                   id="password-sr" 
                   name="password" 
                   type={showPassword ? 'text' : 'password'} 
+                  autoComplete="current-password"
                   required 
                   className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition" 
                   placeholder="Ijambobanga" 
@@ -65,7 +68,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onNavigate }) => {
             </div>
             <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                    <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded" />
+                    <input id="remember-me" name="remember-me" type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded" />
                     <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Nyibuka</label>
                 </div>
                 <div className="text-sm">
