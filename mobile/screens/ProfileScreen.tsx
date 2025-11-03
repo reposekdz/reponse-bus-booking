@@ -43,17 +43,15 @@ export default function ProfileScreen({ navigation }) {
                 </View>
                 
                 <View style={styles.menu}>
-                    {/* FIX: Add missing onPress prop to ProfileOption components. */}
-                    <ProfileOption icon="User" label="Edit Profile" onPress={() => {}} />
-                    <ProfileOption icon="Bell" label="Notifications" onPress={() => {}} />
-                    <ProfileOption icon="Shield" label="Security" onPress={() => {}} />
-                    <ProfileOption icon="Globe" label="Language" onPress={() => {}} />
+                    <ProfileOption icon="User" label="Edit Profile" onPress={() => alert('Navigate to Edit Profile')} />
+                    <ProfileOption icon="Bell" label="Notifications" onPress={() => alert('Navigate to Notifications')} />
+                    <ProfileOption icon="Shield" label="Security" onPress={() => alert('Navigate to Security')} />
+                    <ProfileOption icon="Globe" label="Language" onPress={() => alert('Navigate to Language')} />
                 </View>
 
                 <View style={styles.menu}>
-                     {/* FIX: Add missing onPress prop to ProfileOption components. */}
-                     <ProfileOption icon="Help" label="Help Center" onPress={() => {}} />
-                     <ProfileOption icon="Info" label="About Us" onPress={() => {}} />
+                     <ProfileOption icon="Help" label="Help Center" onPress={() => alert('Navigate to Help Center')} />
+                     <ProfileOption icon="Info" label="About Us" onPress={() => alert('Navigate to About Us')} />
                 </View>
                 
                 <TouchableOpacity style={styles.logoutButton}>

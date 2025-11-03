@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 // FIX: Import `Type` to use with responseSchema.
 import { GoogleGenAI, Type } from "@google/genai";
@@ -29,9 +27,8 @@ const AITripPlanner: React.FC<AITripPlannerProps> = ({ onClose, onPlanTrip }) =>
 The available bus companies are: RITCO, Volcano Express, Horizon Express, ONATRACOM, STELLART.
 Based on the user's prompt, determine the most logical departure city ('from'), destination city ('to'), and the best bus company for the route.
 If a city is not explicitly mentioned, infer it from landmarks (e.g., 'see gorillas' implies Musanze, 'Nyungwe forest' implies Nyungwe).
-The response MUST be a valid JSON object with the following structure and nothing else: {"from": "string", "to": "string"}. Do not add any extra text or markdown formatting.`;
+The response MUST be a valid JSON object.`;
 
-      // FIX: Added responseSchema for more reliable JSON output as per Gemini API guidelines.
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
@@ -41,8 +38,8 @@ The response MUST be a valid JSON object with the following structure and nothin
             responseSchema: {
                 type: Type.OBJECT,
                 properties: {
-                    from: { type: Type.STRING },
-                    to: { type: Type.STRING }
+                    from: { type: Type.STRING, description: 'The departure city.' },
+                    to: { type: Type.STRING, description: 'The destination city.' }
                 },
                 required: ['from', 'to']
             }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChartBarIcon, UsersIcon, BusIcon, BriefcaseIcon } from '../components/icons';
+import ActivityFeed from '../components/ActivityFeed';
 
 // FIX: Added mock company data to be imported by other components.
 export const mockCompaniesData = [
@@ -49,7 +50,6 @@ export const mockCompaniesData = [
   },
 ];
 
-// FIX: Update StatCard to handle non-numeric values
 const StatCard = ({ title, value, icon, format = 'number' }) => {
     const formattedValue = typeof value === 'string' ? value :
         format === 'currency' ? new Intl.NumberFormat('fr-RW').format(value) + ' RWF' : new Intl.NumberFormat().format(value);
@@ -66,7 +66,6 @@ const StatCard = ({ title, value, icon, format = 'number' }) => {
     );
 };
 
-// FIX: Add props interface
 interface AdminDashboardProps {
     companies: any[];
     drivers: any[];
@@ -74,23 +73,25 @@ interface AdminDashboardProps {
     buses: any[];
 }
 
-// FIX: Make component accept props and calculate stats dynamically
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ companies, drivers, agents, buses }) => {
     const totalRevenue = companies.reduce((acc, c) => acc + c.totalRevenue, 0);
     const totalPassengers = companies.reduce((acc, c) => acc + c.totalPassengers, 0);
 
     return (
-        <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500 dark:from-blue-400 dark:to-green-300 mb-6">Platform Overview</h1>
+        <div className="space-y-8">
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500 dark:from-blue-400 dark:to-green-300">Platform Overview</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard title="Total Revenue" value={totalRevenue} icon={<ChartBarIcon />} format="currency" />
                 <StatCard title="Total Passengers" value={totalPassengers} icon={<UsersIcon />} />
                 <StatCard title="Active Buses" value={buses.length} icon={<BusIcon />} />
                 <StatCard title="Registered Agents" value={agents.length} icon={<BriefcaseIcon />} />
             </div>
-            <div className="mt-8 bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                <h2 className="text-xl font-bold dark:text-white">Recent Activity Feed</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-4">Live platform activity will be displayed here...</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                     <h2 className="text-xl font-bold dark:text-white">Revenue by Company</h2>
+                     <p className="text-gray-500 dark:text-gray-400 mt-4">Revenue breakdown will be displayed here...</p>
+                </div>
+                 <ActivityFeed />
             </div>
         </div>
     );

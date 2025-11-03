@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon, EyeIcon } from '../components/icons';
-import { Page } from '../../App';
+import { Page } from '../App';
 
-// FIX: Define props interface
 interface ManageDriversProps {
     drivers: any[];
     companies: any[];
@@ -11,7 +9,6 @@ interface ManageDriversProps {
     navigate: (page: Page, data?: any) => void;
 }
 
-// FIX: Use props for data and handlers, remove local state for drivers list
 const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, companies, crudHandlers, navigate }) => {
     const [searchTerm, setSearchTerm] = useState('');
     
@@ -53,9 +50,12 @@ const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, companies, crudH
                             {drivers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase())).map(driver => (
                                 <tr key={driver.id} className="border-t dark:border-gray-700">
                                     <td className="p-3 font-semibold dark:text-white">
-                                        <button onClick={() => navigate('driverProfile', driver)} className="hover:underline">
-                                            {driver.name}
-                                        </button>
+                                        <div className="flex items-center space-x-3">
+                                            <img src={driver.avatarUrl} alt={driver.name} className="w-8 h-8 rounded-full object-cover"/>
+                                            <button onClick={() => navigate('driverProfile', driver)} className="hover:underline">
+                                                {driver.name}
+                                            </button>
+                                        </div>
                                     </td>
                                     <td>{getCompanyName(driver.companyId)}</td>
                                     <td>{driver.assignedBusId}</td>

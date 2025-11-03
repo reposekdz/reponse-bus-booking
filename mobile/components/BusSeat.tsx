@@ -3,7 +3,16 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-export default function BusSeat({ seatId, status, onPress }) {
+// FIX: Add explicit props type to resolve type error in SeatSelectionScreen.
+type SeatStatus = 'available' | 'occupied' | 'selected' | 'aisle';
+
+interface BusSeatProps {
+    seatId: string;
+    status: SeatStatus;
+    onPress: (seatId: string) => void;
+}
+
+const BusSeat: React.FC<BusSeatProps> = ({ seatId, status, onPress }) => {
     if (status === 'aisle') {
         return <TouchableOpacity style={styles.aisle} disabled />;
     }
@@ -23,7 +32,9 @@ export default function BusSeat({ seatId, status, onPress }) {
             <Text style={styles.seatText}>{seatId}</Text>
         </TouchableOpacity>
     );
-}
+};
+
+export default BusSeat;
 
 const styles = StyleSheet.create({
     seat: {

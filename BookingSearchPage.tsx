@@ -1,17 +1,16 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import BookingForm from './components/BookingForm';
 import { ClockIcon, ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, SparklesIcon, FilterIcon, TruckIcon } from './components/icons';
 import SearchResultSkeleton from './components/SearchResultSkeleton';
 
 const searchResults = [
-  { id: 1, from: 'Kigali', to: 'Rubavu', company: 'Volcano Express', departureTime: '07:00 AM', arrivalTime: '10:30 AM', duration: '3h 30m', price: 4500, availableSeats: 23, amenities: ['WiFi', 'AC'], tag: 'Ikunzwe Cyane', busType: 'Luxury' },
-  { id: 2, from: 'Kigali', to: 'Rubavu', company: 'Horizon Express', departureTime: '08:30 AM', arrivalTime: '12:15 PM', duration: '3h 45m', price: 4800, availableSeats: 15, amenities: ['AC', 'Charging'], busType: 'Standard' },
-  { id: 3, from: 'Kigali', to: 'Huye', company: 'RITCO', departureTime: '09:00 AM', arrivalTime: '11:30 AM', duration: '2h 30m', price: 3000, availableSeats: 30, amenities: ['WiFi', 'AC', 'Charging'], tag: 'Byuzuye', busType: 'Standard' },
-  { id: 4, from: 'Kigali', to: 'Rubavu', company: 'Volcano Express', departureTime: '11:00 AM', arrivalTime: '02:30 PM', duration: '3h 30m', price: 4500, availableSeats: 5, amenities: ['AC'], busType: 'Standard' },
-  { id: 5, from: 'Kigali', to: 'Musanze', company: 'Volcano Express', departureTime: '14:00 PM', arrivalTime: '16:00 PM', duration: '2h 0m', price: 3500, availableSeats: 18, amenities: ['AC', 'WiFi'], busType: 'Luxury' },
-  { id: 6, from: 'Kigali', to: 'Huye', company: 'RITCO', departureTime: '16:00 PM', arrivalTime: '18:30 PM', duration: '2h 30m', price: 3000, availableSeats: 40, amenities: ['AC', 'Charging'], busType: 'Standard' },
-  { id: 7, from: 'Kigali', to: 'Kampala', company: 'Night Cruiser', departureTime: '22:00 PM', arrivalTime: '05:30 AM', duration: '7h 30m', price: 9000, availableSeats: 12, amenities: ['WiFi', 'AC', 'Charging'], busType: 'Sleeper' },
+  { id: 1, from: 'Kigali', to: 'Rubavu', company: 'Volcano Express', departureTime: '07:00 AM', arrivalTime: '10:30 AM', duration: '3h 30m', price: 4500, availableSeats: 23, amenities: ['WiFi', 'AC'], tag: 'Ikunzwe Cyane', busType: 'Luxury', logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png' },
+  { id: 2, from: 'Kigali', to: 'Rubavu', company: 'Horizon Express', departureTime: '08:30 AM', arrivalTime: '12:15 PM', duration: '3h 45m', price: 4800, availableSeats: 15, amenities: ['AC', 'Charging'], busType: 'Standard', logoUrl: 'https://media.jobinrwanda.com/logo/horizon-express-ltd-1681284534.png' },
+  { id: 3, from: 'Kigali', to: 'Huye', company: 'RITCO', departureTime: '09:00 AM', arrivalTime: '11:30 AM', duration: '2h 30m', price: 3000, availableSeats: 30, amenities: ['WiFi', 'AC', 'Charging'], tag: 'Byuzuye', busType: 'Standard', logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg' },
+  { id: 4, from: 'Kigali', to: 'Rubavu', company: 'Volcano Express', departureTime: '11:00 AM', arrivalTime: '02:30 PM', duration: '3h 30m', price: 4500, availableSeats: 5, amenities: ['AC'], busType: 'Standard', logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png' },
+  { id: 5, from: 'Kigali', to: 'Musanze', company: 'Volcano Express', departureTime: '14:00 PM', arrivalTime: '16:00 PM', duration: '2h 0m', price: 3500, availableSeats: 18, amenities: ['AC', 'WiFi'], busType: 'Luxury', logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png' },
+  { id: 6, from: 'Kigali', to: 'Huye', company: 'RITCO', departureTime: '16:00 PM', arrivalTime: '18:30 PM', duration: '2h 30m', price: 3000, availableSeats: 40, amenities: ['AC', 'Charging'], busType: 'Standard', logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg' },
+  { id: 7, from: 'Kigali', to: 'Kampala', company: 'Night Cruiser', departureTime: '22:00 PM', arrivalTime: '05:30 AM', duration: '7h 30m', price: 9000, availableSeats: 12, amenities: ['WiFi', 'AC', 'Charging'], busType: 'Sleeper', logoUrl: '' },
 ];
 
 const featuredRoutes = [
@@ -37,7 +36,10 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
                     {result.tag}
                 </div>
             )}
-            <p className="font-bold text-gray-700 dark:text-gray-200 text-lg">{result.company}</p>
+            <div className="flex items-center space-x-3 mb-1 justify-center sm:justify-start">
+                {result.logoUrl ? <img src={result.logoUrl} alt={`${result.company} logo`} className="w-8 h-8 object-contain rounded-full bg-white p-1 shadow-sm"/> : <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>}
+                <p className="font-bold text-gray-700 dark:text-gray-200 text-lg">{result.company}</p>
+            </div>
             <div className="flex items-center justify-center sm:justify-start space-x-3 mt-1">
                 {result.amenities.map((amenity: string) => <AmenityIcon key={amenity} amenity={amenity} />)}
             </div>
