@@ -1,260 +1,168 @@
-
 import React, { useState, useEffect } from 'react';
-
-// Components
 import Header from './components/Header';
-import Footer from './components/Footer';
 import HeroSection from './components/HeroSection';
 import HowItWorks from './components/HowItWorks';
 import PartnerCompanies from './components/PartnerCompanies';
-import BottomNavigation from './components/BottomNavigation';
-import CompaniesAside from './components/CompaniesAside';
-import NextTripWidget from './components/NextTripWidget';
-import LoadingSpinner from './components/LoadingSpinner';
-import ServicesAside from './components/ServicesAside'; // New Import
-
-// Pages
+import Footer from './components/Footer';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
+import SearchResultsPage from './SearchResultsPage';
+import SeatSelectionPage from './SeatSelectionPage';
 import BookingsPage from './BookingsPage';
+import ProfilePage from './ProfilePage';
 import CompaniesPage from './CompaniesPage';
 import CompanyProfilePage from './CompanyProfilePage';
 import HelpPage from './HelpPage';
 import ContactPage from './ContactPage';
-import BookingSearchPage from './BookingSearchPage';
-import SeatSelectionPage from './SeatSelectionPage';
-import ProfilePage from './ProfilePage';
-import ServicesPage from './ServicesPage';
 import ScheduledTripsPage from './ScheduledTripsPage';
-import DriverDashboard from './DriverDashboard';
-import AgentDashboard from './AgentDashboard';
 import AdminLayout from './admin/AdminLayout';
 import CompanyLayout from './company/CompanyLayout';
-import DriverProfilePage from './DriverProfilePage';
-import AgentProfilePage from './AgentProfilePage';
+import DriverDashboard from './DriverDashboard';
+import AgentDashboard from './AgentDashboard';
+import NextTripWidget from './components/NextTripWidget';
+import LiveTrackingModal from './components/LiveTrackingModal';
+import ServicesPage from './ServicesPage';
 import PackageDeliveryPage from './PackageDeliveryPage';
 import BusCharterPage from './BusCharterPage';
-import DriverSettingsPage from './DriverSettingsPage';
-
-// Data
-import { mockCompaniesData } from './admin/AdminDashboard';
+import CompaniesAside from './components/CompaniesAside';
+import ServicesAside from './components/ServicesAside';
+import BookingSearchPage from './BookingSearchPage';
+import BottomNavigation from './components/BottomNavigation';
+import TicketModal from './components/TicketModal';
 
 export type Page = 
-  | 'home' 
-  | 'login' 
-  | 'register' 
-  | 'bookingSearch' 
-  | 'seatSelection' 
-  | 'bookings' 
-  | 'companies' 
-  | 'companyProfile' 
-  | 'services' 
-  | 'help' 
-  | 'contact' 
-  | 'profile'
-  | 'scheduled'
-  | 'admin'
-  | 'company'
-  | 'driver'
-  | 'agent'
-  | 'driverProfile'
-  | 'agentProfile'
-  | 'packageDelivery'
-  | 'busCharter'
-  | 'driverSettings';
+  | 'home' | 'login' | 'register' | 'bookings' | 'scheduled' | 'search' 
+  | 'seatSelection' | 'payment' | 'confirmation' | 'profile' | 'companies' 
+  | 'companyProfile' | 'help' | 'contact' | 'services' | 'packageDelivery' 
+  | 'busCharter' | 'adminDashboard' | 'companyDashboard' | 'driverDashboard' 
+  | 'agentDashboard' | 'adminCompanies' | 'adminDrivers' | 'adminAgents' 
+  | 'adminPassengers' | 'adminUsers' | 'adminFinancials' | 'adminAds' 
+  | 'adminPromotions' | 'companyBuses' | 'companyDrivers' | 'companyRoutes' 
+  | 'companyPassengers' | 'companyFinancials' | 'companySettings' 
+  | 'fleetMonitoring' | 'driverProfile' | 'agentProfile' | 'bookingSearch';
 
-
-const user = {
-    name: 'Kalisa Jean',
-    email: 'kalisa.j@example.com',
-    memberSince: 'Mutarama 2023',
-    walletPin: '1234', // Hardcoded for simulation
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop',
-    coverUrl: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=2070&auto=format&fit=crop'
+// Mock User Data
+const mockUsers = {
+  passenger: { name: 'Kalisa Jean', email: 'passenger@rwandabus.rw', role: 'passenger', avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg', walletBalance: 15000, pin: '1234' },
+  company: { name: 'Volcano Express', email: 'manager@volcano.rw', role: 'company', avatarUrl: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg', pin: '2024' },
+  admin: { name: 'Admin User', email: 'admin@rwandabus.rw', role: 'admin', avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg' },
+  driver: { id: 'd1', name: 'John Doe', email: 'driver@volcano.rw', role: 'driver', avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg', companyId: 'volcano', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active', joinDate: '2022-03-10', bio: 'Experienced driver with over 10 years on the Kigali-Rubavu route. Safety is my priority.', certifications: [{id: 'CERT-001', name: 'Defensive Driving', expiry: '2025-12-31'}]},
+  agent: { id: 'a1', name: 'Jane Smith', email: 'jane.s@agent.rw', role: 'agent', avatarUrl: 'https://randomuser.me/api/portraits/women/5.jpg', location: 'Nyabugogo', commissionRate: 0.05, totalDeposits: 2500000, pin: '5678' }
 };
 
-const agentTransactions = [
-    { id: 1, agentId: 1, passengerName: 'Kalisa Jean', passengerSerial: 'UM1234', amount: 30000, commission: 600, date: '2024-10-25T10:00:00Z'},
-    { id: 2, agentId: 1, passengerName: 'Mutesi Aline', passengerSerial: 'UM5678', amount: 15000, commission: 300, date: '2024-10-25T11:30:00Z'},
-    { id: 3, agentId: 2, passengerName: 'Gatete David', passengerSerial: 'UM9012', amount: 5000, commission: 100, date: '2024-10-24T15:00:00Z'},
-];
+const mockNextTrip = {
+    route: 'Kigali - Huye',
+    departureTime: 'in 45 minutes',
+    company: 'Volcano Express',
+};
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [pageData, setPageData] = useState<any>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<'passenger' | 'driver' | 'agent' | 'company' | 'admin'>('passenger');
+  const [user, setUser] = useState<any | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [isLoading, setIsLoading] = useState(true);
+  const [showNextTrip, setShowNextTrip] = useState(false);
+  const [showLiveTracking, setShowLiveTracking] = useState(false);
   const [showCompaniesAside, setShowCompaniesAside] = useState(false);
   const [showServicesAside, setShowServicesAside] = useState(false);
-  const [showNextTripWidget, setShowNextTripWidget] = useState(true);
-  const [selectedTrip, setSelectedTrip] = useState<any>(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-  const [walletData, setWalletData] = useState({
-    balance: 25000,
-    currency: 'RWF',
-    serialCode: 'UM1234',
-    transactions: [
-        { id: 1, type: 'deposit', description: 'Agent Deposit', amount: 30000, date: '2024-10-20', status: 'completed' },
-        { id: 2, type: 'payment', description: 'Volcano Express Ticket', amount: -4500, date: '2024-10-18', status: 'completed' },
-    ]
-  });
-
-  const [boardingStatus, setBoardingStatus] = useState<Record<string, 'booked' | 'boarded'>>({
-      'VK-83AD1': 'booked',
-      'VK-83AD2': 'booked',
-      'VK-83AD3': 'booked',
-      'RT-98CD3': 'booked',
-      'RT-98CD4': 'booked',
-  });
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
-
-  useEffect(() => {
-    const handleResize = () => {
-        setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    // Check for persisted session
-    try {
-        const session = localStorage.getItem('rwandaBusSession');
-        if (session) {
-            const { email } = JSON.parse(session);
-            handleLogin({ email }, false); // Don't navigate on auto-login
-        }
-    } catch (error) {
-        console.error("Could not parse session data", error);
-    }
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const navigate = (page: Page, data: any = null) => {
-    setIsLoading(true);
-    setPageData(data);
-    setCurrentPage(page);
-    window.scrollTo(0, 0);
-    setTimeout(() => setIsLoading(false), 300);
-  };
+  const [viewingTicket, setViewingTicket] = useState<any | null>(null);
   
-  const handleLogin = (credentials, rememberMe = false, shouldNavigate = true) => {
-    setIsLoggedIn(true);
-    // Simple role check based on email
-    if (credentials.email?.includes('driver')) setUserRole('driver');
-    else if (credentials.email?.includes('agent')) setUserRole('agent');
-    else if (credentials.email?.includes('company')) setUserRole('company');
-    else if (credentials.email?.includes('admin')) setUserRole('admin');
-    else setUserRole('passenger');
+  // Passenger serial code for agent demo
+  const passengerSerialCode = "UM1234";
+  const [agentTransactions, setAgentTransactions] = useState([]);
 
-    if (rememberMe) {
-        localStorage.setItem('rwandaBusSession', JSON.stringify({ email: credentials.email }));
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
+  }, [theme]);
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
+  
+  const handleAgentDeposit = (serialCode, amount) => {
+    if(serialCode.toUpperCase() !== passengerSerialCode) return { success: false, message: 'Passenger not found.'};
     
-    if (shouldNavigate) {
-        navigate(credentials.email?.includes('driver') ? 'driver' : credentials.email?.includes('agent') ? 'agent' : credentials.email?.includes('company') ? 'company' : credentials.email?.includes('admin') ? 'admin' : 'home');
+    const commission = amount * 0.05;
+    const newTransaction = {
+      id: Date.now(),
+      agentId: mockUsers.agent.id,
+      passengerSerial: serialCode,
+      passengerName: 'Kalisa Jean',
+      amount,
+      commission,
+      date: new Date().toISOString()
+    };
+    setAgentTransactions(prev => [newTransaction, ...prev]);
+    return { success: true, passengerName: 'Kalisa Jean', commission };
+  };
+
+
+  const navigate = (page: Page, data?: any) => {
+    setCurrentPage(page);
+    setPageData(data);
+  };
+
+  const handleLogin = (role: keyof typeof mockUsers) => {
+    const loggedInUser = mockUsers[role];
+    setUser(loggedInUser);
+    if(loggedInUser.role === 'passenger') {
+        navigate('home');
+        setShowNextTrip(true);
+    } else if (loggedInUser.role === 'admin') {
+        navigate('adminDashboard');
+    } else if (loggedInUser.role === 'company') {
+        navigate('companyDashboard');
+    } else if (loggedInUser.role === 'driver') {
+        navigate('driverDashboard');
+    } else if (loggedInUser.role === 'agent') {
+        navigate('agentDashboard');
     }
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserRole('passenger');
-    localStorage.removeItem('rwandaBusSession');
+    setUser(null);
+    setShowNextTrip(false);
     navigate('home');
   };
   
   const handleSearch = (from?: string, to?: string) => {
-    navigate('bookingSearch', { from, to });
-  };
-  
-  const handleTripSelect = (trip: any) => {
-    const tripWithPriceString = {
-        ...trip,
-        price: `${new Intl.NumberFormat('fr-RW').format(trip.price)} RWF`
-    };
-    setSelectedTrip(tripWithPriceString);
-    navigate('seatSelection', tripWithPriceString);
-  };
-
-  const handleBookingConfirm = (selection: any) => {
-    const amountPaid = parseFloat(selection.totalPrice.replace(/[^0-9.-]+/g, ""));
-    const newBalance = walletData.balance - amountPaid;
-
-    const newTransaction = {
-        id: Date.now(),
-        type: 'payment',
-        description: `${selection.tripData.company} Ticket`,
-        amount: -amountPaid,
-        date: new Date().toISOString().split('T')[0],
-        status: 'completed'
-    };
-
-    setWalletData(prev => ({
-        ...prev,
-        balance: newBalance,
-        transactions: [newTransaction, ...prev.transactions]
-    }));
-  };
-  
-  const handlePassengerBoarding = (ticketId: string) => {
-      setBoardingStatus(prev => ({ ...prev, [ticketId]: 'boarded' }));
-  };
-
-  const handleWalletUpdate = (data) => {
-      setWalletData(data);
+      navigate('search', { from, to });
   }
-
-  const handleAgentDeposit = (serialCode: string, amount: number) => {
-      if (serialCode.toUpperCase() === walletData.serialCode) {
-          const commission = amount * 0.02; // 2% commission
-          setWalletData(prev => ({
-              ...prev,
-              balance: prev.balance + amount,
-              transactions: [{
-                  id: Date.now(),
-                  type: 'deposit',
-                  description: 'Agent Deposit',
-                  amount: amount,
-                  date: new Date().toISOString(),
-                  status: 'completed'
-              }, ...prev.transactions]
-          }));
-          return { success: true, passengerName: 'Kalisa Jean', commission };
-      }
-      return { success: false, message: 'Kode y\'umugenzi itariyo.' };
-  };
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'login': return <LoginPage onLogin={handleLogin} onNavigate={navigate} />;
+      case 'login': return <LoginPage onNavigate={navigate} onLogin={handleLogin} />;
       case 'register': return <RegisterPage onNavigate={navigate} />;
-      case 'bookingSearch': return <BookingSearchPage onTripSelect={handleTripSelect} initialSearch={pageData} />;
-      case 'seatSelection': return <SeatSelectionPage tripData={pageData} onConfirm={handleBookingConfirm} navigate={navigate} walletData={walletData} user={user} />;
-      case 'bookings': return <BookingsPage />;
+      case 'search': return <SearchResultsPage onTripSelect={() => navigate('seatSelection')} />;
+      case 'seatSelection': return <SeatSelectionPage onConfirm={() => alert("Proceed to payment")} onBack={() => navigate('search')} tripData={pageData} />;
+      case 'bookings': return <BookingsPage onViewTicket={setViewingTicket} />;
+      case 'profile': return <ProfilePage onNavigate={navigate} />;
+      case 'scheduled': return <ScheduledTripsPage onSearch={handleSearch}/>;
       case 'companies': return <CompaniesPage onNavigate={navigate} />;
       case 'companyProfile': return <CompanyProfilePage company={pageData} onSelectTrip={handleSearch} />;
-      case 'services': return <ServicesPage onNavigate={navigate} onToggleServicesAside={() => setShowServicesAside(true)} />;
       case 'help': return <HelpPage />;
       case 'contact': return <ContactPage />;
-      case 'profile': return <ProfilePage user={user} walletData={walletData} onWalletUpdate={handleWalletUpdate} boardingStatus={boardingStatus} onSearch={handleSearch} />;
-      case 'scheduled': return <ScheduledTripsPage onSearch={handleSearch} />;
-      case 'driverProfile': return <DriverProfilePage driver={pageData || {}} />;
-      case 'agentProfile': return <AgentProfilePage agent={pageData} allTransactions={agentTransactions} />;
+      case 'services': return <ServicesPage onNavigate={navigate} onToggleServicesAside={() => setShowServicesAside(true)} />;
       case 'packageDelivery': return <PackageDeliveryPage onNavigate={navigate} />;
       case 'busCharter': return <BusCharterPage onNavigate={navigate} />;
-      case 'driverSettings': return <DriverSettingsPage driverData={{ id: 1, name: 'John Doe', avatarUrl: user.avatarUrl, assignedBusId: 'VB01' }} companyData={mockCompaniesData[0]} theme={theme} setTheme={setTheme} />;
-      case 'admin': return <AdminLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} navigate={navigate} />;
-      case 'company': return <CompanyLayout onLogout={handleLogout} theme={theme} setTheme={setTheme} companyData={{...mockCompaniesData[0], pin: '5678'}} />;
-      case 'driver': return <DriverDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} driverData={{ id: 1, name: 'John Doe', avatarUrl: user.avatarUrl, assignedBusId: 'VB01' }} allCompanies={mockCompaniesData} onPassengerBoarding={handlePassengerBoarding} navigate={(page, data) => navigate(page, data)} />;
-      case 'agent': return <AgentDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} agentData={{ id: 1, name: 'Jane Smith', location: 'Nyabugogo', pin: '9999' }} onAgentDeposit={handleAgentDeposit} passengerSerialCode={walletData.serialCode} transactions={agentTransactions} />;
-      case 'home':
+      case 'bookingSearch': return <BookingSearchPage onSearch={handleSearch} />;
+      
+      case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminPassengers': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions': case 'agentProfile':
+        return <AdminLayout currentPage={currentPage} navigate={navigate} agentTransactions={agentTransactions} pageData={pageData} />;
+        
+      case 'companyDashboard': case 'companyBuses': case 'companyDrivers': case 'companyRoutes': case 'companyPassengers': case 'companyFinancials': case 'companySettings': case 'fleetMonitoring':
+        return <CompanyLayout currentPage={currentPage} navigate={navigate} companyData={user} />;
+        
+      case 'driverDashboard': case 'driverProfile':
+        return <DriverDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} driverData={mockUsers.driver} allCompanies={[]} onPassengerBoarding={() => {}} navigate={navigate} />;
+
+      case 'agentDashboard':
+        return <AgentDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} agentData={mockUsers.agent} onAgentDeposit={handleAgentDeposit} passengerSerialCode={passengerSerialCode} transactions={agentTransactions} />;
+
       default:
         return (
           <>
@@ -265,39 +173,50 @@ const App: React.FC = () => {
         );
     }
   };
-
-  const isDashboard = ['admin', 'company', 'driver', 'agent'].includes(currentPage);
+  
+  const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminPassengers', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile'].includes(currentPage);
+  const showBottomNav = ['home', 'bookingSearch', 'companies', 'profile'].includes(currentPage);
 
   return (
-    <div className={`${theme} bg-white dark:bg-gray-900`}>
-      {isLoading && <LoadingSpinner />}
-      {!isDashboard && <Header 
-        navigate={navigate} 
-        isLoggedIn={isLoggedIn}
-        onLogout={handleLogout}
-        theme={theme}
-        setTheme={setTheme}
-        currentPage={currentPage}
-        onToggleCompaniesAside={() => setShowCompaniesAside(true)}
-        onToggleServicesAside={() => setShowServicesAside(true)}
-      />}
-      
-      <main className={!isDashboard ? `pt-[68px] ${isMobile ? 'pb-24' : 'pb-0'}` : ""}>
-        {renderPage()}
-      </main>
+    <div className={`${theme} font-sans bg-white dark:bg-gray-900`}>
+        {!isDashboard && (
+             <Header 
+                currentPage={currentPage} 
+                onNavigate={navigate}
+                user={user}
+                onLogout={handleLogout}
+                theme={theme}
+                setTheme={setTheme}
+                onToggleCompaniesAside={() => setShowCompaniesAside(true)}
+             />
+        )}
+        <main className={isDashboard ? '' : 'pt-20'}>
+            <div key={currentPage} className="animate-fade-in">
+                {renderPage()}
+            </div>
+        </main>
+        {!isDashboard && <Footer />}
+        
+        {user?.role === 'passenger' && showNextTrip && (
+            <NextTripWidget 
+                trip={mockNextTrip} 
+                onDismiss={() => setShowNextTrip(false)}
+                onTrack={() => setShowLiveTracking(true)}
+            />
+        )}
+        
+        {showLiveTracking && <LiveTrackingModal onClose={() => setShowLiveTracking(false)} />}
+        {viewingTicket && <TicketModal ticket={viewingTicket} onClose={() => setViewingTicket(null)} />}
 
-      {!isDashboard && <Footer />}
-      {!isDashboard && isMobile && <BottomNavigation navigate={navigate} currentPage={currentPage} />}
-      {!isDashboard && <CompaniesAside isOpen={showCompaniesAside} onClose={() => setShowCompaniesAside(false)} navigate={navigate} />}
-      {!isDashboard && <ServicesAside isOpen={showServicesAside} onClose={() => setShowServicesAside(false)} navigate={navigate} />}
-      
-      {isLoggedIn && userRole === 'passenger' && showNextTripWidget && currentPage === 'home' && (
-        <NextTripWidget 
-            trip={{ route: 'Kigali - Rubavu', departureTime: '07:00 AM', company: 'Volcano Express' }}
-            onDismiss={() => setShowNextTripWidget(false)}
-            onTrack={() => navigate('bookings')}
-        />
-      )}
+        <CompaniesAside isOpen={showCompaniesAside} onClose={() => setShowCompaniesAside(false)} navigate={navigate} />
+        <ServicesAside isOpen={showServicesAside} onClose={() => setShowServicesAside(false)} navigate={navigate} />
+
+        {showBottomNav && (
+            <>
+                <div className="lg:hidden h-20" /> 
+                <BottomNavigation navigate={navigate} currentPage={currentPage} />
+            </>
+        )}
     </div>
   );
 };

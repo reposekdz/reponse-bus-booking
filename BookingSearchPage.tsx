@@ -1,121 +1,94 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, FilterIcon, ChevronDownIcon, ClockIcon } from './components/icons';
-import SearchResultSkeleton from './components/SearchResultSkeleton';
-import BookingForm from './components/BookingForm';
-
-const searchResultsData = [
-  { id: 1, company: 'Volcano Express', departureTime: '07:00 AM', arrivalTime: '10:30 AM', duration: '3h 30m', price: 4500, availableSeats: 23, amenities: ['WiFi', 'AC'], rating: 4.8, tag: 'Ikunzwe Cyane', logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png' },
-  { id: 2, company: 'Horizon Express', departureTime: '08:30 AM', arrivalTime: '12:15 PM', duration: '3h 45m', price: 4800, availableSeats: 15, amenities: ['AC', 'Charging'], rating: 4.5, logoUrl: 'https://media.jobinrwanda.com/logo/horizon-express-ltd-1681284534.png' },
-  { id: 3, company: 'RITCO', departureTime: '09:00 AM', arrivalTime: '12:30 PM', duration: '3h 30m', price: 4500, availableSeats: 0, amenities: ['WiFi', 'AC', 'Charging'], rating: 4.2, tag: 'Byuzuye', logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg' },
-  { id: 4, company: 'Volcano Express', departureTime: '11:00 AM', arrivalTime: '02:30 PM', duration: '3h 30m', price: 4500, availableSeats: 5, amenities: ['AC'], rating: 4.8, logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png' },
-  { id: 5, company: 'STELLART', departureTime: '06:00 AM', arrivalTime: '09:45 AM', duration: '3h 45m', price: 4700, availableSeats: 10, amenities: ['Charging'], rating: 4.6, logoUrl: '' },
-  { id: 6, company: 'RITCO', departureTime: '13:00 PM', arrivalTime: '04:30 PM', duration: '3h 30m', price: 4500, availableSeats: 18, amenities: ['WiFi', 'AC'], rating: 4.2, logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg' },
-];
+import React, { useState } from 'react';
+import { ArrowRightIcon, FilterIcon, LocationMarkerIcon, CalendarIcon, UserCircleIcon } from './components/icons';
+import SearchResultsPage from './SearchResultsPage';
+import AdBanner from './components/AdBanner';
+import FareCalendar from './components/FareCalendar';
 
 interface BookingSearchPageProps {
-  onTripSelect: (trip: any) => void;
-  initialSearch?: { from?: string; to?: string };
+  onSearch: (from: string, to: string) => void;
 }
 
-const AmenityIcon: React.FC<{ amenity: string }> = ({ amenity }) => {
-    const iconClass = "w-4 h-4 text-gray-500 dark:text-gray-400";
-    if (amenity === 'WiFi') return <WifiIcon className={iconClass} title="WiFi" />;
-    if (amenity === 'AC') return <AcIcon className={iconClass} title="Air Conditioning" />;
-    if (amenity === 'Charging') return <PowerIcon className={iconClass} title="Charging Ports" />;
-    return null;
-};
+const locations = ['Kigali', 'Rubavu', 'Musanze', 'Huye', 'Rusizi', 'Nyagatare', 'Muhanga'];
 
-const SearchResultCard: React.FC<{ result: any, onSelect: () => void }> = ({ result, onSelect }) => (
-    <button onClick={onSelect} disabled={result.availableSeats === 0} className="w-full text-left bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0 sm:space-x-6 transform hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 relative disabled:opacity-60 disabled:cursor-not-allowed">
-        {result.tag && (
-            <div className={`absolute top-0 left-6 -translate-y-1/2 text-xs font-bold px-3 py-1 rounded-full shadow-md ${result.tag === 'Byuzuye' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}`}>
-                {result.tag}
-            </div>
-        )}
-        <div className="flex items-center space-x-4">
-            {result.logoUrl ? <img src={result.logoUrl} alt={result.company} className="w-12 h-12 object-contain bg-gray-100 rounded-full p-1"/> : <div className="w-12 h-12 bg-gray-200 rounded-full"></div>}
-            <div>
-                <p className="font-bold text-gray-800 dark:text-gray-200 text-lg">{result.company}</p>
-                <div className="flex items-center space-x-1 mt-1">
-                    <StarIcon className="w-4 h-4 text-yellow-400" />
-                    <span className="text-sm font-bold text-gray-600 dark:text-gray-300">{result.rating}</span>
-                     <div className="flex items-center space-x-2 ml-3">
-                        {result.amenities.map((amenity: string) => <AmenityIcon key={amenity} amenity={amenity} />)}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div className="flex items-center space-x-4">
-            <div className="text-center">
-                <p className="font-bold text-xl text-gray-800 dark:text-white">{result.departureTime}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{result.from || 'Kigali'}</p>
-            </div>
-            <div className="text-center text-gray-400">
-                <p className="text-xs flex items-center"><ClockIcon className="w-3 h-3 mr-1"/>{result.duration}</p>
-                <div className="w-20 h-0.5 bg-gray-300 dark:bg-gray-600 my-1"></div>
-            </div>
-            <div className="text-center">
-                <p className="font-bold text-xl text-gray-800 dark:text-white">{result.arrivalTime}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{result.to || 'Rubavu'}</p>
-            </div>
-        </div>
-        <div className="flex items-center space-x-4">
-            <div className="text-center sm:text-right">
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{new Intl.NumberFormat('fr-RW').format(result.price)} <span className="text-sm font-normal">RWF</span></p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{result.availableSeats > 0 ? `hasigaye imyanya ${result.availableSeats}` : 'Imyanya yose yafashwe'}</p>
-            </div>
-            <div className="hidden sm:block">
-                 <ArrowRightIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-            </div>
-        </div>
-    </button>
-);
+const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onSearch }) => {
+  const [fromLocation, setFromLocation] = useState('Kigali');
+  const [toLocation, setToLocation] = useState('Rubavu');
+  const [journeyDate, setJourneyDate] = useState(new Date().toISOString().split('T')[0]);
+  const [returnDate, setReturnDate] = useState('');
+  const [tripType, setTripType] = useState('one-way');
+  const [passengers, setPassengers] = useState(1);
 
-
-const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onTripSelect, initialSearch }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [results, setResults] = useState<any[]>([]);
-
-  useEffect(() => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-        setResults(searchResultsData);
-        setIsLoading(false);
-    }, 1000);
-  }, []);
-
-  const fromCity = initialSearch?.from || "Kigali";
-  const toCity = initialSearch?.to || "Rubavu";
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(fromLocation, toLocation);
+  };
+  
+  const swapLocations = () => {
+    const temp = fromLocation;
+    setFromLocation(toLocation);
+    setToLocation(temp);
+  };
 
   return (
-    <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-full">
-        <header className="bg-white dark:bg-gray-800/50 shadow-sm py-8">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <header className="bg-white dark:bg-gray-800/50 shadow-sm pt-12 pb-24">
             <div className="container mx-auto px-6">
-                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Ibyavuye mu Gushakisha</h1>
-                 <p className="text-gray-600 dark:text-gray-400 mt-1">{fromCity} <ArrowRightIcon className="inline w-4 h-4"/> {toCity} - 28 Ukwakira, 2024</p>
-            </div>
-        </header>
-
-        <main className="container mx-auto px-6 py-8">
-            <div className="space-y-6">
-                {isLoading ? <SearchResultSkeleton count={4} /> : (
-                    results.length > 0 ? results.map(result => (
-                        <SearchResultCard 
-                            key={result.id} 
-                            result={{...result, from: fromCity, to: toCity}} 
-                            onSelect={() => onTripSelect({...result, from: fromCity, to: toCity})}
-                        />
-                    )) : (
-                        <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-lg">
-                            <h2 className="text-xl font-bold">Nta ngendo zibonetse</h2>
-                            <p className="text-gray-500 mt-2">Gerageza guhindura aho uva, aho ujya, cyangwa itariki.</p>
+                <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Gushakisha Urugendo</h1>
+                <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">Bona urugendo rwiza kuri wowe.</p>
+                
+                {/* ADVANCED SEARCH FORM */}
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg mt-6 relative z-10">
+                    <div className="flex space-x-4 border-b dark:border-gray-700 pb-4 mb-4">
+                        <button onClick={() => setTripType('one-way')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'one-way' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}`}>Urugendo Rumwe</button>
+                        <button onClick={() => setTripType('round-trip')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'round-trip' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}`}>Kugenda no Kugaruka</button>
+                    </div>
+                    <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+                        <div className="lg:col-span-3 relative">
+                            <label className="text-xs font-semibold text-gray-500">Uva</label>
+                            <select value={fromLocation} onChange={e => setFromLocation(e.target.value)} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:ring-yellow-500 focus:border-yellow-500">
+                                {locations.map(l => <option key={`from-${l}`}>{l}</option>)}
+                            </select>
                         </div>
-                    )
-                )}
+
+                         <div className="lg:col-span-3 relative">
+                            <label className="text-xs font-semibold text-gray-500">Ujya</label>
+                            <select value={toLocation} onChange={e => setToLocation(e.target.value)} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:ring-yellow-500 focus:border-yellow-500">
+                                {locations.map(l => <option key={`to-${l}`}>{l}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="lg:col-span-2 relative">
+                            <label className="text-xs font-semibold text-gray-500">Itariki yo Kugenda</label>
+                            <input type="date" value={journeyDate} onChange={e => setJourneyDate(e.target.value)} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
+                        </div>
+                        <div className={`lg:col-span-2 relative transition-opacity ${tripType === 'one-way' ? 'opacity-50' : 'opacity-100'}`}>
+                            <label className="text-xs font-semibold text-gray-500">Itariki yo Kugaruka</label>
+                            <input type="date" value={returnDate} onChange={e => setReturnDate(e.target.value)} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" disabled={tripType === 'one-way'} />
+                        </div>
+
+                        <div className="lg:col-span-2">
+                            <button type="submit" className="w-full py-2.5 bg-yellow-400 text-[#0033A0] font-semibold rounded-lg hover:bg-yellow-500 transition shadow-md">Shakisha</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </main>
+      </header>
+       <main className="container mx-auto px-6 py-8 -mt-12">
+         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+           <aside className="lg:col-span-1">
+             <div className="sticky top-24 space-y-6">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                    <h3 className="text-xl font-bold dark:text-white mb-4 flex items-center"><FilterIcon className="w-5 h-5 mr-2"/> Sefa Ibindi</h3>
+                    <p className="text-sm text-gray-500">Filter options (by price, time, etc.) coming soon.</p>
+                </div>
+             </div>
+           </aside>
+           <div className="lg:col-span-3">
+               <SearchResultsPage onTripSelect={() => {}} />
+           </div>
+         </div>
+       </main>
     </div>
   );
 };

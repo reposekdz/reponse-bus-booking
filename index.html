@@ -15,6 +15,7 @@
       }
       /* Custom scrollbar for webkit browsers */
       .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
         height: 8px;
       }
       .custom-scrollbar::-webkit-scrollbar-track {
@@ -38,6 +39,19 @@
       }
       .animate-fade-in {
         animation: fadeIn 0.5s ease-out forwards;
+      }
+      .stagger-fade-in {
+        animation: fadeIn 0.5s ease-out backwards;
+      }
+
+      /* Seat selection animation */
+      @keyframes pop-in {
+        0% { transform: scale(0.9); }
+        70% { transform: scale(1.15); }
+        100% { transform: scale(1.1); }
+      }
+      .animate-pop-in {
+        animation: pop-in 0.2s ease-out forwards;
       }
       
       /* 3D card effect for partner companies */
@@ -67,7 +81,9 @@
     "@react-navigation/native": "https://aistudiocdn.com/@react-navigation/native@^7.1.19",
     "@react-navigation/bottom-tabs": "https://aistudiocdn.com/@react-navigation/bottom-tabs@^7.7.3",
     "@react-navigation/native-stack": "https://aistudiocdn.com/@react-navigation/native-stack@^7.6.2",
-    "@react-navigation/stack": "https://aistudiocdn.com/@react-navigation/stack@^7.6.2"
+    "@react-navigation/stack": "https://aistudiocdn.com/@react-navigation/stack@^7.6.2",
+    "expo-status-bar": "https://aistudiocdn.com/expo-status-bar@^3.0.8",
+    "react-native-gesture-handler": "https://aistudiocdn.com/react-native-gesture-handler@^2.29.1"
   }
 }
 </script>

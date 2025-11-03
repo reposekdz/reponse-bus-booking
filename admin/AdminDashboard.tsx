@@ -1,160 +1,52 @@
 
+import React from 'react';
+import { ChartBarIcon, UsersIcon, BuildingOfficeIcon, BriefcaseIcon } from '../components/icons';
 
-import React, { useState } from 'react';
-import { ChartBarIcon, UsersIcon, BusIcon, BriefcaseIcon, CurrencyDollarIcon } from '../components/icons';
-import ActivityFeed from '../components/ActivityFeed';
-import DateRangePicker from '../components/DateRangePicker';
-
+// FIX: Exporting mock data to resolve module not found errors in other components.
 export const mockCompaniesData = [
-  { 
-    id: 'volcano', 
-    name: 'Volcano Express', 
-    totalPassengers: 3500000, 
-    totalRevenue: 15700000000, 
-    routes: [ { from: 'Kigali', to: 'Rubavu', price: '4,500 FRW' }, { from: 'Kigali', to: 'Musanze', price: '3,500 FRW' }, { from: 'Rubavu', to: 'Kigali', price: '4,500 FRW' } ],
-    status: 'Active',
-    coverUrl: 'https://images.unsplash.com/photo-1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop',
-    logoUrl: 'https://seeklogo.com/images/V/volcano-express-logo-F735513A51-seeklogo.com.png',
-    description: "Volcano Express ni kimwe mu bigo bikunzwe cyane mu Rwanda, kizwiho serivisi nziza, isuku, no kugera ku gihe. Bakorera mu mihanda myinshi ikomeye."
-  },
-  { 
-    id: 'ritco', 
-    name: 'RITCO', 
-    totalPassengers: 2100000, 
-    totalRevenue: 9400000000, 
-    routes: [ { from: 'Kigali', to: 'Huye', price: '3,000 FRW' }, { from: 'Kigali', to: 'Nyungwe', price: '7,000 FRW' }, { from: 'Kigali', to: 'Rusizi', price: '8,000 FRW' }, { from: 'Huye', to: 'Kigali', price: '3,000 FRW' } ],
-    status: 'Active',
-    coverUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop',
-    logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/03/logo.svg',
-    description: "RITCO ni ikigo cya Leta gishinzwe gutwara abantu mu buryo bwa rusange, kizwiho kugira imodoka nini kandi zigezweho zitwara abantu mu gihugu hose."
-  },
-  { 
-    id: 'horizon', 
-    name: 'Horizon Express', 
-    totalPassengers: 1200000, 
-    totalRevenue: 5400000000, 
-    routes: [ { from: 'Huye', to: 'Musanze', price: '5,000 FRW' } ],
-    status: 'Inactive',
-    coverUrl: 'https://images.unsplash.com/photo-1605641793224-6512a8d8363b?q=80&w=1974&auto=format&fit=crop',
-    logoUrl: 'https://media.jobinrwanda.com/logo/horizon-express-ltd-1681284534.png',
-    description: 'Horizon Express itanga serivisi zo gutwara abantu hagati y\'imijyi itandukanye, cyane cyane mu majyepfo y\'u Rwanda.'
-  },
-  { 
-    id: 'stellart', 
-    name: 'STELLART', 
-    totalPassengers: 1800000, 
-    totalRevenue: 7000000000, 
-    routes: [ { from: 'Kigali', to: 'Rusizi', price: '8,500 FRW' } ],
-    status: 'Active',
-    coverUrl: 'https://images.unsplash.com/photo-1616372819235-9b2e1577a2d4?q=80&w=2070&auto=format&fit=crop',
-    logoUrl: '',
-    description: 'Stellart itanga ingendo nziza kandi zihuse kuva i Kigali ujya mu bice by\'uburengerazuba.'
-  },
+  { id: 'volcano', name: 'Volcano Express', status: 'Active', totalRevenue: 5_800_000_000, totalPassengers: 3_500_000, routesCount: 30, logoUrl: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg', coverUrl: 'https://images.unsplash.com/photo-1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop', description: 'Volcano Express is one of the most popular transport companies in Rwanda, known for its excellent service, cleanliness, and punctuality.' },
+  { id: 'ritco', name: 'RITCO', status: 'Active', totalRevenue: 8_200_000_000, totalPassengers: 2_100_000, routesCount: 25, logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/04/ritco-logo-single.png', coverUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop', description: 'RITCO is a public-private partnership providing reliable country-wide transportation with a modern fleet of large buses.' },
+  { id: 'horizon', name: 'Horizon Express', status: 'Active', totalRevenue: 3_100_000_000, totalPassengers: 1_800_000, routesCount: 22, logoUrl: 'https://media.licdn.com/dms/image/C4D0BAQHL8G_LgDIeew/company-logo_200_200/0/1630656360706/horizon_express_ltd_logo?e=2147483647&v=beta&t=o1QkClM7J5Z8Y4b3b2A1e2a5f6a8b7c5d4e3f2a1', coverUrl: 'https://images.unsplash.com/photo-1605641793224-6512a8d8363b?q=80&w=1974&auto=format&fit=crop', description: 'Horizon Express connects major towns with a focus on customer comfort and safety.' },
+  { id: 'stellart', name: 'STELLART', status: 'Inactive', totalRevenue: 1_500_000_000, totalPassengers: 950_000, routesCount: 15, logoUrl: 'https://pbs.twimg.com/profile_images/1364539655823495169/DE-O7wXJ_400x400.jpg', coverUrl: 'https://images.unsplash.com/photo-1616372819235-9b2e1577a2d4?q=80&w=2070&auto=format&fit=crop', description: 'STELLART provides affordable travel options across the country.' },
 ];
 
-const StatCard = ({ title, value, icon, format = 'number' }) => {
-    const formattedValue = typeof value === 'string' ? value :
-        format === 'currency' ? new Intl.NumberFormat('fr-RW', { notation: 'compact' }).format(value) + ' RWF' : new Intl.NumberFormat().format(value);
-    return(
-        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg relative overflow-hidden group">
-            <div className="absolute -right-4 -bottom-4 text-gray-200/20 dark:text-gray-900/20 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
-                {React.cloneElement(icon, { className: "w-20 h-20" })}
+export const mockDriversData = [
+    { id: 'd1', name: 'John Doe', companyId: 'volcano', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active', avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
+    { id: 'd2', name: 'Peter Jones', companyId: 'ritco', assignedBusId: 'RAF 456 C', phone: '0788333444', status: 'Active', avatarUrl: 'https://randomuser.me/api/portraits/men/5.jpg' },
+    { id: 'd3', name: 'Mary Anne', companyId: 'volcano', assignedBusId: 'RAE 789 A', phone: '0788555666', status: 'On Leave', avatarUrl: 'https://randomuser.me/api/portraits/women/6.jpg' },
+];
+
+
+const StatCard = ({ title, value, icon, change, changeType }) => (
+    <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+        <div className="flex items-center space-x-4">
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+                {icon}
             </div>
-            <div className="relative">
+            <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{formattedValue}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
             </div>
         </div>
-    );
-};
-
-const BarChart = ({ data, title, dataKey, labelKey, colorClass, format = 'compact' }: { data: any[], title: string, dataKey: string, labelKey: string, colorClass: string, format?: 'compact' | 'standard' | 'scientific' | 'engineering' }) => {
-    const maxValue = Math.max(...data.map(d => d[dataKey]));
-    return (
-        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-            <h3 className="font-bold mb-4 dark:text-white">{title}</h3>
-            <div className="flex items-end h-64 space-x-2">
-                {data.map(item => (
-                    <div key={item[labelKey]} className="flex-1 flex flex-col items-center justify-end group">
-                        <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {new Intl.NumberFormat('fr-RW', { notation: format }).format(item[dataKey])}
-                        </div>
-                        <div className={`w-full ${colorClass} rounded-t-lg hover:opacity-80 transition-opacity`} style={{height: `${(item[dataKey] / (maxValue || 1)) * 100}%`}}></div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item[labelKey]}</div>
-                    </div>
-                ))}
-            </div>
+        <div className={`text-xs mt-2 font-semibold ${changeType === 'increase' ? 'text-green-500' : 'text-red-500'}`}>
+            {change} vs last month
         </div>
-    );
-};
+    </div>
+);
 
-interface AdminDashboardProps {
-    companies: any[];
-    drivers: any[];
-    agents: any[];
-    buses: any[];
-}
-
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ companies, drivers, agents, buses }) => {
-    const [dateRange, setDateRange] = useState('30 Days');
-    
-    // Mock data based on date range
-    const multiplier = dateRange === 'Today' ? 0.03 : dateRange === '7 Days' ? 0.2 : 1;
-    const totalRevenue = companies.reduce((acc, c) => acc + c.totalRevenue, 0) * multiplier;
-    const totalPassengers = companies.reduce((acc, c) => acc + c.totalPassengers, 0) * multiplier;
-
-    const topRoutes = [
-        { name: 'KGL-RBV', revenue: 580000000 * multiplier },
-        { name: 'KGL-HYE', revenue: 420000000 * multiplier },
-        { name: 'KGL-MSZ', revenue: 350000000 * multiplier },
-        { name: 'KGL-RSZ', revenue: 310000000 * multiplier },
-    ];
-
+const AdminDashboard: React.FC = () => {
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500 dark:from-blue-400 dark:to-green-300">Platform Overview</h1>
-                <DateRangePicker activeRange={dateRange} onRangeChange={setDateRange} />
-            </div>
+        <div>
+            <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Admin Overview</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Revenue" value={totalRevenue} icon={<CurrencyDollarIcon />} format="currency" />
-                <StatCard title="Total Passengers" value={totalPassengers} icon={<UsersIcon />} />
-                <StatCard title="Avg. Occupancy" value={`${(78.5 * (1 + (Math.random() - 0.5) * 0.1)).toFixed(1)}%`} icon={<BusIcon />} format="string"/>
-                <StatCard title="Active Users" value={8650 * multiplier} icon={<BriefcaseIcon />} />
+                <StatCard title="Total Revenue" value="25.8M RWF" icon={<ChartBarIcon className="w-6 h-6 text-blue-600"/>} change="+5.2%" changeType="increase" />
+                <StatCard title="Total Passengers" value="8.6M" icon={<UsersIcon className="w-6 h-6 text-blue-600"/>} change="+2.1%" changeType="increase" />
+                <StatCard title="Active Companies" value="4" icon={<BuildingOfficeIcon className="w-6 h-6 text-blue-600"/>} change="-1" changeType="decrease" />
+                <StatCard title="Registered Agents" value="2" icon={<BriefcaseIcon className="w-6 h-6 text-blue-600"/>} change="+0%" changeType="increase" />
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                     <BarChart 
-                        data={companies}
-                        title="Revenue by Company"
-                        dataKey="totalRevenue"
-                        labelKey="name"
-                        colorClass="bg-blue-300 dark:bg-blue-800/80"
-                        format="compact"
-                    />
-                </div>
-                 <ActivityFeed />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                     <BarChart 
-                        data={topRoutes}
-                        title="Top Routes by Revenue"
-                        dataKey="revenue"
-                        labelKey="name"
-                        colorClass="bg-green-300 dark:bg-green-800/80"
-                        format="compact"
-                    />
-                </div>
-                 <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                     <h2 className="text-xl font-bold dark:text-white">Quick Stats</h2>
-                     <div className="space-y-3 mt-4 text-sm">
-                         <div className="flex justify-between"><span className="text-gray-500">Companies</span><span className="font-bold dark:text-white">{companies.length}</span></div>
-                         <div className="flex justify-between"><span className="text-gray-500">Drivers</span><span className="font-bold dark:text-white">{drivers.length}</span></div>
-                         <div className="flex justify-between"><span className="text-gray-500">Agents</span><span className="font-bold dark:text-white">{agents.length}</span></div>
-                         <div className="flex justify-between"><span className="text-gray-500">Buses</span><span className="font-bold dark:text-white">{buses.length}</span></div>
-                     </div>
-                </div>
+            <div className="mt-8 bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                <h2 className="text-xl font-bold dark:text-white">Recent Activity</h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-4">A live feed of platform activity will be shown here.</p>
             </div>
         </div>
     );

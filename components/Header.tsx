@@ -1,220 +1,156 @@
-import React, { useState, useEffect } from 'react';
-import { BusIcon, SunIcon, MoonIcon, BellIcon, MenuIcon, XIcon, UserCircleIcon, ChevronDownIcon, LanguageIcon } from './icons';
-import type { Page } from '../App';
-
-interface NavItem {
-    label: string;
-    page: Page;
-    action?: () => void;
-    children?: NavItem[];
-}
+import React, { useState } from 'react';
+import { Page } from '../App';
+import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, BuildingOfficeIcon, LanguageIcon, ChevronDownIcon, WalletIcon } from './icons';
 
 interface HeaderProps {
-  navigate: (page: Page) => void;
-  isLoggedIn: boolean;
+  currentPage: Page;
+  onNavigate: (page: Page) => void;
+  user: any | null;
   onLogout: () => void;
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
-  currentPage: Page;
   onToggleCompaniesAside: () => void;
-  onToggleServicesAside: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ navigate, isLoggedIn, onLogout, theme, setTheme, currentPage, onToggleCompaniesAside, onToggleServicesAside }) => {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState('KIN');
+const NavLink: React.FC<{ page: Page; currentPage: Page; onNavigate: (page: Page) => void; children: React.ReactNode }> = ({ page, currentPage, onNavigate, children }) => (
+  <button 
+    onClick={() => onNavigate(page)}
+    className={`px-4 py-2 text-sm font-semibold transition-colors duration-200 ${currentPage === page ? 'text-yellow-300' : 'text-white hover:text-yellow-200'}`}
+  >
+    {children}
+  </button>
+);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) { // Corresponds to lg breakpoint
-        setIsMenuOpen(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  let navItems: NavItem[] = [
-    { label: 'Ahabanza', page: 'home' },
-    { label: 'Kata Itike', page: 'bookingSearch' },
-    { label: 'Amatike Yanjye', page: 'bookings' },
-    { label: 'Ibigo', page: 'companies', action: onToggleCompaniesAside },
-    { label: 'Serivisi', page: 'services', action: onToggleServicesAside },
-    { label: 'Ubufasha', page: 'help' },
-    { label: 'Twandikire', page: 'contact' },
+const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout, theme, setTheme, onToggleCompaniesAside }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState({ code: 'RW', name: 'Kinyarwanda', flag: '🇷🇼' });
+
+  const languages = [
+    { code: 'RW', name: 'Kinyarwanda', flag: '🇷🇼' },
+    { code: 'EN', name: 'English', flag: '🇬🇧' },
+    { code: 'FR', name: 'Français', flag: '🇫🇷' },
   ];
-  
-  if (isLoggedIn) {
-      navItems = [
-          { label: 'Ahabanza', page: 'home' },
-          { label: 'Kata Itike', page: 'bookingSearch' },
-          { label: 'Umwirondoro', page: 'profile' },
-          { label: 'Ibigo', page: 'companies', action: onToggleCompaniesAside },
-          { label: 'Serivisi', page: 'services', action: onToggleServicesAside },
-          { label: 'Twandikire', page: 'contact' },
-      ]
-  }
-  
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+
+  const selectLanguage = (lang) => {
+    setCurrentLang(lang);
+    setIsLangOpen(false);
   };
-  
-  const handleNavClick = (item: NavItem) => {
-    if (item.action) {
-        item.action();
-    } else {
-        navigate(item.page);
-    }
-    setIsMenuOpen(false);
-  };
-  
-  const languages = ['KIN', 'ENG', 'FRA'];
 
   return (
-    <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#0033A0] to-[#0c2461] shadow-lg text-white dark:from-gray-900 dark:to-black">
-        <div className="container mx-auto px-6 py-3 flex justify-between items-center">
-          <button onClick={() => navigate('home')} className="flex items-center space-x-2 focus:outline-none">
-            <BusIcon className="h-8 w-8 bg-gradient-to-r from-blue-400 to-yellow-300 p-1 rounded" />
-            <span className="text-xl font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-yellow-300">
-              RWANDA BUS
-            </span>
+    <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0033A0] to-[#0c2461] text-white shadow-lg backdrop-blur-sm bg-opacity-90">
+      <div className="container mx-auto px-6 h-20 flex justify-between items-center">
+        <button onClick={() => onNavigate('home')} className="text-2xl font-extrabold tracking-tight">
+          Rwanda<span className="text-yellow-300">Bus</span>
+        </button>
+
+        <nav className="hidden lg:flex items-center space-x-2">
+          <NavLink page="home" currentPage={currentPage} onNavigate={onNavigate}>Ahabanza</NavLink>
+          <NavLink page="bookingSearch" currentPage={currentPage} onNavigate={onNavigate}>Gukata Itike</NavLink>
+          <button onClick={onToggleCompaniesAside} className="px-4 py-2 text-sm font-semibold text-white hover:text-yellow-200 transition-colors duration-200">Ibigo</button>
+          <NavLink page="services" currentPage={currentPage} onNavigate={onNavigate}>Serivisi</NavLink>
+          <NavLink page="help" currentPage={currentPage} onNavigate={onNavigate}>Ubufasha</NavLink>
+          <NavLink page="contact" currentPage={currentPage} onNavigate={onNavigate}>Twandikire</NavLink>
+        </nav>
+
+        <div className="flex items-center space-x-2 sm:space-x-4">
+           <div className="relative hidden lg:block">
+            <button onClick={() => setIsLangOpen(!isLangOpen)} className="flex items-center space-x-2 p-2 rounded-full hover:bg-white/10">
+              <span className="text-sm font-semibold">{currentLang.flag}</span>
+              <ChevronDownIcon className={`w-4 h-4 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isLangOpen && (
+              <div 
+                className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 animate-fade-in"
+                onMouseLeave={() => setIsLangOpen(false)}
+              >
+                {languages.map(lang => (
+                  <button key={lang.code} onClick={() => selectLanguage(lang)} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <span className="mr-3">{lang.flag}</span>
+                    {lang.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-white/10">
+            {theme === 'light' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
           </button>
           
-          <nav className="hidden lg:flex items-center space-x-8">
-            {navItems.map((item) => (
-                <button
-                    key={item.page}
-                    onClick={() => handleNavClick(item)}
-                    className={`relative group transition-colors duration-300 ${currentPage === item.page ? 'text-yellow-300' : 'text-gray-200 hover:text-yellow-300'}`}
-                >
-                    {item.label}
-                    <span className={`absolute bottom-0 left-0 h-0.5 bg-yellow-300 transition-all duration-300 ${currentPage === item.page ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+          <div className="hidden lg:flex items-center">
+            {user ? (
+              <div className="relative">
+                <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="flex items-center space-x-2 p-1 rounded-full hover:bg-white/10">
+                  <img src={user.avatarUrl} alt="User" className="w-8 h-8 rounded-full" />
                 </button>
-            ))}
-          </nav>
-
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-                <button onClick={() => setShowLanguageMenu(!showLanguageMenu)} className="flex items-center text-gray-200 hover:text-yellow-300 transition-colors duration-300">
-                    <LanguageIcon className="w-6 h-6" />
-                    <span className="text-sm font-semibold ml-1">{currentLanguage}</span>
-                    <ChevronDownIcon className="w-4 h-4" />
-                </button>
-                 {showLanguageMenu && (
-                    <div className="absolute right-0 mt-2 w-24 bg-white dark:bg-gray-800 rounded-lg shadow-xl py-1 text-gray-800 dark:text-gray-200">
-                        {languages.map(lang => (
-                             <button 
-                                key={lang}
-                                onClick={() => { setCurrentLanguage(lang); setShowLanguageMenu(false); }}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                            >
-                                {lang}
-                            </button>
-                        ))}
+                {isUserMenuOpen && (
+                  <div 
+                    className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg animate-fade-in"
+                    onMouseLeave={() => setIsUserMenuOpen(false)}
+                  >
+                    <div className="p-4 border-b dark:border-gray-700">
+                        <p className="font-bold text-gray-800 dark:text-white">{user.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                     </div>
-                )}
-            </div>
-
-            <button onClick={toggleTheme} className="text-gray-200 hover:text-yellow-300 transition-colors duration-300">
-              {theme === 'light' ? <MoonIcon className="w-6 h-6" /> : <SunIcon className="w-6 h-6" />}
-            </button>
-            
-            <div className="relative">
-              <button onClick={() => setShowNotifications(!showNotifications)} className="text-gray-200 hover:text-yellow-300 transition-colors duration-300">
-                <BellIcon className="w-6 h-6" />
-              </button>
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 text-gray-800 dark:text-gray-200">
-                  <p className="font-bold mb-2">Ibimenyetso</p>
-                  <div className="text-sm space-y-2">
-                    <p>Urugendo rwawe rujya i Rubavu ni ejo!</p>
-                    <p className="text-green-600 dark:text-green-400">Gura itike ubu ubone igabanyirizwa rya 10%.</p>
+                    <div className="py-2">
+                        <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><UserCircleIcon className="w-5 h-5 mr-2"/> Umwirondoro</button>
+                        <button onClick={() => { onNavigate('bookings'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><UserCircleIcon className="w-5 h-5 mr-2"/> Amatike Yanjye</button>
+                        <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><WalletIcon className="w-5 h-5 mr-2"/> Ikofi</button>
+                    </div>
+                     <div className="border-t dark:border-gray-700 p-2">
+                        <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">Sohoka</button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-
-            <div className="hidden sm:flex items-center space-x-4">
-              {isLoggedIn ? (
-                <div className="flex items-center space-x-4">
-                  <button onClick={() => navigate('profile')} className="flex items-center text-gray-200 hover:text-yellow-300 transition-colors duration-300">
-                    <UserCircleIcon className="w-7 h-7" />
-                  </button>
-                  <button 
-                    onClick={onLogout}
-                    className="px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md text-sm font-semibold"
-                  >
-                    Sohoka
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <button 
-                    onClick={() => navigate('login')}
-                    className="px-4 py-2 rounded-md border border-blue-400 text-blue-300 hover:bg-blue-400 hover:text-white transition-all duration-300 text-sm font-semibold"
-                  >
-                    Injira
-                  </button>
-                  <button 
-                    onClick={() => navigate('register')}
-                    className="px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md text-sm font-semibold"
-                  >
-                    Iyandikishe
-                  </button>
-                </>
-              )}
-            </div>
-          <div className="lg:hidden">
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white focus:outline-none">
-                <MenuIcon className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-      
-      {/* Tablet & Mobile Side Menu */}
-      <div 
-        className={`lg:hidden fixed inset-0 z-50 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        onClick={() => setIsMenuOpen(false)}
-      >
-        <div className="absolute inset-0 bg-black/60"></div>
-        <aside className={`absolute top-0 left-0 h-full w-72 bg-gradient-to-b from-[#0033A0] to-[#0c2461] dark:from-gray-900 dark:to-black shadow-2xl p-6 transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-8">
-               <span className="text-lg font-bold text-white">Menu</span>
-                <button onClick={() => setIsMenuOpen(false)} className="text-white">
-                    <XIcon className="w-6 h-6" />
-                </button>
-            </div>
-            <nav className="flex flex-col space-y-1">
-              {navItems.map((item) => (
-                <button key={item.page} onClick={() => handleNavClick(item)} className={`w-full p-3 rounded-lg text-left transition-colors duration-200 ${currentPage === item.page && !item.action ? 'bg-yellow-400 text-[#0033A0] font-bold' : 'text-gray-200 hover:bg-white/10'}`}>
-                {item.label}
-                </button>
-              ))}
-            </nav>
-            <div className="sm:hidden flex flex-col items-center space-y-4 pt-6 border-t border-gray-700 w-full mt-6">
-               {isLoggedIn ? (
-                  <button onClick={onLogout} className="w-full px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] text-sm font-semibold">
-                    Sohoka
-                  </button>
-                ) : (
-                  <>
-                    <button onClick={() => navigate('login')} className="w-full px-4 py-2 rounded-md border border-blue-400 text-blue-300 text-sm font-semibold">
-                      Injira
-                    </button>
-                    <button onClick={() => navigate('register')} className="w-full px-4 py-2 rounded-md bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] text-sm font-semibold">
-                      Iyandikishe
-                    </button>
-                  </>
                 )}
               </div>
-        </aside>
+            ) : (
+              <button onClick={() => onNavigate('login')} className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] rounded-md hover:saturate-150 transition-all shadow-md transform hover:-translate-y-0.5">Injira</button>
+            )}
+          </div>
+          
+          <button className="lg:hidden" onClick={() => setIsMobileMenuOpen(true)}>
+            <MenuIcon className="w-6 h-6" />
+          </button>
+        </div>
       </div>
-    </>
+      
+       {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-gray-900/80 backdrop-blur-sm lg:hidden">
+            <div className="absolute top-0 right-0 w-full max-w-xs bg-gradient-to-b from-[#0033A0] to-[#0c2461] h-full p-6">
+                <div className="flex justify-between items-center mb-8">
+                    <span className="text-xl font-bold">Menu</span>
+                    <button onClick={() => setIsMobileMenuOpen(false)}><XIcon className="w-6 h-6"/></button>
+                </div>
+                 <nav className="flex flex-col space-y-4">
+                    <button onClick={() => {onNavigate('home'); setIsMobileMenuOpen(false);}}>Ahabanza</button>
+                    <button onClick={() => {onNavigate('bookingSearch'); setIsMobileMenuOpen(false);}}>Gukata Itike</button>
+                    <button onClick={() => {onToggleCompaniesAside(); setIsMobileMenuOpen(false);}}>Ibigo</button>
+                    <button onClick={() => {onNavigate('services'); setIsMobileMenuOpen(false);}}>Serivisi</button>
+                    <button onClick={() => {onNavigate('help'); setIsMobileMenuOpen(false);}}>Ubufasha</button>
+                    <button onClick={() => {onNavigate('contact'); setIsMobileMenuOpen(false);}}>Twandikire</button>
+
+                     <div className="border-t border-white/20 my-4"></div>
+                     {user ? (
+                         <>
+                            <button onClick={() => {onNavigate('profile'); setIsMobileMenuOpen(false);}} className="flex items-center space-x-3">
+                                <img src={user.avatarUrl} alt="User" className="w-8 h-8 rounded-full" />
+                                <span>{user.name}</span>
+                            </button>
+                            <button onClick={() => {onLogout(); setIsMobileMenuOpen(false);}} className="text-red-400 text-left">Sohoka</button>
+                         </>
+                     ) : (
+                        <button onClick={() => {onNavigate('login'); setIsMobileMenuOpen(false);}} className="px-4 py-2 text-sm font-semibold bg-yellow-400 text-[#0033A0] rounded-md hover:bg-yellow-500 transition-colors">Injira</button>
+                     )}
+                 </nav>
+            </div>
+        </div>
+      )}
+    </header>
   );
 };
 

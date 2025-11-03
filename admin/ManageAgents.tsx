@@ -1,13 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { BriefcaseIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon, EyeIcon, ArrowUpTrayIcon } from '../components/icons';
 import Modal from '../components/Modal';
 import { Page } from '../App';
 
-interface ManageAgentsProps {
-    agents: any[];
-    crudHandlers: any;
-    navigate: (page: Page, data?: any) => void;
-}
+const mockAgents = [
+    { id: 'a1', name: 'Jane Smith', email: 'jane.s@agent.rw', phone: '0788777888', location: 'Nyabugogo', commissionRate: 0.05, totalDeposits: 2500000, status: 'Active', avatarUrl: 'https://randomuser.me/api/portraits/women/5.jpg' },
+    { id: 'a2', name: 'Peter Kamari', email: 'peter.k@agent.rw', phone: '0788999000', location: 'Remera', commissionRate: 0.05, totalDeposits: 1800000, status: 'Active', avatarUrl: 'https://randomuser.me/api/portraits/men/7.jpg' }
+];
 
 const AgentForm = ({ agent, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ const AgentForm = ({ agent, onSave, onCancel }) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center space-x-4">
-                <img src={avatarPreview || 'https://via.placeholder.com/100'} alt="Avatar" className="w-20 h-20 rounded-full object-cover bg-gray-200"/>
+                <img src={avatarPreview || 'https://randomuser.me/api/portraits/lego/3.jpg'} alt="Avatar" className="w-20 h-20 rounded-full object-cover bg-gray-200"/>
                 <div>
                     <button type="button" onClick={() => fileInputRef.current?.click()} className="text-sm font-semibold text-blue-600 hover:underline">Upload Photo</button>
                     <p className="text-xs text-gray-500">PNG or JPG. Max 2MB.</p>
@@ -80,7 +80,8 @@ const AgentForm = ({ agent, onSave, onCancel }) => {
     );
 };
 
-const ManageAgents: React.FC<ManageAgentsProps> = ({ agents, crudHandlers, navigate }) => {
+const ManageAgents: React.FC<{ navigate: (page: Page, data?: any) => void; }> = ({ navigate }) => {
+    const [agents, setAgents] = useState(mockAgents);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentAgent, setCurrentAgent] = useState<any | null>(null);
@@ -107,11 +108,17 @@ const ManageAgents: React.FC<ManageAgentsProps> = ({ agents, crudHandlers, navig
 
     const handleSave = (agentData) => {
         if (currentAgent) {
-            crudHandlers.updateAgent(agentData);
+            setAgents(agents.map(a => a.id === currentAgent.id ? { ...a, ...agentData } : a));
         } else {
-            crudHandlers.addAgent(agentData);
+            setAgents([...agents, { ...agentData, id: `agent-${Date.now()}`, totalDeposits: 0 }]);
         }
         setIsModalOpen(false);
+    };
+
+    const handleDelete = (id) => {
+        if (window.confirm("Are you sure you want to delete this agent?")) {
+            setAgents(agents.filter(a => a.id !== id));
+        }
     };
     
     const statusIndicator = (status) => {
@@ -174,7 +181,7 @@ const ManageAgents: React.FC<ManageAgentsProps> = ({ agents, crudHandlers, navig
                                     <td className="flex space-x-1 p-3">
                                         <button onClick={() => navigate('agentProfile', agent)} className="p-1 text-gray-500 hover:text-green-600" title="View Profile"><EyeIcon className="w-5 h-5"/></button>
                                         <button onClick={() => openModal(agent)} className="p-1 text-gray-500 hover:text-blue-600" title="Edit"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button onClick={() => crudHandlers.deleteAgent(agent.id)} className="p-1 text-gray-500 hover:text-red-600" title="Delete"><TrashIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => handleDelete(agent.id)} className="p-1 text-gray-500 hover:text-red-600" title="Delete"><TrashIcon className="w-5 h-5"/></button>
                                     </td>
                                 </tr>
                             ))}

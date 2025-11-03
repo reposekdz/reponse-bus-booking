@@ -21,8 +21,8 @@ const AmenityIcon: React.FC<{ amenity: string }> = ({ amenity }) => {
     return null;
 };
 
-const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite: boolean, onToggleFavorite: () => void }> = ({ result, onSelect, isFavorite, onToggleFavorite }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-6 transform hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 relative">
+const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite: boolean, onToggleFavorite: () => void, style: React.CSSProperties, className: string }> = ({ result, onSelect, isFavorite, onToggleFavorite, style, className }) => (
+    <div style={style} className={`${className} bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 relative`}>
         <div className="flex-shrink-0 w-full sm:w-auto text-center sm:text-left">
             {result.tag && (
                 <div className="absolute top-0 left-0 transform -translate-x-3 -translate-y-3 -rotate-12 bg-yellow-400 text-blue-900 text-xs font-bold px-3 py-1 rounded-full shadow-md">
@@ -61,7 +61,7 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
             >
                 <StarIcon className={`w-6 h-6 transition-colors ${isFavorite ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} />
             </button>
-            <button onClick={onSelect} className="w-full sm:w-auto flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 shadow-md">
+            <button onClick={onSelect} className="w-full sm:w-auto flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold hover:saturate-150 transition-all duration-300 shadow-md transform hover:-translate-y-0.5">
                 Hitamo Imyanya <ArrowRightIcon className="w-5 h-5 ml-2" />
             </button>
         </div>
@@ -89,25 +89,20 @@ const SearchResultsPage: React.FC<SearchResultsPageProps> = ({ onTripSelect }) =
   };
 
   return (
-    <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-full py-12">
-      <div className="container mx-auto px-6">
-        <AdBanner type="banner" />
-        <div className="my-8">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Ibyavuye mu Gushakisha</h1>
-            <p className="text-gray-600 dark:text-gray-400">Kigali - Rubavu, 28 Ukwakira, 2024</p>
-        </div>
+    <div className="min-h-full">
         <div className="space-y-6">
-            {searchResults.map(result => (
+            {searchResults.map((result, index) => (
                 <SearchResultCard 
                     key={result.id} 
                     result={result} 
                     onSelect={() => onTripSelect(result)}
                     isFavorite={favoriteTrips.includes(result.id)}
                     onToggleFavorite={() => toggleFavorite(result.id)}
+                    style={{ animationDelay: `${index * 100}ms` }}
+                    className="stagger-fade-in"
                 />
             ))}
         </div>
-      </div>
     </div>
   );
 };

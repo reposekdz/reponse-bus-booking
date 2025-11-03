@@ -1,18 +1,85 @@
+
 import React, { useState } from 'react';
 import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon, EyeIcon } from '../components/icons';
 import { Page } from '../App';
+import { mockDriversData, mockCompaniesData } from './AdminDashboard';
+import Modal from '../components/Modal';
 
-interface ManageDriversProps {
-    drivers: any[];
-    companies: any[];
-    crudHandlers: any;
-    navigate: (page: Page, data?: any) => void;
-}
 
-const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, companies, crudHandlers, navigate }) => {
+const DriverForm = ({ driver, companies, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        phone: '',
+        companyId: companies[0]?.id || '',
+        assignedBusId: '',
+        status: 'Active',
+        avatarUrl: 'https://randomuser.me/api/portraits/lego/1.jpg',
+        ...driver
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Driver Name</label>
+                <input type="text" name="name" value={formData.name} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
+                <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company</label>
+                <select name="companyId" value={formData.companyId} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                    {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+            </div>
+            <div className="flex justify-end space-x-3 pt-4">
+                <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-semibold border rounded-lg dark:border-gray-600">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Driver</button>
+            </div>
+        </form>
+    );
+};
+
+
+const ManageDrivers: React.FC<{ navigate: (page: Page, data?: any) => void; }> = ({ navigate }) => {
+    const [drivers, setDrivers] = useState(mockDriversData);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentDriver, setCurrentDriver] = useState(null);
     
-    const getCompanyName = (companyId: string) => companies.find(c => c.id === companyId)?.name || companyId;
+    const getCompanyName = (companyId: string) => mockCompaniesData.find(c => c.id === companyId)?.name || companyId;
+    
+    const openModal = (driver = null) => {
+        setCurrentDriver(driver);
+        setIsModalOpen(true);
+    };
+
+    const handleSave = (driverData) => {
+        if (currentDriver) {
+            setDrivers(drivers.map(d => d.id === currentDriver.id ? { ...d, ...driverData } : d));
+        } else {
+            setDrivers([...drivers, { ...driverData, id: `driver-${Date.now()}` }]);
+        }
+        setIsModalOpen(false);
+    };
+    
+    const handleDelete = (id) => {
+        if(window.confirm('Are you sure you want to delete this driver?')) {
+            setDrivers(drivers.filter(d => d.id !== id));
+        }
+    };
+
 
     return (
         <div>
@@ -29,7 +96,7 @@ const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, companies, crudH
                             className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
                         />
                     </div>
-                    <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                    <button onClick={() => openModal()} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">
                         <PlusIcon className="w-5 h-5 mr-2" /> Add Driver
                     </button>
                 </div>
@@ -67,8 +134,8 @@ const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, companies, crudH
                                     </td>
                                     <td className="flex space-x-1 p-3">
                                         <button onClick={() => navigate('driverProfile', driver)} className="p-1 text-gray-500 hover:text-green-600" title="View Profile"><EyeIcon className="w-5 h-5"/></button>
-                                        <button className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => openModal(driver)} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => handleDelete(driver.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
                                     </td>
                                 </tr>
                             ))}
@@ -76,6 +143,9 @@ const ManageDrivers: React.FC<ManageDriversProps> = ({ drivers, companies, crudH
                     </table>
                 </div>
             </div>
+             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentDriver ? "Edit Driver" : "Add New Driver"}>
+                <DriverForm driver={currentDriver} companies={mockCompaniesData} onSave={handleSave} onCancel={() => setIsModalOpen(false)} />
+            </Modal>
         </div>
     );
 };

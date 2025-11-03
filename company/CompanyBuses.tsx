@@ -3,12 +3,6 @@ import React, { useState } from 'react';
 import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 import Modal from '../components/Modal';
 
-interface CompanyBusesProps {
-    buses: any[];
-    crudHandlers: any;
-    companyId: string;
-}
-
 const BusForm = ({ bus, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
         plate: '',
@@ -65,7 +59,15 @@ const BusForm = ({ bus, onSave, onCancel }) => {
     );
 };
 
-const CompanyBuses: React.FC<CompanyBusesProps> = ({ buses, crudHandlers, companyId }) => {
+// FIX: Define props interface to accept `buses` from the parent component.
+interface CompanyBusesProps {
+    companyId: string;
+    buses: any[];
+    crudHandlers: any;
+}
+
+const CompanyBuses: React.FC<CompanyBusesProps> = ({ companyId, buses: initialBuses }) => {
+    const [buses, setBuses] = useState(initialBuses);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentBus, setCurrentBus] = useState<any | null>(null);
@@ -77,11 +79,17 @@ const CompanyBuses: React.FC<CompanyBusesProps> = ({ buses, crudHandlers, compan
 
     const handleSave = (busData) => {
         if (currentBus) {
-            crudHandlers.updateBus(busData);
+            setBuses(buses.map(b => b.id === currentBus.id ? { ...b, ...busData } : b));
         } else {
-            crudHandlers.addBus({ ...busData, companyId });
+            setBuses([...buses, { ...busData, id: `bus-${Date.now()}`, companyId }]);
         }
         setIsModalOpen(false);
+    };
+
+    const handleDelete = (id: string) => {
+        if (window.confirm("Are you sure you want to delete this bus?")) {
+            setBuses(buses.filter(b => b.id !== id));
+        }
     };
 
     return (
@@ -130,7 +138,7 @@ const CompanyBuses: React.FC<CompanyBusesProps> = ({ buses, crudHandlers, compan
                                     <td>{new Date(bus.maintenanceDate).toLocaleDateString()}</td>
                                     <td className="flex space-x-2 p-3">
                                         <button onClick={() => openModal(bus)} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button onClick={() => crudHandlers.deleteBus(bus.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => handleDelete(bus.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
                                     </td>
                                 </tr>
                             ))}

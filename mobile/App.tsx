@@ -1,27 +1,25 @@
-// This is the root of the React Native App.
-// It sets up the core navigation and theme providers.
 
+import 'react-native-gesture-handler';
 import React from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { StatusBar } from 'react-native';
-import { AuthProvider } from './hooks/useAuth';
+import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './navigation/AppNavigator';
+import { AuthProvider } from './hooks/useAuth';
+import useCachedResources from './hooks/useCachedResources';
 
-// In a real React Native app, you'd have your navigation and providers here.
 export default function App() {
-  // In a real app, a hook like `useCachedResources` would load fonts/assets.
-  // We'll assume resources are ready for this context.
+  const isLoadingComplete = useCachedResources();
+
+  if (!isLoadingComplete) {
+    return null; // Or a splash screen
+  }
 
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        {/*
-          The NavigationContainer is the root of the navigation stack.
-          AppNavigator contains all the app's screens and navigation logic (Tabs and Stacks).
-        */}
+    <AuthProvider>
+      <NavigationContainer>
         <AppNavigator />
-        <StatusBar barStyle="dark-content" />
-      </AuthProvider>
-    </SafeAreaProvider>
+        <StatusBar style="auto" />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }

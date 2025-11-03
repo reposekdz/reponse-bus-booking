@@ -1,42 +1,32 @@
-// New screen to display search results for bus trips.
 
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const searchResults = [
-  { id: '1', company: 'Volcano Express', from: 'Kigali', to: 'Rubavu', departureTime: '07:00', arrivalTime: '10:30', price: 4500, availableSeats: 23 },
-  { id: '2', company: 'Horizon Express', from: 'Kigali', to: 'Rubavu', departureTime: '08:30', arrivalTime: '12:15', price: 4800, availableSeats: 15 },
-  { id: '3', company: 'RITCO', from: 'Kigali', to: 'Rubavu', departureTime: '09:00', arrivalTime: '12:30', price: 4500, availableSeats: 0 },
+  { id: 1, company: 'Volcano Express', departureTime: '07:00', arrivalTime: '10:30', price: 4500, seats: 23 },
+  { id: 2, company: 'Horizon Express', departureTime: '08:30', arrivalTime: '12:15', price: 4800, seats: 15 },
+  { id: 3, company: 'RITCO', departureTime: '09:00', arrivalTime: '12:30', price: 4500, seats: 30 },
 ];
 
 const TripCard = ({ trip, onPress }) => (
-    <TouchableOpacity style={styles.tripCard} onPress={onPress} disabled={trip.availableSeats === 0}>
-        <View>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+        <View style={styles.companyRow}>
             <Text style={styles.company}>{trip.company}</Text>
-            <View style={styles.timeContainer}>
-                <Text style={styles.time}>{trip.departureTime}</Text>
-                <Text style={styles.arrow}> → </Text>
-                <Text style={styles.time}>{trip.arrivalTime}</Text>
-            </View>
-        </View>
-        <View style={styles.priceContainer}>
             <Text style={styles.price}>{new Intl.NumberFormat('fr-RW').format(trip.price)} RWF</Text>
-            <Text style={trip.availableSeats > 0 ? styles.seatsAvailable : styles.seatsFull}>
-                {trip.availableSeats > 0 ? `${trip.availableSeats} seats left` : 'Full'}
-            </Text>
         </View>
+        <View style={styles.timeRow}>
+            <Text style={styles.time}>{trip.departureTime}</Text>
+            <Text style={styles.arrow}>→</Text>
+            <Text style={styles.time}>{trip.arrivalTime}</Text>
+        </View>
+        <Text style={styles.seats}>{trip.seats} seats available</Text>
     </TouchableOpacity>
 );
 
 export default function SearchResultsScreen({ route, navigation }) {
-    // const { from, to } = route.params; // In a real app
-    const from = "Kigali";
-    const to = "Rubavu";
-
-    const handleSelectTrip = (trip) => {
-        navigation.navigate('SeatSelection', { trip });
-    };
+    // const { from, to } = route.params;
+    const { from, to } = { from: 'Kigali', to: 'Rubavu' }; // Mock data
 
     return (
         <SafeAreaView style={styles.container}>
@@ -44,53 +34,65 @@ export default function SearchResultsScreen({ route, navigation }) {
                 <TouchableOpacity onPress={() => navigation.goBack()}><Text style={styles.backButton}>{'<'}</Text></TouchableOpacity>
                 <View>
                     <Text style={styles.headerTitle}>{from} to {to}</Text>
-                    <Text style={styles.headerSubtitle}>October 28, 2024</Text>
+                    <Text style={styles.headerSubtitle}>Oct 28, 2024</Text>
                 </View>
             </View>
-            <FlatList
-                data={searchResults}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <TripCard trip={item} onPress={() => handleSelectTrip(item)} />}
-                contentContainerStyle={styles.list as any}
-            />
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                {searchResults.map(trip => (
+                    <TripCard key={trip.id} trip={trip} onPress={() => navigation.navigate('SeatSelection', { trip })} />
+                ))}
+            </ScrollView>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F3F4F6' },
-    header: {
-        padding: 20,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    backButton: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginRight: 16,
-        color: '#0033A0',
-    },
+    header: { padding: 20, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', backgroundColor: 'white', flexDirection: 'row', alignItems: 'center' },
+    backButton: { fontSize: 24, fontWeight: 'bold', marginRight: 16, color: '#0033A0' },
     headerTitle: { fontSize: 20, fontWeight: 'bold' },
-    headerSubtitle: { fontSize: 14, color: '#6B7280' },
-    list: { padding: 20 },
-    tripCard: {
+    headerSubtitle: { color: '#6B7280' },
+    scrollContent: { padding: 16 },
+    card: {
         backgroundColor: 'white',
         borderRadius: 12,
         padding: 16,
-        marginBottom: 16,
+        marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    companyRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        marginBottom: 12,
     },
-    company: { fontSize: 16, fontWeight: '600', color: '#374151' },
-    timeContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
-    time: { fontSize: 18, fontWeight: 'bold', color: '#111827' },
-    arrow: { color: '#9CA3AF' },
-    priceContainer: { alignItems: 'flex-end' },
-    price: { fontSize: 18, fontWeight: 'bold', color: '#059669' },
-    seatsAvailable: { fontSize: 12, color: '#6B7280', marginTop: 4 },
-    seatsFull: { fontSize: 12, color: '#EF4444', fontWeight: '600', marginTop: 4 },
+    company: {
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    price: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        color: '#059669',
+    },
+    timeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    time: {
+        fontSize: 20,
+        fontWeight: '700',
+    },
+    arrow: {
+        marginHorizontal: 12,
+        color: '#9CA3AF',
+    },
+    seats: {
+        fontSize: 12,
+        color: '#6B7280',
+    }
 });

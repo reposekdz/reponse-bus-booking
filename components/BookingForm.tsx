@@ -1,134 +1,124 @@
 import React, { useState } from 'react';
-import { CalendarIcon, ArrowRightIcon, LocationMarkerIcon, UsersIcon } from './icons';
-import FareCalendar from './FareCalendar';
-
-type TripType = 'one-way' | 'round-trip';
+import { LocationMarkerIcon, CalendarIcon, UserCircleIcon, ArrowRightIcon, PlusIcon, TagIcon } from './icons';
 
 interface BookingFormProps {
-  onSearch: (from?: string, to?: string) => void;
+  onSearch: (from: string, to: string) => void;
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
-  const [tripType, setTripType] = useState<TripType>('one-way');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [departureDate, setDepartureDate] = useState<Date | null>(null);
-  const [returnDate, setReturnDate] = useState<Date | null>(null);
-  const [showCalendar, setShowCalendar] = useState<'departure' | 'return' | null>(null);
-  const [passengers, setPassengers] = useState('1');
+const locations = ['Kigali', 'Rubavu', 'Musanze', 'Huye', 'Rusizi', 'Nyagatare', 'Muhanga'];
 
-  const handleDateSelect = (date: Date) => {
-    if (showCalendar === 'departure') {
-      setDepartureDate(date);
-    } else if (showCalendar === 'return') {
-      setReturnDate(date);
-    }
-    setShowCalendar(null);
+const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
+  const [fromLocation, setFromLocation] = useState('Kigali');
+  const [toLocation, setToLocation] = useState('Rubavu');
+  const [journeyDate, setJourneyDate] = useState(new Date().toISOString().split('T')[0]);
+  const [returnDate, setReturnDate] = useState('');
+  const [passengers, setPassengers] = useState({ adults: 1, children: 0 });
+  const [isPassengerDropdownOpen, setIsPassengerDropdownOpen] = useState(false);
+  const [tripType, setTripType] = useState('one-way');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(fromLocation, toLocation);
+  };
+
+  const swapLocations = () => {
+    setFromLocation(toLocation);
+    setToLocation(fromLocation);
   };
   
-  const formatDate = (date: Date | null) => {
-    if (!date) return '';
-    return date.toLocaleDateString('fr-CA'); // YYYY-MM-DD format
-  };
-
-  const handlePassengerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Allow empty string for intermediate input, but enforce numbers
-    if (value === '' || /^[1-9]\d*$/.test(value)) {
-      setPassengers(value);
-    }
-  };
-
-  const handlePassengerBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (e.target.value === '') {
-      setPassengers('1');
-    }
+  const handlePassengerChange = (type: 'adults' | 'children', operation: 'inc' | 'dec') => {
+      setPassengers(prev => ({
+          ...prev,
+          [type]: operation === 'inc' ? prev[type] + 1 : Math.max(0, prev[type] - 1)
+      }));
   };
 
   return (
-    <div className="text-left relative">
-      <div className="mb-4 flex items-center bg-black/20 rounded-full p-1 max-w-xs">
-        <button
-          onClick={() => setTripType('one-way')}
-          className={`w-1/2 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${
-            tripType === 'one-way' ? 'bg-white/90 text-[#0033A0]' : 'text-white hover:bg-white/10'
-          }`}
-        >
-          Kugenda gusa
-        </button>
-        <button
-          onClick={() => setTripType('round-trip')}
-          className={`w-1/2 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${
-            tripType === 'round-trip' ? 'bg-white/90 text-[#0033A0]' : 'text-white hover:bg-white/10'
-          }`}
-        >
-          Kugenda no kugaruka
-        </button>
+    <form onSubmit={handleSubmit} className="space-y-4 text-gray-800 dark:text-white">
+      <div className="flex items-center space-x-4 mb-4">
+        <button type="button" onClick={() => setTripType('one-way')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'one-way' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white'}`}>Urugendo Rumwe</button>
+        <button type="button" onClick={() => setTripType('round-trip')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'round-trip' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white'}`}>Kugenda no Kugaruka</button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-        <div className="md:col-span-2 relative">
-          <label htmlFor="from" className="block text-sm font-medium mb-1 text-gray-200">Uva</label>
-           <LocationMarkerIcon className="absolute left-3 top-10 h-5 w-5 text-gray-300" />
-          <input id="from" type="text" placeholder="Aho uva" value={from} onChange={e => setFrom(e.target.value)} className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all" />
-        </div>
-        <div className="md:col-span-2 relative">
-          <label htmlFor="to" className="block text-sm font-medium mb-1 text-gray-200">Ujya</label>
-          <LocationMarkerIcon className="absolute left-3 top-10 h-5 w-5 text-gray-300" />
-           <input id="to" type="text" placeholder="Aho ujya" value={to} onChange={e => setTo(e.target.value)} className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all" />
-        </div>
-         <div className="md:col-span-1 relative">
-          <label htmlFor="passengers" className="block text-sm font-medium mb-1 text-gray-200">Abagenzi</label>
-          <UsersIcon className="absolute left-3 top-10 h-5 w-5 text-gray-300" />
-           <input 
-             id="passengers" 
-             type="text" 
-             inputMode="numeric"
-             value={passengers}
-             onChange={handlePassengerChange}
-             onBlur={handlePassengerBlur}
-             className="w-full pl-10 bg-white/10 border border-white/20 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all" 
-           />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+          <div className="relative">
+            <label htmlFor="from" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Uva</label>
+            <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
+            <select
+              id="from"
+              value={fromLocation}
+              onChange={(e) => setFromLocation(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition appearance-none"
+            >
+              {locations.map(loc => <option key={`from-${loc}`} value={loc}>{loc}</option>)}
+            </select>
+          </div>
+           <div className="relative">
+            <label htmlFor="to" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Ujya</label>
+            <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
+            <select
+              id="to"
+              value={toLocation}
+              onChange={(e) => setToLocation(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition appearance-none"
+            >
+              {locations.map(loc => <option key={`to-${loc}`} value={loc}>{loc}</option>)}
+            </select>
+          </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div className="relative">
-          <label htmlFor="departure" className="block text-sm font-medium mb-1 text-gray-200">Itariki yo Kugenda</label>
-          <input type="text" id="departure" readOnly onClick={() => setShowCalendar('departure')} value={formatDate(departureDate)} placeholder="Hitamo itariki" className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all cursor-pointer" />
-          <CalendarIcon className="absolute right-3 top-10 h-5 w-5 text-gray-300" />
-        </div>
-        <div className="relative">
-          <label htmlFor="return" className="block text-sm font-medium mb-1 text-gray-200">Itariki yo Kugaruka</label>
-          <input
-            type="text"
-            id="return"
-            readOnly
-            onClick={() => tripType === 'round-trip' && setShowCalendar('return')}
-            value={formatDate(returnDate)}
-            placeholder="Hitamo itariki (bishyirwamo)"
-            disabled={tripType === 'one-way'}
-            className="w-full bg-white/10 border border-white/20 rounded-lg p-3 pr-10 focus:ring-2 focus:ring-yellow-400/50 focus:outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          />
-          <CalendarIcon className="absolute right-3 top-10 h-5 w-5 text-gray-300" />
-        </div>
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative">
+            <label htmlFor="date" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Itariki</label>
+            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
+            <input type="date" id="date" value={journeyDate} onChange={(e) => setJourneyDate(e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition"/>
+          </div>
+          <div className={`relative transition-opacity ${tripType === 'one-way' ? 'opacity-50' : 'opacity-100'}`}>
+            <label htmlFor="return-date" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Kugaruka</label>
+            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
+            <input type="date" id="return-date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} disabled={tripType === 'one-way'} className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition"/>
+          </div>
       </div>
-      
-      {showCalendar && (
-        <div className="absolute top-full mt-2 z-50 left-0 right-0">
-             <FareCalendar
-                onDateSelect={handleDateSelect}
-                selectedDate={showCalendar === 'departure' ? departureDate : returnDate}
-            />
-        </div>
-      )}
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative">
+            <label className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Abagenzi</label>
+            <button type="button" onClick={() => setIsPassengerDropdownOpen(!isPassengerDropdownOpen)} className="w-full flex items-center text-left pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition">
+                 <UserCircleIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                 {passengers.adults} Adult(s), {passengers.children} Child(ren)
+            </button>
+             {isPassengerDropdownOpen && (
+                <div className="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 z-20">
+                    <div className="flex justify-between items-center">
+                        <p>Abakuru</p>
+                        <div className="flex items-center space-x-2">
+                            <button type="button" onClick={() => handlePassengerChange('adults', 'dec')} className="p-1 rounded-full bg-gray-200 dark:bg-gray-700">-</button>
+                            <span>{passengers.adults}</span>
+                            <button type="button" onClick={() => handlePassengerChange('adults', 'inc')} className="p-1 rounded-full bg-gray-200 dark:bg-gray-700">+</button>
+                        </div>
+                    </div>
+                     <div className="flex justify-between items-center mt-2">
+                        <p>Abana</p>
+                        <div className="flex items-center space-x-2">
+                            <button type="button" onClick={() => handlePassengerChange('children', 'dec')} className="p-1 rounded-full bg-gray-200 dark:bg-gray-700">-</button>
+                            <span>{passengers.children}</span>
+                            <button type="button" onClick={() => handlePassengerChange('children', 'inc')} className="p-1 rounded-full bg-gray-200 dark:bg-gray-700">+</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+          </div>
+            <div className="relative">
+                <label className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Kode</label>
+                <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
+                <input type="text" placeholder="Shyiramo kode" className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition"/>
+            </div>
+       </div>
 
-      <button 
-        onClick={() => onSearch(from, to)}
-        className="w-full flex items-center justify-center p-4 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-[#0033A0] font-bold text-lg hover:from-yellow-500 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-lg"
+      <button
+        type="submit"
+        className="w-full flex items-center justify-center px-8 py-4 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold hover:saturate-150 transition-all duration-300 shadow-lg text-lg transform hover:-translate-y-0.5"
       >
-        Shakisha Bisi
-        <ArrowRightIcon className="w-6 h-6 ml-3" />
+        Shakisha Ingendo <ArrowRightIcon className="w-5 h-5 ml-2" />
       </button>
-    </div>
+    </form>
   );
 };
 

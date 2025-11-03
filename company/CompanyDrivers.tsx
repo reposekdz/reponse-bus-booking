@@ -3,12 +3,6 @@ import React, { useState } from 'react';
 import { UsersIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 import Modal from '../components/Modal';
 
-interface CompanyDriversProps {
-    drivers: any[];
-    crudHandlers: any;
-    companyId: string;
-}
-
 const DriverForm = ({ driver, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
         name: '',
@@ -60,7 +54,15 @@ const DriverForm = ({ driver, onSave, onCancel }) => {
     );
 };
 
-const CompanyDrivers: React.FC<CompanyDriversProps> = ({ drivers, crudHandlers, companyId }) => {
+// FIX: Define props interface to accept `drivers` from the parent component.
+interface CompanyDriversProps {
+    companyId: string;
+    drivers: any[];
+    crudHandlers: any;
+}
+
+const CompanyDrivers: React.FC<CompanyDriversProps> = ({ companyId, drivers: initialDrivers }) => {
+    const [drivers, setDrivers] = useState(initialDrivers);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentDriver, setCurrentDriver] = useState<any | null>(null);
@@ -72,11 +74,17 @@ const CompanyDrivers: React.FC<CompanyDriversProps> = ({ drivers, crudHandlers, 
 
     const handleSave = (driverData) => {
         if (currentDriver) {
-            crudHandlers.updateDriver(driverData);
+            setDrivers(drivers.map(d => d.id === currentDriver.id ? { ...d, ...driverData } : d));
         } else {
-            crudHandlers.addDriver({ ...driverData, companyId });
+            setDrivers([...drivers, { ...driverData, id: `driver-${Date.now()}`, companyId }]);
         }
         setIsModalOpen(false);
+    };
+
+    const handleDelete = (id: string) => {
+        if (window.confirm("Are you sure you want to delete this driver?")) {
+            setDrivers(drivers.filter(d => d.id !== id));
+        }
     };
     
     return (
@@ -123,7 +131,7 @@ const CompanyDrivers: React.FC<CompanyDriversProps> = ({ drivers, crudHandlers, 
                                     </td>
                                     <td className="flex space-x-2 p-3">
                                         <button onClick={() => openModal(driver)} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button onClick={() => crudHandlers.deleteDriver(driver.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => handleDelete(driver.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
                                     </td>
                                 </tr>
                             ))}
