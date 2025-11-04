@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +8,13 @@ const services = [
     { title: 'Lost & Found', description: 'Report or find a lost item.', icon: '🔍', screen: 'LostAndFound' },
 ];
 
-const ServiceCard = ({ service, onPress }) => (
+// FIX: Change component to React.FC and define props to correctly handle React's special `key` prop.
+interface ServiceCardProps {
+    service: typeof services[0];
+    onPress: () => void;
+}
+
+const ServiceCard: React.FC<ServiceCardProps> = ({ service, onPress }) => (
     <TouchableOpacity style={styles.card} onPress={onPress}>
         <Text style={styles.icon}>{service.icon}</Text>
         <View style={styles.textContainer}>

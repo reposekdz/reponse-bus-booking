@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +8,13 @@ const searchResults = [
   { id: 3, company: 'RITCO', departureTime: '09:00', arrivalTime: '12:30', price: 4500, seats: 30 },
 ];
 
-const TripCard = ({ trip, onPress }) => (
+// FIX: Change component to React.FC and define props to correctly handle React's special `key` prop.
+interface TripCardProps {
+    trip: typeof searchResults[0];
+    onPress: () => void;
+}
+
+const TripCard: React.FC<TripCardProps> = ({ trip, onPress }) => (
     <TouchableOpacity style={styles.card} onPress={onPress}>
         <View style={styles.companyRow}>
             <Text style={styles.company}>{trip.company}</Text>

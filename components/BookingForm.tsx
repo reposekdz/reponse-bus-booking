@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LocationMarkerIcon, CalendarIcon, UserCircleIcon, ArrowRightIcon, PlusIcon, TagIcon } from './icons';
+import { LocationMarkerIcon, CalendarIcon, UserCircleIcon, ArrowRightIcon, PlusIcon, TagIcon, ArrowsUpDownIcon } from './icons';
 
 interface BookingFormProps {
   onSearch: (from: string, to: string) => void;
@@ -22,14 +22,15 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
   };
 
   const swapLocations = () => {
+    const temp = fromLocation;
     setFromLocation(toLocation);
-    setToLocation(fromLocation);
+    setToLocation(temp);
   };
   
   const handlePassengerChange = (type: 'adults' | 'children', operation: 'inc' | 'dec') => {
       setPassengers(prev => ({
           ...prev,
-          [type]: operation === 'inc' ? prev[type] + 1 : Math.max(0, prev[type] - 1)
+          [type]: operation === 'inc' ? prev[type] + 1 : Math.max(type === 'adults' ? 1 : 0, prev[type] - 1)
       }));
   };
 
@@ -39,9 +40,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
         <button type="button" onClick={() => setTripType('one-way')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'one-way' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white'}`}>Urugendo Rumwe</button>
         <button type="button" onClick={() => setTripType('round-trip')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'round-trip' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white'}`}>Kugenda no Kugaruka</button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
           <div className="relative">
-            <label htmlFor="from" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Uva</label>
+            <label htmlFor="from" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Aho uherereye</label>
             <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
             <select
               id="from"
@@ -52,8 +53,15 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
               {locations.map(loc => <option key={`from-${loc}`} value={loc}>{loc}</option>)}
             </select>
           </div>
+
+          <div className="relative mt-4">
+             <button type="button" onClick={swapLocations} className="w-10 h-10 rounded-full bg-white/30 text-white flex items-center justify-center hover:bg-white/50 transition-colors transform hover:rotate-180 duration-300">
+                <ArrowsUpDownIcon className="w-5 h-5"/>
+             </button>
+          </div>
+
            <div className="relative">
-            <label htmlFor="to" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Ujya</label>
+            <label htmlFor="to" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Aho werekeje</label>
             <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
             <select
               id="to"
@@ -72,7 +80,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
             <input type="date" id="date" value={journeyDate} onChange={(e) => setJourneyDate(e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition"/>
           </div>
           <div className={`relative transition-opacity ${tripType === 'one-way' ? 'opacity-50' : 'opacity-100'}`}>
-            <label htmlFor="return-date" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Kugaruka</label>
+            <label htmlFor="return-date" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Itariki yo kugaruka</label>
             <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
             <input type="date" id="return-date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} disabled={tripType === 'one-way'} className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition"/>
           </div>

@@ -10,7 +10,15 @@ const pastBookings = [
     { id: 'TICKET-003', from: 'Kigali', to: 'Musanze', company: 'Horizon Express', date: '15 Ukwakira, 2024', time: '09:00 AM', seats: 'D3', price: '3,500 FRW', passenger: 'Kalisa Jean', busPlate: 'RAE 789 A' },
 ];
 
-const BookingCard = ({ booking, onViewTicket }) => (
+type Booking = typeof upcomingBookings[0];
+
+// FIX: Define props for BookingCard component and change it to a React.FC to correctly handle React's special `key` prop.
+interface BookingCardProps {
+    booking: Booking;
+    onViewTicket: (booking: Booking) => void;
+}
+
+const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket }) => (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden flex flex-col sm:flex-row my-4 transform hover:shadow-xl transition-shadow">
         <div className="p-5 flex-grow">
             <div className="flex justify-between items-start">

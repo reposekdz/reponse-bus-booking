@@ -3,7 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 const Icon = ({ name, style }) => <Text style={[{ color: '#6B7280', fontSize: 10 }, style]}>{name}</Text>;
 
-export default function BookingCard({ ticket, isPast, onPress }) {
+// FIX: Change component to React.FC and define props to correctly handle React's special `key` prop.
+interface BookingCardProps {
+  ticket: any;
+  isPast?: boolean;
+  onPress?: () => void;
+}
+
+const BookingCard: React.FC<BookingCardProps> = ({ ticket, isPast, onPress }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} disabled={!onPress}>
       <View style={styles.topRow}>
@@ -140,3 +147,5 @@ const styles = StyleSheet.create({
       letterSpacing: 2,
   }
 });
+
+export default BookingCard;

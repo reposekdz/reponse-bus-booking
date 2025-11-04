@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Page } from '../App';
-import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, BuildingOfficeIcon, LanguageIcon, ChevronDownIcon, WalletIcon } from './icons';
+import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, BuildingOfficeIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon } from './icons';
 
 interface HeaderProps {
   currentPage: Page;
@@ -11,6 +11,13 @@ interface HeaderProps {
   setTheme: (theme: 'light' | 'dark') => void;
   onToggleCompaniesAside: () => void;
 }
+
+const navTranslations = {
+  'RW': { home: 'Ahabanza', booking: 'Gukata Itike', companies: 'Ibigo', services: 'Serivisi', help: 'Ubufasha', contact: 'Twandikire' },
+  'EN': { home: 'Home', booking: 'Book Ticket', companies: 'Companies', services: 'Services', help: 'Help', contact: 'Contact Us' },
+  'FR': { home: 'Accueil', booking: 'Réserver', companies: 'Agences', services: 'Services', help: 'Aide', contact: 'Contactez-nous' }
+};
+
 
 const NavLink: React.FC<{ page: Page; currentPage: Page; onNavigate: (page: Page) => void; children: React.ReactNode }> = ({ page, currentPage, onNavigate, children }) => (
   <button 
@@ -39,21 +46,24 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
     setCurrentLang(lang);
     setIsLangOpen(false);
   };
+  
+  const T = navTranslations[currentLang.code];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0033A0] to-[#0c2461] text-white shadow-lg backdrop-blur-sm bg-opacity-90">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0033A0] via-[#00574B] to-[#204F46] text-white shadow-lg backdrop-blur-sm bg-opacity-90">
       <div className="container mx-auto px-6 h-20 flex justify-between items-center">
-        <button onClick={() => onNavigate('home')} className="text-2xl font-extrabold tracking-tight">
-          Rwanda<span className="text-yellow-300">Bus</span>
+        <button onClick={() => onNavigate('home')} className="group flex items-center gap-2 text-2xl font-extrabold tracking-tight transition-transform duration-300 hover:scale-105">
+          <BusIcon className="w-8 h-8 transition-transform duration-500 group-hover:-translate-x-1 group-hover:text-yellow-300" />
+          <span>Rwanda<span className="text-yellow-300">Bus</span></span>
         </button>
 
         <nav className="hidden lg:flex items-center space-x-2">
-          <NavLink page="home" currentPage={currentPage} onNavigate={onNavigate}>Ahabanza</NavLink>
-          <NavLink page="bookingSearch" currentPage={currentPage} onNavigate={onNavigate}>Gukata Itike</NavLink>
-          <button onClick={onToggleCompaniesAside} className="px-4 py-2 text-sm font-semibold text-white hover:text-yellow-200 transition-colors duration-200">Ibigo</button>
-          <NavLink page="services" currentPage={currentPage} onNavigate={onNavigate}>Serivisi</NavLink>
-          <NavLink page="help" currentPage={currentPage} onNavigate={onNavigate}>Ubufasha</NavLink>
-          <NavLink page="contact" currentPage={currentPage} onNavigate={onNavigate}>Twandikire</NavLink>
+          <NavLink page="home" currentPage={currentPage} onNavigate={onNavigate}>{T.home}</NavLink>
+          <NavLink page="bookingSearch" currentPage={currentPage} onNavigate={onNavigate}>{T.booking}</NavLink>
+          <button onClick={onToggleCompaniesAside} className="px-4 py-2 text-sm font-semibold text-white hover:text-yellow-200 transition-colors duration-200">{T.companies}</button>
+          <NavLink page="services" currentPage={currentPage} onNavigate={onNavigate}>{T.services}</NavLink>
+          <NavLink page="help" currentPage={currentPage} onNavigate={onNavigate}>{T.help}</NavLink>
+          <NavLink page="contact" currentPage={currentPage} onNavigate={onNavigate}>{T.contact}</NavLink>
         </nav>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
@@ -127,12 +137,12 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
                     <button onClick={() => setIsMobileMenuOpen(false)}><XIcon className="w-6 h-6"/></button>
                 </div>
                  <nav className="flex flex-col space-y-4">
-                    <button onClick={() => {onNavigate('home'); setIsMobileMenuOpen(false);}}>Ahabanza</button>
-                    <button onClick={() => {onNavigate('bookingSearch'); setIsMobileMenuOpen(false);}}>Gukata Itike</button>
-                    <button onClick={() => {onToggleCompaniesAside(); setIsMobileMenuOpen(false);}}>Ibigo</button>
-                    <button onClick={() => {onNavigate('services'); setIsMobileMenuOpen(false);}}>Serivisi</button>
-                    <button onClick={() => {onNavigate('help'); setIsMobileMenuOpen(false);}}>Ubufasha</button>
-                    <button onClick={() => {onNavigate('contact'); setIsMobileMenuOpen(false);}}>Twandikire</button>
+                    <button onClick={() => {onNavigate('home'); setIsMobileMenuOpen(false);}}>{T.home}</button>
+                    <button onClick={() => {onNavigate('bookingSearch'); setIsMobileMenuOpen(false);}}>{T.booking}</button>
+                    <button onClick={() => {onToggleCompaniesAside(); setIsMobileMenuOpen(false);}}>{T.companies}</button>
+                    <button onClick={() => {onNavigate('services'); setIsMobileMenuOpen(false);}}>{T.services}</button>
+                    <button onClick={() => {onNavigate('help'); setIsMobileMenuOpen(false);}}>{T.help}</button>
+                    <button onClick={() => {onNavigate('contact'); setIsMobileMenuOpen(false);}}>{T.contact}</button>
 
                      <div className="border-t border-white/20 my-4"></div>
                      {user ? (
