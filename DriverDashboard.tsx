@@ -1,7 +1,10 @@
+
 import React, { useState } from 'react';
 import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon } from './components/icons';
 import { Page } from './App';
 import DriverSettingsPage from './DriverSettingsPage'; // New Import
+// FIX: Import mockCompaniesData to resolve 'Cannot find name' error.
+import { mockCompaniesData } from './admin/AdminDashboard';
 
 interface DriverDashboardProps {
     onLogout: () => void;
@@ -22,6 +25,8 @@ const mockCurrentTrip = {
         { id: 1, name: 'Kalisa Jean', seat: 'A5', ticketId: 'VK-83AD1', status: 'booked' },
         { id: 2, name: 'Mutesi Aline', seat: 'A6', ticketId: 'VK-83AD2', status: 'booked' },
         { id: 3, name: 'Gatete David', seat: 'B1', ticketId: 'VK-83AD3', status: 'boarded' },
+        { id: 4, name: 'Uwineza Grace', seat: 'C3', ticketId: 'VK-83AD4', status: 'booked' },
+        { id: 5, name: 'Mugisha Frank', seat: 'C4', ticketId: 'VK-83AD5', status: 'booked' },
     ],
 };
 
@@ -33,7 +38,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
     
-    const driverCompany = allCompanies.find(c => c.name.toLowerCase().includes(driverData.name.toLowerCase().split(' ')[0])) || allCompanies[0];
+    const driverCompany = mockCompaniesData.find(c => c.id === 'volcano') || mockCompaniesData[0];
 
 
     const handleScan = () => {
@@ -91,9 +96,9 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
         switch(view) {
             case 'boarding':
                 return (
-                    <div className="max-w-xl mx-auto">
-                         <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Scan Passenger Ticket</h1>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                          <div className="bg-white dark:bg-gray-800/50 p-6 sm:p-8 rounded-2xl shadow-lg">
+                            <h1 className="text-2xl font-bold dark:text-gray-200 mb-6">Scan Passenger Ticket</h1>
                             <div className="aspect-square w-full bg-gray-900 rounded-xl mb-6 flex items-center justify-center p-4 relative overflow-hidden">
                                 <div className="absolute inset-0 bg-repeat opacity-5" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`}}></div>
                                 <div className="w-full h-full border-4 border-dashed border-blue-500/50 rounded-lg flex items-center justify-center flex-col">
@@ -126,11 +131,11 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                                  </div>
                              </div>
                          </div>
-                         <div className="mt-6 bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                            <h2 className="font-bold text-lg mb-4 dark:text-white">Passenger Manifest ({mockCurrentTrip.route})</h2>
-                            <div className="space-y-3 h-64 overflow-y-auto custom-scrollbar">
+                         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                            <h2 className="font-bold text-xl mb-4 dark:text-white">Passenger Manifest ({mockCurrentTrip.route})</h2>
+                            <div className="space-y-3 h-[600px] overflow-y-auto custom-scrollbar pr-2">
                                 {passengers.map(p => (
-                                    <div key={p.id} className="flex justify-between items-center p-2 rounded-md bg-gray-100 dark:bg-gray-700/50">
+                                    <div key={p.id} className="flex justify-between items-center p-3 rounded-lg bg-gray-100 dark:bg-gray-700/50">
                                         <div>
                                             <p className="font-semibold dark:text-white">{p.name}</p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Seat: {p.seat} | ID: {p.ticketId}</p>
@@ -172,7 +177,11 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                 <nav className="flex-1 px-4 py-6 space-y-2">
                     <NavLink viewName="dashboard" label="Dashboard" icon={ChartBarIcon} />
                     <NavLink viewName="boarding" label="Passenger Boarding" icon={QrCodeIcon} />
-                    <NavLink viewName="profile" label="My Profile" icon={UsersIcon} />
+                    <button onClick={() => navigate('driverProfile')} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative text-gray-400 hover:text-white hover:bg-white/5`}>
+                        <div className={`absolute left-0 top-0 h-full w-1 rounded-r-full bg-yellow-400 transition-all duration-300 scale-y-0 group-hover:scale-y-50`}></div>
+                        <UsersIcon className="w-6 h-6 mr-4 transition-transform duration-300 group-hover:scale-110" />
+                        <span className="font-semibold">My Profile</span>
+                    </button>
                     <NavLink viewName="settings" label="Settings" icon={CogIcon} />
                 </nav>
             </aside>

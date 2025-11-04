@@ -31,8 +31,7 @@ const featuredRoutes = [
 export default function HomeScreen({ navigation }) {
   const { t } = useLanguage();
   const handleSearch = (from, to) => {
-    // navigation.navigate('SearchResults', { from, to });
-    alert(`Navigating to search results for ${from} to ${to}`);
+    navigation.navigate('SearchResults', { from, to });
   };
 
   return (

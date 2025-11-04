@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Page } from '../App';
 import { ChartBarIcon, BuildingOfficeIcon, UsersIcon, BriefcaseIcon, SunIcon, MoonIcon, MegaphoneIcon, TagIcon, CurrencyDollarIcon } from '../components/icons';
@@ -11,16 +10,12 @@ import ManageUsers from './ManageUsers';
 import AdminFinancials from './AdminFinancials';
 import ManageAds from './ManageAds';
 import ManagePromotions from './ManagePromotions';
-import AgentProfilePage from '../AgentProfilePage';
 
 interface AdminLayoutProps {
     currentPage: Page;
     navigate: (page: Page, data?: any) => void;
-    pageData?: any;
-    agentTransactions?: any[];
 }
 
-// FIX: Explicitly type the navItems array to ensure `item.page` is of type `Page`.
 const navItems: { page: Page; label: string; icon: React.FC<any> }[] = [
     { page: 'adminDashboard', label: 'Dashboard', icon: ChartBarIcon },
     { page: 'adminCompanies', label: 'Companies', icon: BuildingOfficeIcon },
@@ -32,19 +27,11 @@ const navItems: { page: Page; label: string; icon: React.FC<any> }[] = [
     { page: 'adminAds', label: 'Adverts', icon: MegaphoneIcon },
 ];
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPage, navigate, pageData, agentTransactions }) => {
+const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPage, navigate }) => {
     
-    // Mock data for sub-pages
-    const mockData = {
-        companies: [],
-        drivers: [],
-        agents: [],
-    };
-
     const renderContent = () => {
         switch (currentPage) {
             case 'adminDashboard': return <AdminDashboard />;
-            // FIX: Removed props from components that use their own internal state and mock data.
             case 'adminCompanies': return <ManageCompanies />;
             case 'adminDrivers': return <ManageDrivers navigate={navigate} />;
             case 'adminAgents': return <ManageAgents navigate={navigate} />;
@@ -53,7 +40,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPage, navigate, pageDa
             case 'adminFinancials': return <AdminFinancials />;
             case 'adminAds': return <ManageAds />;
             case 'adminPromotions': return <ManagePromotions />;
-            case 'agentProfile': return <AgentProfilePage agent={pageData} allTransactions={agentTransactions} />;
             default: return <AdminDashboard />;
         }
     };

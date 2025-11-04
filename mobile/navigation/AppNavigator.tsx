@@ -17,6 +17,9 @@ import SeatSelectionScreen from '../screens/SeatSelectionScreen';
 import BookingConfirmationScreen from '../screens/BookingConfirmationScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import WalletScreen from '../screens/WalletScreen';
+import BusCharterScreen from '../screens/BusCharterScreen';
+import LostAndFoundScreen from '../screens/LostAndFoundScreen';
+
 
 // Agent Screens
 import AgentDashboardScreen from '../screens/agent/AgentDashboardScreen';
@@ -34,6 +37,9 @@ import DriverSettingsScreen from '../screens/driver/DriverSettingsScreen';
 import CompanyDashboardScreen from '../screens/company/CompanyDashboardScreen';
 import ManageFleetScreen from '../screens/company/ManageFleetScreen';
 import ManageDriversScreen from '../screens/company/ManageDriversScreen';
+import AddEditBusScreen from '../screens/company/AddEditBusScreen';
+import AddEditDriverScreen from '../screens/company/AddEditDriverScreen';
+
 
 // Admin Screens
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
@@ -86,24 +92,34 @@ function DriverTabs() {
                 let iconName;
                 if (route.name === 'Dashboard') iconName = 'chart-bar';
                 else if (route.name === 'Boarding') iconName = 'qr-code';
-                else if (route.name === 'Profile') iconName = 'user-circle';
+                else if (route.name === 'Settings') iconName = 'user-circle';
                 return <Icon name={iconName} size={size} color={color} />;
             },
         })}>
             <Tab.Screen name="Dashboard" component={DriverDashboardScreen} />
             <Tab.Screen name="Boarding" component={BoardingScreen} />
-            <Tab.Screen name="Profile" component={ProfileScreen} />
+            <Tab.Screen name="Settings" component={DriverSettingsScreen} />
         </Tab.Navigator>
     );
 }
 
 function AgentTabs() {
     return (
-        <Tab.Navigator>
-            <Tab.Screen name="Dashboard" component={AgentDashboardScreen} options={{ headerShown: false }} />
-            <Tab.Screen name="Deposit" component={AgentDepositScreen} options={{ headerShown: false }} />
-            <Tab.Screen name="Transactions" component={AgentTransactionsScreen} options={{ headerShown: false }}/>
-            <Tab.Screen name="Profile" component={AgentProfileScreen} options={{ headerShown: false }} />
+        <Tab.Navigator screenOptions={({ route }) => ({
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => {
+                let iconName;
+                if (route.name === 'Dashboard') iconName = 'chart-bar';
+                else if (route.name === 'Deposit') iconName = 'qr-code';
+                else if (route.name === 'Transactions') iconName = 'briefcase';
+                 else if (route.name === 'Profile') iconName = 'user-circle';
+                return <Icon name={iconName} size={size} color={color} />;
+            },
+        })}>
+            <Tab.Screen name="Dashboard" component={AgentDashboardScreen} />
+            <Tab.Screen name="Deposit" component={AgentDepositScreen} />
+            <Tab.Screen name="Transactions" component={AgentTransactionsScreen} />
+            <Tab.Screen name="Profile" component={AgentProfileScreen} />
         </Tab.Navigator>
     );
 }
@@ -164,6 +180,10 @@ export default function AppNavigator() {
                     <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
                     <Stack.Screen name="TicketDetails" component={TicketDetailsScreen} />
                     <Stack.Screen name="DriverBoarding" component={BoardingScreen} />
+                    <Stack.Screen name="BusCharter" component={BusCharterScreen} />
+                    <Stack.Screen name="LostAndFound" component={LostAndFoundScreen} />
+                    <Stack.Screen name="AddEditBus" component={AddEditBusScreen} />
+                    <Stack.Screen name="AddEditDriver" component={AddEditDriverScreen} />
                 </>
             ) : (
                 <>

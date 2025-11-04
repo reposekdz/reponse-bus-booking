@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Page } from '../App';
 import { ChartBarIcon, BusIcon, UsersIcon, MapIcon, WalletIcon, CogIcon } from '../components/icons';
@@ -17,7 +16,6 @@ interface CompanyLayoutProps {
     companyData: any;
 }
 
-// FIX: Explicitly type the navItems array to ensure `item.page` is of type `Page`.
 const navItems: { page: Page; label: string; icon: React.FC<any> }[] = [
     { page: 'companyDashboard', label: 'Dashboard', icon: ChartBarIcon },
     { page: 'fleetMonitoring', label: 'Fleet Monitoring', icon: MapIcon },
@@ -29,35 +27,19 @@ const navItems: { page: Page; label: string; icon: React.FC<any> }[] = [
     { page: 'companySettings', label: 'Settings', icon: CogIcon },
 ];
 
-// Mock data for a single company
-const companyMockData = {
-    drivers: [
-        { id: 'd1', name: 'John Doe', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active' },
-        { id: 'd3', name: 'Mary Anne', assignedBusId: 'RAE 789 A', phone: '0788555666', status: 'On Leave' },
-    ],
-    buses: [
-        { id: 'b1', plate: 'RAD 123 B', model: 'Yutong Explorer', capacity: 55, status: 'Operational', maintenanceDate: '2024-12-15' },
-        { id: 'b2', plate: 'RAE 789 A', model: 'Coaster', capacity: 30, status: 'On Route', maintenanceDate: '2024-11-30' },
-    ],
-    routes: [
-        { id: 'r1', from: 'Kigali', to: 'Rubavu', distance: '150km', duration: '3.5h', price: 4500, status: 'Active' },
-        { id: 'r2', from: 'Kigali', to: 'Musanze', distance: '90km', duration: '2h', price: 3500, status: 'Active' },
-    ]
-};
-
 const CompanyLayout: React.FC<CompanyLayoutProps> = ({ currentPage, navigate, companyData }) => {
     
     const renderContent = () => {
         switch (currentPage) {
-            case 'companyDashboard': return <CompanyDashboard drivers={companyMockData.drivers} buses={companyMockData.buses} routes={companyMockData.routes} companyPin={companyData.pin} />;
-            case 'companyBuses': return <CompanyBuses buses={companyMockData.buses} crudHandlers={{}} companyId={companyData.id} />;
-            case 'companyDrivers': return <CompanyDrivers drivers={companyMockData.drivers} crudHandlers={{}} companyId={companyData.id} />;
-            case 'companyRoutes': return <CompanyRoutes routes={companyMockData.routes} crudHandlers={{}} companyId={companyData.id} />;
+            case 'companyDashboard': return <CompanyDashboard companyPin={companyData.pin} />;
+            case 'companyBuses': return <CompanyBuses companyId={companyData.id} />;
+            case 'companyDrivers': return <CompanyDrivers companyId={companyData.id} />;
+            case 'companyRoutes': return <CompanyRoutes companyId={companyData.id} />;
             case 'companyPassengers': return <CompanyPassengers />;
             case 'companyFinancials': return <CompanyFinancials />;
             case 'companySettings': return <CompanySettings companyData={companyData} />;
-            case 'fleetMonitoring': return <FleetMonitoring buses={companyMockData.buses} />;
-            default: return <CompanyDashboard drivers={companyMockData.drivers} buses={companyMockData.buses} routes={companyMockData.routes} companyPin={companyData.pin} />;
+            case 'fleetMonitoring': return <FleetMonitoring />;
+            default: return <CompanyDashboard companyPin={companyData.pin} />;
         }
     };
     

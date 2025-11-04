@@ -5,16 +5,17 @@ import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/types';
 
-type AddEditDriverScreenRouteProp = RouteProp<RootStackParamList, 'App'>;
+// FIX: Update param list to a known key for type safety.
+type AddEditDriverScreenRouteProp = RouteProp<RootStackParamList, 'AddEditDriver'>;
 // @ts-ignore
-type AddEditDriverScreenNavigationProp = StackNavigationProp<RootStackParamList, 'App'>;
+type AddEditDriverScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddEditDriver'>;
 
 type Props = {
   route: AddEditDriverScreenRouteProp;
   navigation: AddEditDriverScreenNavigationProp;
 };
 
-export default function AddEditDriverScreen({ route, navigation }) {
+export default function AddEditDriverScreen({ route, navigation }: Props) {
     const { driver } = route.params || {};
     const isEditing = !!driver;
 

@@ -1,57 +1,33 @@
 // types.ts
 import { NavigatorScreenParams } from '@react-navigation/native';
-import { User } from '../hooks/useAuth';
 
-// Define params for each screen
-export type HomeStackParamList = {
-  HomeMain: undefined;
-  SearchResults: { from: string; to: string };
-  SeatSelection: { trip: any };
-  BookingConfirmation: { trip: any; selectedSeats: string[] };
-};
+// Define params for each screen that receives them
+type SearchResultsParams = { from: string; to: string };
+type SeatSelectionParams = { trip: any };
+type BookingConfirmationParams = { trip: any; selectedSeats: string[] };
+type TicketDetailsParams = { ticket: any };
+type AddEditBusParams = { bus?: any };
+type AddEditDriverParams = { driver?: any };
 
-export type TicketsStackParamList = {
-  MyTicketsList: undefined;
-  TicketDetails: { ticket: any };
-};
-
-export type ProfileStackParamList = {
-    ProfileMain: undefined;
-    EditProfile: undefined;
-    DriverSettings: undefined;
-};
-
-// Define params for each tab
-export type PassengerTabParamList = {
-  Home: NavigatorScreenParams<HomeStackParamList>;
-  MyTickets: NavigatorScreenParams<TicketsStackParamList>;
-  Services: undefined;
-  Profile: NavigatorScreenParams<ProfileStackParamList>;
-};
-
-export type DriverTabParamList = {
-    Dashboard: undefined;
-    Boarding: undefined;
-    Profile: NavigatorScreenParams<ProfileStackParamList>;
-};
-
-export type CompanyTabParamList = {
-    Dashboard: undefined;
-    Fleet: undefined;
-    Drivers: undefined;
-};
-
-
-// The root stack contains everything, including modals
+// The root stack contains everything, including modals and nested navigators
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
-  App: NavigatorScreenParams<{
-      MainTabs: undefined;
-      // Modals
-      AddEditBus: { bus?: any };
-      AddEditDriver: { driver?: any };
-  }>;
+  MainApp: undefined; // This will hold the tab navigators
+  // Screens that can be pushed on top of any tab
+  SearchResults: SearchResultsParams;
+  SeatSelection: SeatSelectionParams;
+  BookingConfirmation: BookingConfirmationParams;
+  TicketDetails: TicketDetailsParams;
+  DriverBoarding: undefined;
+  BusCharter: undefined;
+  LostAndFound: undefined;
+  // Modals or forms
+  AddEditBus: AddEditBusParams;
+  AddEditDriver: AddEditDriverParams;
+  // Profile stack screens
+  EditProfile: undefined;
+  Wallet: undefined;
 };
 
 // This allows us to use useNavigation with type safety

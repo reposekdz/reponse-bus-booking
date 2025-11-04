@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { UsersIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 import Modal from '../components/Modal';
@@ -54,14 +53,16 @@ const DriverForm = ({ driver, onSave, onCancel }) => {
     );
 };
 
-// FIX: Define props interface to accept `drivers` from the parent component.
+const initialDrivers = [
+    { id: 'd1', name: 'John Doe', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active' },
+    { id: 'd3', name: 'Mary Anne', assignedBusId: 'RAE 789 A', phone: '0788555666', status: 'On Leave' },
+];
+
 interface CompanyDriversProps {
     companyId: string;
-    drivers: any[];
-    crudHandlers: any;
 }
 
-const CompanyDrivers: React.FC<CompanyDriversProps> = ({ companyId, drivers: initialDrivers }) => {
+const CompanyDrivers: React.FC<CompanyDriversProps> = ({ companyId }) => {
     const [drivers, setDrivers] = useState(initialDrivers);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);

@@ -1,12 +1,12 @@
-
 import React from 'react';
 import { ChartBarIcon, UsersIcon, BuildingOfficeIcon, BriefcaseIcon } from '../components/icons';
+import ActivityFeed from '../components/ActivityFeed';
 
 // FIX: Exporting mock data to resolve module not found errors in other components.
 export const mockCompaniesData = [
   { id: 'volcano', name: 'Volcano Express', status: 'Active', totalRevenue: 5_800_000_000, totalPassengers: 3_500_000, routesCount: 30, logoUrl: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg', coverUrl: 'https://images.unsplash.com/photo-1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop', description: 'Volcano Express is one of the most popular transport companies in Rwanda, known for its excellent service, cleanliness, and punctuality.' },
   { id: 'ritco', name: 'RITCO', status: 'Active', totalRevenue: 8_200_000_000, totalPassengers: 2_100_000, routesCount: 25, logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/04/ritco-logo-single.png', coverUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop', description: 'RITCO is a public-private partnership providing reliable country-wide transportation with a modern fleet of large buses.' },
-  { id: 'horizon', name: 'Horizon Express', status: 'Active', totalRevenue: 3_100_000_000, totalPassengers: 1_800_000, routesCount: 22, logoUrl: 'https://media.licdn.com/dms/image/C4D0BAQHL8G_LgDIeew/company-logo_200_200/0/1630656360706/horizon_express_ltd_logo?e=2147483647&v=beta&t=o1QkClM7J5Z8Y4b3b2A1e2a5f6a8b7c5d4e3f2a1', coverUrl: 'https://images.unsplash.com/photo-1605641793224-6512a8d8363b?q=80&w=1974&auto=format&fit=crop', description: 'Horizon Express connects major towns with a focus on customer comfort and safety.' },
+  { id: 'horizon', name: 'Horizon Express', status: 'Active', totalRevenue: 3_100_000_000, totalPassengers: 1_800_000, routesCount: 22, logoUrl: 'https://media.licdn.com/dms/image/C4D0BAQHL8G_LgDIeew/company-logo_200_200/0/1630656360706/horizon_express_ltd_logo?e=2147483647&v=beta&t=o1QkClM7J5Z8Y4b3b2A1e2a5f6a8b7c5d4e3f2a1', coverUrl: 'https://images.unsplash.com/photo-1605641793224-6512a_d8363b?q=80&w=1974&auto=format&fit=crop', description: 'Horizon Express connects major towns with a focus on customer comfort and safety.' },
   { id: 'stellart', name: 'STELLART', status: 'Inactive', totalRevenue: 1_500_000_000, totalPassengers: 950_000, routesCount: 15, logoUrl: 'https://pbs.twimg.com/profile_images/1364539655823495169/DE-O7wXJ_400x400.jpg', coverUrl: 'https://images.unsplash.com/photo-1616372819235-9b2e1577a2d4?q=80&w=2070&auto=format&fit=crop', description: 'STELLART provides affordable travel options across the country.' },
 ];
 
@@ -44,9 +44,12 @@ const AdminDashboard: React.FC = () => {
                 <StatCard title="Active Companies" value="4" icon={<BuildingOfficeIcon className="w-6 h-6 text-blue-600"/>} change="-1" changeType="decrease" />
                 <StatCard title="Registered Agents" value="2" icon={<BriefcaseIcon className="w-6 h-6 text-blue-600"/>} change="+0%" changeType="increase" />
             </div>
-            <div className="mt-8 bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                <h2 className="text-xl font-bold dark:text-white">Recent Activity</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-4">A live feed of platform activity will be shown here.</p>
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                    <h2 className="text-xl font-bold dark:text-white">Platform Analytics</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mt-4">Charts showing revenue, passenger growth, etc., will be here.</p>
+                </div>
+                <ActivityFeed />
             </div>
         </div>
     );

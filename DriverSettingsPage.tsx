@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { CameraIcon, SunIcon, MoonIcon, BellIcon, ShieldCheckIcon, UserCircleIcon, BriefcaseIcon } from './components/icons';
 

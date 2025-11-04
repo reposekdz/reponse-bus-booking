@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 import Modal from '../components/Modal';
@@ -59,14 +58,16 @@ const BusForm = ({ bus, onSave, onCancel }) => {
     );
 };
 
-// FIX: Define props interface to accept `buses` from the parent component.
+const initialBuses = [
+    { id: 'b1', plate: 'RAD 123 B', model: 'Yutong Explorer', capacity: 55, status: 'Operational', maintenanceDate: '2024-12-15' },
+    { id: 'b2', plate: 'RAE 789 A', model: 'Coaster', capacity: 30, status: 'On Route', maintenanceDate: '2024-11-30' },
+];
+
 interface CompanyBusesProps {
     companyId: string;
-    buses: any[];
-    crudHandlers: any;
 }
 
-const CompanyBuses: React.FC<CompanyBusesProps> = ({ companyId, buses: initialBuses }) => {
+const CompanyBuses: React.FC<CompanyBusesProps> = ({ companyId }) => {
     const [buses, setBuses] = useState(initialBuses);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);

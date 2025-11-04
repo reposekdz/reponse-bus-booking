@@ -4,6 +4,7 @@ import {
     WalletIcon, CreditCardIcon, SearchIcon, XIcon, CheckCircleIcon, PhoneIcon, MapPinIcon
 } from './components/icons';
 import PinModal from './components/PinModal';
+import { Page } from './App';
 
 interface AgentDashboardProps {
     onLogout: () => void;
@@ -13,6 +14,7 @@ interface AgentDashboardProps {
     onAgentDeposit: (serialCode: string, amount: number) => { success: boolean, passengerName?: string, commission?: number, message?: string };
     passengerSerialCode: string;
     transactions: any[];
+    navigate: (page: Page, data?: any) => void;
 }
 
 const StatCard = ({ title, value, icon, format = 'currency' }) => (
@@ -297,7 +299,7 @@ const TransactionsView = ({ transactions }) => {
 };
 
 
-const AgentDashboard: React.FC<AgentDashboardProps> = ({ onLogout, theme, setTheme, agentData, onAgentDeposit, passengerSerialCode, transactions }) => {
+const AgentDashboard: React.FC<AgentDashboardProps> = ({ onLogout, theme, setTheme, agentData, onAgentDeposit, passengerSerialCode, transactions, navigate }) => {
     const [view, setView] = useState('dashboard');
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
@@ -326,7 +328,11 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ onLogout, theme, setThe
                     <NavLink viewName="dashboard" label="Imbonerahamwe" icon={ChartBarIcon} />
                     <NavLink viewName="deposit" label="Kubitsa" icon={CreditCardIcon} />
                     <NavLink viewName="transactions" label="Ibikorwa" icon={WalletIcon} />
-                    <NavLink viewName="profile" label="Umwirondoro" icon={UsersIcon} />
+                    <button onClick={() => navigate('agentProfile')} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative text-gray-400 hover:text-white hover:bg-white/5`}>
+                         <div className={`absolute left-0 top-0 h-full w-1 rounded-r-full bg-yellow-400 transition-all duration-300 scale-y-0 group-hover:scale-y-50`}></div>
+                        <UsersIcon className="w-6 h-6 mr-4 transition-transform duration-300 group-hover:scale-110" />
+                        <span className="font-semibold">Umwirondoro</span>
+                    </button>
                     <NavLink viewName="settings" label="Iboneza" icon={CogIcon} />
                 </nav>
             </aside>

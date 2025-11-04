@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,7 +29,6 @@ export default function OtpScreen({ navigation }) {
                 {otp.map((digit, index) => (
                     <TextInput
                         key={index}
-                        // FIX: Use a function block for the ref callback to ensure a void return type.
                         ref={(ref) => { inputs.current[index] = ref; }}
                         style={styles.otpInput}
                         value={digit}

@@ -24,13 +24,13 @@ import LiveTrackingModal from './components/LiveTrackingModal';
 import ServicesPage from './ServicesPage';
 import PackageDeliveryPage from './PackageDeliveryPage';
 import BusCharterPage from './BusCharterPage';
-import CompaniesAside from './components/CompaniesAside';
-import ServicesAside from './components/ServicesAside';
-// FIX: Import allSearchResults to provide data to SearchResultsPage
 import BookingSearchPage, { allSearchResults } from './BookingSearchPage';
 import BottomNavigation from './components/BottomNavigation';
 import TicketModal from './components/TicketModal';
 import { LanguageProvider } from './contexts/LanguageContext';
+import DriverProfilePage from './DriverProfilePage';
+import AgentProfilePage from './AgentProfilePage';
+
 
 export type Page = 
   | 'home' | 'login' | 'register' | 'bookings' | 'scheduled' | 'search' 
@@ -48,8 +48,8 @@ const mockUsers = {
   passenger: { name: 'Kalisa Jean', email: 'passenger@rwandabus.rw', role: 'passenger', avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg', walletBalance: 15000, pin: '1234' },
   company: { name: 'Volcano Express', email: 'manager@volcano.rw', role: 'company', avatarUrl: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg', pin: '2024' },
   admin: { name: 'Admin User', email: 'admin@rwandabus.rw', role: 'admin', avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg' },
-  driver: { id: 'd1', name: 'John Doe', email: 'driver@volcano.rw', role: 'driver', avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg', companyId: 'volcano', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active', joinDate: '2022-03-10', bio: 'Experienced driver with over 10 years on the Kigali-Rubavu route. Safety is my priority.', certifications: [{id: 'CERT-001', name: 'Defensive Driving', expiry: '2025-12-31'}]},
-  agent: { id: 'a1', name: 'Jane Smith', email: 'jane.s@agent.rw', role: 'agent', avatarUrl: 'https://randomuser.me/api/portraits/women/5.jpg', location: 'Nyabugogo', commissionRate: 0.05, totalDeposits: 2500000, pin: '5678' }
+  driver: { id: 'd1', name: 'John Doe', email: 'driver@volcano.rw', role: 'driver', avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg', company: 'Volcano Express', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active', joinDate: '2022-03-10', bio: 'Experienced driver with over 10 years on the Kigali-Rubavu route. Safety is my priority.', certifications: [{id: 'CERT-001', name: 'Defensive Driving', expiry: '2025-12-31'}]},
+  agent: { id: 'a1', name: 'Jane Smith', email: 'jane.s@agent.rw', role: 'agent', avatarUrl: 'https://randomuser.me/api/portraits/women/5.jpg', location: 'Nyabugogo', commissionRate: 0.05, totalDeposits: 2500000, pin: '5678', phone: '0788777888' }
 };
 
 const mockNextTrip = {
@@ -65,8 +65,6 @@ const AppContent: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [showNextTrip, setShowNextTrip] = useState(false);
   const [showLiveTracking, setShowLiveTracking] = useState(false);
-  const [showCompaniesAside, setShowCompaniesAside] = useState(false);
-  const [showServicesAside, setShowServicesAside] = useState(false);
   const [viewingTicket, setViewingTicket] = useState<any | null>(null);
   
   // Passenger serial code for agent demo
@@ -139,7 +137,6 @@ const AppContent: React.FC = () => {
     switch (currentPage) {
       case 'login': return <LoginPage onNavigate={navigate} onLogin={handleLogin} />;
       case 'register': return <RegisterPage onNavigate={navigate} />;
-      // FIX: Pass 'results' prop to SearchResultsPage and pass trip data on selection.
       case 'search': return <SearchResultsPage results={allSearchResults} onTripSelect={(trip) => navigate('seatSelection', trip)} />;
       case 'seatSelection': return <SeatSelectionPage onConfirm={() => alert("Proceed to payment")} onBack={() => navigate('search')} tripData={pageData} />;
       case 'bookings': return <BookingsPage onViewTicket={setViewingTicket} />;
@@ -149,23 +146,25 @@ const AppContent: React.FC = () => {
       case 'companyProfile': return <CompanyProfilePage company={pageData} onSelectTrip={handleSearch} />;
       case 'help': return <HelpPage />;
       case 'contact': return <ContactPage />;
-      case 'services': return <ServicesPage onNavigate={navigate} onToggleServicesAside={() => setShowServicesAside(true)} />;
+      case 'services': return <ServicesPage onNavigate={navigate} />;
       case 'packageDelivery': return <PackageDeliveryPage onNavigate={navigate} />;
       case 'busCharter': return <BusCharterPage onNavigate={navigate} />;
-      // FIX: Pass 'navigate' prop to BookingSearchPage as it's required.
       case 'bookingSearch': return <BookingSearchPage onSearch={handleSearch} navigate={navigate} />;
       
-      case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminPassengers': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions': case 'agentProfile':
-        return <AdminLayout currentPage={currentPage} navigate={navigate} agentTransactions={agentTransactions} pageData={pageData} />;
+      case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminPassengers': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions':
+        return <AdminLayout currentPage={currentPage} navigate={navigate} />;
         
       case 'companyDashboard': case 'companyBuses': case 'companyDrivers': case 'companyRoutes': case 'companyPassengers': case 'companyFinancials': case 'companySettings': case 'fleetMonitoring':
         return <CompanyLayout currentPage={currentPage} navigate={navigate} companyData={user} />;
         
-      case 'driverDashboard': case 'driverProfile':
+      case 'driverDashboard':
         return <DriverDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} driverData={mockUsers.driver} allCompanies={[]} onPassengerBoarding={() => {}} navigate={navigate} />;
 
       case 'agentDashboard':
         return <AgentDashboard onLogout={handleLogout} theme={theme} setTheme={setTheme} agentData={mockUsers.agent} onAgentDeposit={handleAgentDeposit} passengerSerialCode={passengerSerialCode} transactions={agentTransactions} />;
+        
+      case 'driverProfile': return <DriverProfilePage driver={pageData || mockUsers.driver} />;
+      case 'agentProfile': return <AgentProfilePage agent={pageData || mockUsers.agent} allTransactions={agentTransactions} />;
 
       default:
         return (
@@ -179,7 +178,7 @@ const AppContent: React.FC = () => {
   };
   
   const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminPassengers', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile'].includes(currentPage);
-  const showBottomNav = ['home', 'bookingSearch', 'companies', 'profile'].includes(currentPage);
+  const showBottomNav = !isDashboard && ['home', 'bookingSearch', 'companies', 'profile', 'services'].includes(currentPage);
 
   return (
     <div className={`${theme} font-sans bg-white dark:bg-gray-900`}>
@@ -191,7 +190,6 @@ const AppContent: React.FC = () => {
                 onLogout={handleLogout}
                 theme={theme}
                 setTheme={setTheme}
-                onToggleCompaniesAside={() => setShowCompaniesAside(true)}
              />
         )}
         <main className={isDashboard ? '' : 'pt-20'}>
@@ -211,9 +209,6 @@ const AppContent: React.FC = () => {
         
         {showLiveTracking && <LiveTrackingModal onClose={() => setShowLiveTracking(false)} />}
         {viewingTicket && <TicketModal ticket={viewingTicket} onClose={() => setViewingTicket(null)} />}
-
-        <CompaniesAside isOpen={showCompaniesAside} onClose={() => setShowCompaniesAside(false)} navigate={navigate} />
-        <ServicesAside isOpen={showServicesAside} onClose={() => setShowServicesAside(false)} navigate={navigate} />
 
         {showBottomNav && (
             <>

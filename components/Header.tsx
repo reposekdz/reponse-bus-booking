@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Page } from '../App';
-import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, BuildingOfficeIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon } from './icons';
+import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface HeaderProps {
@@ -10,7 +10,6 @@ interface HeaderProps {
   onLogout: () => void;
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
-  onToggleCompaniesAside: () => void;
 }
 
 const NavLink: React.FC<{ page: Page; currentPage: Page; onNavigate: (page: Page) => void; children: React.ReactNode }> = ({ page, currentPage, onNavigate, children }) => (
@@ -22,7 +21,7 @@ const NavLink: React.FC<{ page: Page; currentPage: Page; onNavigate: (page: Page
   </button>
 );
 
-const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout, theme, setTheme, onToggleCompaniesAside }) => {
+const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout, theme, setTheme }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -37,6 +36,15 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
   };
 
   const currentLang = languages.find(l => l.code === language);
+  
+  const DropdownMenu: React.FC<{isOpen: boolean; children: React.ReactNode; onMouseLeave: () => void; className?: string}> = ({isOpen, children, onMouseLeave, className}) => (
+      <div 
+        className={`absolute right-0 mt-3 w-64 origin-top-right rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-300 ease-in-out ${className} ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+        onMouseLeave={onMouseLeave}
+      >
+        {children}
+      </div>
+  );
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0033A0] via-[#00574B] to-[#204F46] text-white shadow-lg backdrop-blur-sm bg-opacity-90">
@@ -49,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
         <nav className="hidden lg:flex items-center space-x-2">
           <NavLink page="home" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_home')}</NavLink>
           <NavLink page="bookingSearch" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_booking')}</NavLink>
-          <button onClick={onToggleCompaniesAside} className="px-4 py-2 text-sm font-semibold text-white hover:text-yellow-200 transition-colors duration-200">{t('nav_companies')}</button>
+          <NavLink page="companies" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_companies')}</NavLink>
           <NavLink page="services" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_services')}</NavLink>
           <NavLink page="help" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_help')}</NavLink>
           <NavLink page="contact" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_contact')}</NavLink>
@@ -57,24 +65,21 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
 
         <div className="flex items-center space-x-2 sm:space-x-4">
            <div className="relative hidden lg:block">
-            <button onClick={() => setIsLangOpen(!isLangOpen)} className="flex items-center space-x-1 p-2 rounded-full hover:bg-white/10">
+            <button onClick={() => setIsLangOpen(!isLangOpen)} onMouseEnter={() => setIsLangOpen(true)} className="flex items-center space-x-1 p-2 rounded-full hover:bg-white/10">
               <LanguageIcon className="w-5 h-5" />
               <span className="text-xs font-bold">{currentLang?.code}</span>
               <ChevronDownIcon className={`w-4 h-4 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
             </button>
-            {isLangOpen && (
-              <div 
-                className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 animate-fade-in"
-                onMouseLeave={() => setIsLangOpen(false)}
-              >
-                {languages.map(lang => (
-                  <button key={lang.code} onClick={() => selectLanguage(lang)} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <span className="mr-3">{lang.flag}</span>
-                    {lang.name}
-                  </button>
-                ))}
-              </div>
-            )}
+             <DropdownMenu isOpen={isLangOpen} onMouseLeave={() => setIsLangOpen(false)} className="w-48">
+                <div className="py-1">
+                    {languages.map(lang => (
+                      <button key={lang.code} onClick={() => selectLanguage(lang)} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <span className="mr-3 text-lg">{lang.flag}</span>
+                        {lang.name}
+                      </button>
+                    ))}
+                </div>
+              </DropdownMenu>
           </div>
 
           <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-white/10">
@@ -82,55 +87,57 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
           </button>
 
           <div className="relative hidden lg:block">
-            <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="p-2 rounded-full hover:bg-white/10 relative">
+            <button onMouseEnter={() => setIsNotificationsOpen(true)} onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="p-2 rounded-full hover:bg-white/10 relative">
               <BellIcon className="w-5 h-5" />
               <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white/20"></span>
             </button>
-            {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl animate-fade-in" onMouseLeave={() => setIsNotificationsOpen(false)}>
+            <DropdownMenu isOpen={isNotificationsOpen} onMouseLeave={() => setIsNotificationsOpen(false)} className="w-80">
                 <div className="p-3 font-bold text-gray-800 dark:text-white border-b dark:border-gray-700">Notifications</div>
-                <div className="py-2">
-                    <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <p className="font-semibold">Trip Reminder</p>
-                        <p className="text-xs">Your trip to Rubavu is tomorrow at 07:00.</p>
+                <div className="py-2 max-h-64 overflow-y-auto">
+                    <div className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-start space-x-3">
+                        <TicketIcon className="w-5 h-5 text-blue-500 mt-0.5"/>
+                        <div>
+                            <p className="font-semibold">Trip Reminder</p>
+                            <p className="text-xs">Your trip to Rubavu is tomorrow at 07:00.</p>
+                        </div>
                     </div>
-                     <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <p className="font-semibold text-red-500">Promotion!</p>
-                        <p className="text-xs">Get 10% off on all weekend trips.</p>
+                     <div className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-start space-x-3">
+                         <TagIcon className="w-5 h-5 text-red-500 mt-0.5"/>
+                         <div>
+                            <p className="font-semibold text-red-500">Promotion!</p>
+                            <p className="text-xs">Get 10% off on all weekend trips. Use code WEEKEND10.</p>
+                        </div>
                     </div>
                 </div>
                  <div className="p-2 border-t dark:border-gray-700 text-center">
                     <button className="text-xs text-blue-600 dark:text-blue-400 font-semibold">View All</button>
                 </div>
-              </div>
-            )}
+            </DropdownMenu>
           </div>
           
           <div className="hidden lg:flex items-center">
             {user ? (
               <div className="relative">
-                <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="flex items-center space-x-2 p-1 rounded-full hover:bg-white/10">
+                <button onMouseEnter={() => setIsUserMenuOpen(true)} onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="flex items-center space-x-2 p-1 rounded-full hover:bg-white/10">
                   <img src={user.avatarUrl} alt="User" className="w-8 h-8 rounded-full" />
                 </button>
-                {isUserMenuOpen && (
-                  <div 
-                    className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg animate-fade-in"
-                    onMouseLeave={() => setIsUserMenuOpen(false)}
-                  >
+                <DropdownMenu isOpen={isUserMenuOpen} onMouseLeave={() => setIsUserMenuOpen(false)}>
                     <div className="p-4 border-b dark:border-gray-700">
                         <p className="font-bold text-gray-800 dark:text-white">{user.name}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                     </div>
+                     <div className="p-4 border-b dark:border-gray-700">
+                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Wallet Balance</p>
+                        <p className="font-bold text-xl text-green-600 dark:text-green-400">{new Intl.NumberFormat('fr-RW').format(user.walletBalance)} RWF</p>
+                    </div>
                     <div className="py-2">
-                        <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><UserCircleIcon className="w-5 h-5 mr-2"/> {t('usermenu_profile')}</button>
-                        <button onClick={() => { onNavigate('bookings'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><UserCircleIcon className="w-5 h-5 mr-2"/> {t('usermenu_bookings')}</button>
-                        <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><WalletIcon className="w-5 h-5 mr-2"/> {t('usermenu_wallet')}</button>
+                        <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><UserCircleIcon className="w-5 h-5 mr-3"/> {t('usermenu_profile')}</button>
+                        <button onClick={() => { onNavigate('bookings'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><TicketIcon className="w-5 h-5 mr-3"/> {t('usermenu_bookings')}</button>
                     </div>
                      <div className="border-t dark:border-gray-700 p-2">
-                        <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">{t('usermenu_logout')}</button>
+                        <button onClick={onLogout} className="w-full text-left px-3 py-2 text-sm font-semibold text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20">{t('usermenu_logout')}</button>
                     </div>
-                  </div>
-                )}
+                </DropdownMenu>
               </div>
             ) : (
               <button onClick={() => onNavigate('login')} className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] rounded-md hover:saturate-150 transition-all shadow-md transform hover:-translate-y-0.5">{t('login_button')}</button>
@@ -154,7 +161,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
                  <nav className="flex flex-col space-y-4">
                     <button onClick={() => {onNavigate('home'); setIsMobileMenuOpen(false);}}>{t('nav_home')}</button>
                     <button onClick={() => {onNavigate('bookingSearch'); setIsMobileMenuOpen(false);}}>{t('nav_booking')}</button>
-                    <button onClick={() => {onToggleCompaniesAside(); setIsMobileMenuOpen(false);}}>{t('nav_companies')}</button>
+                    <button onClick={() => {onNavigate('companies'); setIsMobileMenuOpen(false);}}>{t('nav_companies')}</button>
                     <button onClick={() => {onNavigate('services'); setIsMobileMenuOpen(false);}}>{t('nav_services')}</button>
                     <button onClick={() => {onNavigate('help'); setIsMobileMenuOpen(false);}}>{t('nav_help')}</button>
                     <button onClick={() => {onNavigate('contact'); setIsMobileMenuOpen(false);}}>{t('nav_contact')}</button>

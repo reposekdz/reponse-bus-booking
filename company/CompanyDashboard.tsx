@@ -16,15 +16,30 @@ const StatCard = ({ title, value, icon }) => (
     </div>
 );
 
+// Mock data moved inside for component self-containment
+const companyMockData = {
+    drivers: [
+        { id: 'd1', name: 'John Doe', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active' },
+        { id: 'd3', name: 'Mary Anne', assignedBusId: 'RAE 789 A', phone: '0788555666', status: 'On Leave' },
+    ],
+    buses: [
+        { id: 'b1', plate: 'RAD 123 B', model: 'Yutong Explorer', capacity: 55, status: 'Operational', maintenanceDate: '2024-12-15' },
+        { id: 'b2', plate: 'RAE 789 A', model: 'Coaster', capacity: 30, status: 'On Route', maintenanceDate: '2024-11-30' },
+    ],
+    routes: [
+        { id: 'r1', from: 'Kigali', to: 'Rubavu', distance: '150km', duration: '3.5h', price: 4500, status: 'Active' },
+        { id: 'r2', from: 'Kigali', to: 'Musanze', distance: '90km', duration: '2h', price: 3500, status: 'Active' },
+    ]
+};
+
 interface CompanyDashboardProps {
-    drivers: any[];
-    buses: any[];
-    routes: any[];
     companyPin: string;
 }
 
-const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ drivers, buses, routes, companyPin }) => {
+const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ companyPin }) => {
     const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+    
+    const { drivers, buses, routes } = companyMockData;
     const activeBuses = buses.filter(b => b.status === 'On Route').length;
     const popularRoute = routes.length > 0 ? `${routes[0].from} - ${routes[0].to}` : 'N/A';
     

@@ -5,16 +5,17 @@ import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/types';
 
-type AddEditBusScreenRouteProp = RouteProp<RootStackParamList, 'App'>;
+// FIX: Update param list to a known key for type safety.
+type AddEditBusScreenRouteProp = RouteProp<RootStackParamList, 'AddEditBus'>;
 // @ts-ignore
-type AddEditBusScreenNavigationProp = StackNavigationProp<RootStackParamList, 'App'>;
+type AddEditBusScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddEditBus'>;
 
 type Props = {
   route: AddEditBusScreenRouteProp;
   navigation: AddEditBusScreenNavigationProp;
 };
 
-export default function AddEditBusScreen({ route, navigation }) {
+export default function AddEditBusScreen({ route, navigation }: Props) {
     const { bus } = route.params || {};
     const isEditing = !!bus;
 

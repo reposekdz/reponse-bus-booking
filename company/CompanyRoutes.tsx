@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MapIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
 import Modal from '../components/Modal';
@@ -54,14 +53,16 @@ const RouteForm = ({ route, onSave, onCancel }) => {
     );
 };
 
-// FIX: Define props interface to accept `routes` from the parent component.
+const initialRoutes = [
+    { id: 'r1', from: 'Kigali', to: 'Rubavu', distance: '150km', duration: '3.5h', price: 4500, status: 'Active' },
+    { id: 'r2', from: 'Kigali', to: 'Musanze', distance: '90km', duration: '2h', price: 3500, status: 'Active' },
+];
+
 interface CompanyRoutesProps {
     companyId: string;
-    routes: any[];
-    crudHandlers: any;
 }
 
-const CompanyRoutes: React.FC<CompanyRoutesProps> = ({ companyId, routes: initialRoutes }) => {
+const CompanyRoutes: React.FC<CompanyRoutesProps> = ({ companyId }) => {
     const [routes, setRoutes] = useState(initialRoutes);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);

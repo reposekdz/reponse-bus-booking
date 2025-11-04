@@ -1,9 +1,14 @@
-
 import React from 'react';
 import { BusIcon } from '../components/icons';
 
-const FleetMonitoring: React.FC<{ buses: any[] }> = ({ buses }) => {
-    const onRouteBuses = buses.filter(b => b.status === 'On Route');
+const mockBuses = [
+    { id: 'b1', plate: 'RAD 123 B', model: 'Yutong Explorer', capacity: 55, status: 'On Route', maintenanceDate: '2024-12-15' },
+    { id: 'b2', plate: 'RAE 789 A', model: 'Coaster', capacity: 30, status: 'On Route', maintenanceDate: '2024-11-30' },
+    { id: 'b3', plate: 'RAG 246 D', model: 'Yutong Explorer', capacity: 55, status: 'Idle', maintenanceDate: '2025-01-20' },
+];
+
+const FleetMonitoring: React.FC = () => {
+    const onRouteBuses = mockBuses.filter(b => b.status === 'On Route');
 
     return (
         <div>
