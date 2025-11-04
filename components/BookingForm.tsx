@@ -33,90 +33,94 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
           [type]: operation === 'inc' ? prev[type] + 1 : Math.max(type === 'adults' ? 1 : 0, prev[type] - 1)
       }));
   };
+  
+  const formInputBaseClass = "w-full pl-10 pr-4 py-3 rounded-lg border-2 border-white/10 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-black/30 backdrop-blur-sm text-white transition appearance-none";
+  const formLabelClass = "absolute -top-2 left-4 text-xs px-1 text-yellow-300 z-10 font-semibold [text-shadow:0_0_5px_rgba(251,191,36,0.5)]";
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-gray-800 dark:text-white">
       <div className="flex items-center space-x-4 mb-4">
-        <button type="button" onClick={() => setTripType('one-way')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'one-way' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white'}`}>Urugendo Rumwe</button>
-        <button type="button" onClick={() => setTripType('round-trip')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'round-trip' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white'}`}>Kugenda no Kugaruka</button>
+        <button type="button" onClick={() => setTripType('one-way')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'one-way' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>Urugendo Rumwe</button>
+        <button type="button" onClick={() => setTripType('round-trip')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'round-trip' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>Kugenda no Kugaruka</button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
           <div className="relative">
-            <label htmlFor="from" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Aho uherereye</label>
-            <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
+            <label htmlFor="from" className={formLabelClass}>Aho uherereye</label>
+            <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
             <select
               id="from"
               value={fromLocation}
               onChange={(e) => setFromLocation(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition appearance-none"
+              className={`${formInputBaseClass} text-white`}
             >
-              {locations.map(loc => <option key={`from-${loc}`} value={loc}>{loc}</option>)}
+              {locations.map(loc => <option key={`from-${loc}`} value={loc} className="bg-gray-800">{loc}</option>)}
             </select>
           </div>
 
-          <div className="relative mt-4">
-             <button type="button" onClick={swapLocations} className="w-10 h-10 rounded-full bg-white/30 text-white flex items-center justify-center hover:bg-white/50 transition-colors transform hover:rotate-180 duration-300">
+          <div className="relative mt-5">
+             <button type="button" onClick={swapLocations} className="w-10 h-10 rounded-full bg-white/30 text-white flex items-center justify-center hover:bg-white/50 transition-all transform hover:rotate-180 duration-300">
                 <ArrowsUpDownIcon className="w-5 h-5"/>
              </button>
           </div>
 
            <div className="relative">
-            <label htmlFor="to" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Aho werekeje</label>
-            <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
+            <label htmlFor="to" className={formLabelClass}>Aho werekeje</label>
+            <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
             <select
               id="to"
               value={toLocation}
               onChange={(e) => setToLocation(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition appearance-none"
+              className={`${formInputBaseClass} text-white`}
             >
-              {locations.map(loc => <option key={`to-${loc}`} value={loc}>{loc}</option>)}
+              {locations.map(loc => <option key={`to-${loc}`} value={loc} className="bg-gray-800">{loc}</option>)}
             </select>
           </div>
       </div>
        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
-            <label htmlFor="date" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Itariki</label>
-            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
-            <input type="date" id="date" value={journeyDate} onChange={(e) => setJourneyDate(e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition"/>
+            <label htmlFor="date" className={formLabelClass}>Itariki</label>
+            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+            <input type="date" id="date" value={journeyDate} onChange={(e) => setJourneyDate(e.target.value)} className={formInputBaseClass}/>
           </div>
           <div className={`relative transition-opacity ${tripType === 'one-way' ? 'opacity-50' : 'opacity-100'}`}>
-            <label htmlFor="return-date" className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Itariki yo kugaruka</label>
-            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
-            <input type="date" id="return-date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} disabled={tripType === 'one-way'} className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition"/>
+            <label htmlFor="return-date" className={formLabelClass}>Itariki yo kugaruka</label>
+            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+            <input type="date" id="return-date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} disabled={tripType === 'one-way'} className={formInputBaseClass}/>
           </div>
       </div>
        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
-            <label className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Abagenzi</label>
-            <button type="button" onClick={() => setIsPassengerDropdownOpen(!isPassengerDropdownOpen)} className="w-full flex items-center text-left pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition">
-                 <UserCircleIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <label className={formLabelClass}>Abagenzi</label>
+            <button type="button" onClick={() => setIsPassengerDropdownOpen(!isPassengerDropdownOpen)} className={`${formInputBaseClass} text-left`}>
+                 <UserCircleIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                  {passengers.adults} Mukuru(ba), {passengers.children} Mwana(ba)
             </button>
              {isPassengerDropdownOpen && (
-                <div className="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 z-20">
+                <div className="absolute top-full mt-2 w-full bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg shadow-xl p-4 z-20 text-white">
                     <div className="flex justify-between items-center">
                         <p>Abakuru</p>
-                        <div className="flex items-center space-x-2">
-                            <button type="button" onClick={() => handlePassengerChange('adults', 'dec')} className="p-1 rounded-full bg-gray-200 dark:bg-gray-700">-</button>
-                            <span>{passengers.adults}</span>
-                            <button type="button" onClick={() => handlePassengerChange('adults', 'inc')} className="p-1 rounded-full bg-gray-200 dark:bg-gray-700">+</button>
+                        <div className="flex items-center space-x-3">
+                            <button type="button" onClick={() => handlePassengerChange('adults', 'dec')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">-</button>
+                            <span className="w-4 text-center">{passengers.adults}</span>
+                            <button type="button" onClick={() => handlePassengerChange('adults', 'inc')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">+</button>
                         </div>
                     </div>
                      <div className="flex justify-between items-center mt-2">
                         <p>Abana</p>
-                        <div className="flex items-center space-x-2">
-                            <button type="button" onClick={() => handlePassengerChange('children', 'dec')} className="p-1 rounded-full bg-gray-200 dark:bg-gray-700">-</button>
-                            <span>{passengers.children}</span>
-                            <button type="button" onClick={() => handlePassengerChange('children', 'inc')} className="p-1 rounded-full bg-gray-200 dark:bg-gray-700">+</button>
+                        <div className="flex items-center space-x-3">
+                            <button type="button" onClick={() => handlePassengerChange('children', 'dec')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">-</button>
+                            <span className="w-4 text-center">{passengers.children}</span>
+                            <button type="button" onClick={() => handlePassengerChange('children', 'inc')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">+</button>
                         </div>
                     </div>
                 </div>
             )}
           </div>
             <div className="relative">
-                <label className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Kode</label>
-                <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 z-10" />
-                <input type="text" placeholder="Shyiramo kode" className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition"/>
+                <label className={formLabelClass}>Kode</label>
+                <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                <input type="text" placeholder="Shyiramo kode" className={formInputBaseClass}/>
             </div>
        </div>
 

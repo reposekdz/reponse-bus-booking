@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { ArrowRightIcon, FilterIcon, LocationMarkerIcon, CalendarIcon, UserCircleIcon } from './components/icons';
 import SearchResultsPage from './SearchResultsPage';
@@ -74,6 +73,7 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onSearch: navigat
         case 'cheapest': return a.price - b.price;
         case 'fastest': return a.durationMinutes - b.durationMinutes;
         case 'earliest': return a.departureTime.localeCompare(b.departureTime);
+        case 'seats_desc': return b.availableSeats - a.availableSeats;
         default: return 0;
       }
     });
@@ -112,6 +112,7 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ onSearch: navigat
                             <button onClick={() => setSortOrder('fastest')} className={`text-left p-1 rounded ${sortOrder==='fastest' ? 'font-bold text-blue-600' : ''}`}>Icyihuta cyane</button>
                             <button onClick={() => setSortOrder('cheapest')} className={`text-left p-1 rounded ${sortOrder==='cheapest' ? 'font-bold text-blue-600' : ''}`}>Igihendutse</button>
                             <button onClick={() => setSortOrder('earliest')} className={`text-left p-1 rounded ${sortOrder==='earliest' ? 'font-bold text-blue-600' : ''}`}>Igisohoka mbere</button>
+                            <button onClick={() => setSortOrder('seats_desc')} className={`text-left p-1 rounded ${sortOrder==='seats_desc' ? 'font-bold text-blue-600' : ''}`}>Imyanya myinshi</button>
                         </div>
                     </div>
 
