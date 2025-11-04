@@ -90,7 +90,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
             <label className="absolute -top-2 left-3 text-xs bg-transparent px-1 text-white z-10">Abagenzi</label>
             <button type="button" onClick={() => setIsPassengerDropdownOpen(!isPassengerDropdownOpen)} className="w-full flex items-center text-left pl-10 pr-4 py-3 rounded-lg border-2 border-transparent focus:border-yellow-300 focus:ring-0 bg-white/80 dark:bg-gray-900/80 transition">
                  <UserCircleIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                 {passengers.adults} Adult(s), {passengers.children} Child(ren)
+                 {passengers.adults} Mukuru(ba), {passengers.children} Mwana(ba)
             </button>
              {isPassengerDropdownOpen && (
                 <div className="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 z-20">

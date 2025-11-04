@@ -69,7 +69,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
         <div className="flex items-center space-x-2 sm:space-x-4">
            <div className="relative hidden lg:block">
             <button onClick={() => setIsLangOpen(!isLangOpen)} className="flex items-center space-x-2 p-2 rounded-full hover:bg-white/10">
-              <span className="text-sm font-semibold">{currentLang.flag}</span>
+              <LanguageIcon className="w-5 h-5" />
               <ChevronDownIcon className={`w-4 h-4 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
             </button>
             {isLangOpen && (
