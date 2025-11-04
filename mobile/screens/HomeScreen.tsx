@@ -1,24 +1,23 @@
-// Placeholder for HomeScreen.tsx in a React Native app.
-// It showcases a typical layout with a hero image, search form, and featured content.
-
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // Mock Form Component
 const SearchForm = ({ onSearch }) => {
+    const { t } = useLanguage();
     const [from, setFrom] = React.useState('Kigali');
     const [to, setTo] = React.useState('Rubavu');
     return (
         <View style={styles.searchForm}>
-            <TextInput placeholder="From" style={styles.input} value={from} onChangeText={setFrom} />
-            <TextInput placeholder="To" style={styles.input} value={to} onChangeText={setTo} />
+            <TextInput placeholder={t('form_from')} style={styles.input} value={from} onChangeText={setFrom} />
+            <TextInput placeholder={t('form_to')} style={styles.input} value={to} onChangeText={setTo} />
             <View style={styles.row}>
                 <TouchableOpacity style={styles.dateInput}><Text>Oct 28</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.passengersInput}><Text>1 Passenger</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.passengersInput}><Text>1 {t('form_passengers')}</Text></TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.searchButton} onPress={() => onSearch(from, to)}>
-                <Text style={styles.searchButtonText}>Search Buses</Text>
+                <Text style={styles.searchButtonText}>{t('form_search_button')}</Text>
             </TouchableOpacity>
         </View>
     );
@@ -30,6 +29,7 @@ const featuredRoutes = [
 ];
 
 export default function HomeScreen({ navigation }) {
+  const { t } = useLanguage();
   const handleSearch = (from, to) => {
     // navigation.navigate('SearchResults', { from, to });
     alert(`Navigating to search results for ${from} to ${to}`);
@@ -43,8 +43,8 @@ export default function HomeScreen({ navigation }) {
           style={styles.hero}
         >
           <View style={styles.heroOverlay} />
-          <Text style={styles.heroTitle}>Tegura Urugendo Rwawe</Text>
-          <Text style={styles.heroSubtitle}>Kata itike ya bisi mu buryo bworoshye.</Text>
+          <Text style={styles.heroTitle}>{t('hero_title')}</Text>
+          <Text style={styles.heroSubtitle}>{t('hero_subtitle')}</Text>
         </ImageBackground>
 
         <View style={styles.formContainer}>
@@ -52,7 +52,7 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.sectionTitle}>Ingendo Zikunzwe</Text>
+          <Text style={styles.sectionTitle}>{t('mobile_home_featured')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {featuredRoutes.map((route) => (
               <TouchableOpacity key={`${route.from}-${route.to}`} style={styles.routeCard} onPress={() => handleSearch(route.from, route.to)}>

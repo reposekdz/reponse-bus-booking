@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../hooks/useAuth';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // Import Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -16,6 +16,7 @@ import SearchResultsScreen from '../screens/SearchResultsScreen';
 import SeatSelectionScreen from '../screens/SeatSelectionScreen';
 import BookingConfirmationScreen from '../screens/BookingConfirmationScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
+import WalletScreen from '../screens/WalletScreen';
 
 // Agent Screens
 import AgentDashboardScreen from '../screens/agent/AgentDashboardScreen';
@@ -42,24 +43,37 @@ import Icon from '../components/Icon';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+const ProfileStack = createStackNavigator();
+
+function ProfileNavigator() {
+    return (
+        <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+            <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
+            <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
+            <ProfileStack.Screen name="Wallet" component={WalletScreen} />
+        </ProfileStack.Navigator>
+    );
+}
+
 
 function PassengerTabs() {
+    const { t } = useLanguage();
     return (
         <Tab.Navigator screenOptions={({ route }) => ({
             headerShown: false,
             tabBarIcon: ({ color, size }) => {
                 let iconName;
-                if (route.name === 'Home') iconName = 'home';
-                else if (route.name === 'MyTickets') iconName = 'ticket';
-                else if (route.name === 'Services') iconName = 'briefcase';
-                else if (route.name === 'Profile') iconName = 'user-circle';
+                if (route.name === t('mobile_tab_home')) iconName = 'home';
+                else if (route.name === t('mobile_tab_tickets')) iconName = 'ticket';
+                else if (route.name === t('mobile_tab_services')) iconName = 'briefcase';
+                else if (route.name === t('mobile_tab_profile')) iconName = 'user-circle';
                 return <Icon name={iconName} size={size} color={color} />;
             },
         })}>
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="MyTickets" component={MyTicketsScreen} />
-            <Tab.Screen name="Services" component={ServicesScreen} />
-            <Tab.Screen name="Profile" component={ProfileScreen} />
+            <Tab.Screen name={t('mobile_tab_home')} component={HomeScreen} />
+            <Tab.Screen name={t('mobile_tab_tickets')} component={MyTicketsScreen} />
+            <Tab.Screen name={t('mobile_tab_services')} component={ServicesScreen} />
+            <Tab.Screen name={t('mobile_tab_profile')} component={ProfileNavigator} />
         </Tab.Navigator>
     );
 }
@@ -149,7 +163,6 @@ export default function AppNavigator() {
                     <Stack.Screen name="SeatSelection" component={SeatSelectionScreen} />
                     <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
                     <Stack.Screen name="TicketDetails" component={TicketDetailsScreen} />
-                    <Stack.Screen name="EditProfile" component={EditProfileScreen} />
                     <Stack.Screen name="DriverBoarding" component={BoardingScreen} />
                 </>
             ) : (

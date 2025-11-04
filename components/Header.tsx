@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Page } from '../App';
-import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, BuildingOfficeIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon } from './icons';
+import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, BuildingOfficeIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon } from './icons';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface HeaderProps {
   currentPage: Page;
@@ -11,13 +12,6 @@ interface HeaderProps {
   setTheme: (theme: 'light' | 'dark') => void;
   onToggleCompaniesAside: () => void;
 }
-
-const navTranslations = {
-  'RW': { home: 'Ahabanza', booking: 'Gukata Itike', companies: 'Ibigo', services: 'Serivisi', help: 'Ubufasha', contact: 'Twandikire' },
-  'EN': { home: 'Home', booking: 'Book Ticket', companies: 'Companies', services: 'Services', help: 'Help', contact: 'Contact Us' },
-  'FR': { home: 'Accueil', booking: 'Réserver', companies: 'Agences', services: 'Services', help: 'Aide', contact: 'Contactez-nous' }
-};
-
 
 const NavLink: React.FC<{ page: Page; currentPage: Page; onNavigate: (page: Page) => void; children: React.ReactNode }> = ({ page, currentPage, onNavigate, children }) => (
   <button 
@@ -32,22 +26,17 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState({ code: 'RW', name: 'Kinyarwanda', flag: '🇷🇼' });
-
-  const languages = [
-    { code: 'RW', name: 'Kinyarwanda', flag: '🇷🇼' },
-    { code: 'EN', name: 'English', flag: '🇬🇧' },
-    { code: 'FR', name: 'Français', flag: '🇫🇷' },
-  ];
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const { language, setLanguage, t, languages } = useLanguage();
 
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
   const selectLanguage = (lang) => {
-    setCurrentLang(lang);
+    setLanguage(lang.code);
     setIsLangOpen(false);
   };
-  
-  const T = navTranslations[currentLang.code];
+
+  const currentLang = languages.find(l => l.code === language);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0033A0] via-[#00574B] to-[#204F46] text-white shadow-lg backdrop-blur-sm bg-opacity-90">
@@ -58,18 +47,19 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
         </button>
 
         <nav className="hidden lg:flex items-center space-x-2">
-          <NavLink page="home" currentPage={currentPage} onNavigate={onNavigate}>{T.home}</NavLink>
-          <NavLink page="bookingSearch" currentPage={currentPage} onNavigate={onNavigate}>{T.booking}</NavLink>
-          <button onClick={onToggleCompaniesAside} className="px-4 py-2 text-sm font-semibold text-white hover:text-yellow-200 transition-colors duration-200">{T.companies}</button>
-          <NavLink page="services" currentPage={currentPage} onNavigate={onNavigate}>{T.services}</NavLink>
-          <NavLink page="help" currentPage={currentPage} onNavigate={onNavigate}>{T.help}</NavLink>
-          <NavLink page="contact" currentPage={currentPage} onNavigate={onNavigate}>{T.contact}</NavLink>
+          <NavLink page="home" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_home')}</NavLink>
+          <NavLink page="bookingSearch" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_booking')}</NavLink>
+          <button onClick={onToggleCompaniesAside} className="px-4 py-2 text-sm font-semibold text-white hover:text-yellow-200 transition-colors duration-200">{t('nav_companies')}</button>
+          <NavLink page="services" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_services')}</NavLink>
+          <NavLink page="help" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_help')}</NavLink>
+          <NavLink page="contact" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_contact')}</NavLink>
         </nav>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
            <div className="relative hidden lg:block">
-            <button onClick={() => setIsLangOpen(!isLangOpen)} className="flex items-center space-x-2 p-2 rounded-full hover:bg-white/10">
+            <button onClick={() => setIsLangOpen(!isLangOpen)} className="flex items-center space-x-1 p-2 rounded-full hover:bg-white/10">
               <LanguageIcon className="w-5 h-5" />
+              <span className="text-xs font-bold">{currentLang?.code}</span>
               <ChevronDownIcon className={`w-4 h-4 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
             </button>
             {isLangOpen && (
@@ -90,6 +80,31 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
           <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-white/10">
             {theme === 'light' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
           </button>
+
+          <div className="relative hidden lg:block">
+            <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="p-2 rounded-full hover:bg-white/10 relative">
+              <BellIcon className="w-5 h-5" />
+              <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white/20"></span>
+            </button>
+            {isNotificationsOpen && (
+              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl animate-fade-in" onMouseLeave={() => setIsNotificationsOpen(false)}>
+                <div className="p-3 font-bold text-gray-800 dark:text-white border-b dark:border-gray-700">Notifications</div>
+                <div className="py-2">
+                    <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <p className="font-semibold">Trip Reminder</p>
+                        <p className="text-xs">Your trip to Rubavu is tomorrow at 07:00.</p>
+                    </div>
+                     <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <p className="font-semibold text-red-500">Promotion!</p>
+                        <p className="text-xs">Get 10% off on all weekend trips.</p>
+                    </div>
+                </div>
+                 <div className="p-2 border-t dark:border-gray-700 text-center">
+                    <button className="text-xs text-blue-600 dark:text-blue-400 font-semibold">View All</button>
+                </div>
+              </div>
+            )}
+          </div>
           
           <div className="hidden lg:flex items-center">
             {user ? (
@@ -107,18 +122,18 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
                         <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                     </div>
                     <div className="py-2">
-                        <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><UserCircleIcon className="w-5 h-5 mr-2"/> Umwirondoro</button>
-                        <button onClick={() => { onNavigate('bookings'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><UserCircleIcon className="w-5 h-5 mr-2"/> Amatike Yanjye</button>
-                        <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><WalletIcon className="w-5 h-5 mr-2"/> Ikofi</button>
+                        <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><UserCircleIcon className="w-5 h-5 mr-2"/> {t('usermenu_profile')}</button>
+                        <button onClick={() => { onNavigate('bookings'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><UserCircleIcon className="w-5 h-5 mr-2"/> {t('usermenu_bookings')}</button>
+                        <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><WalletIcon className="w-5 h-5 mr-2"/> {t('usermenu_wallet')}</button>
                     </div>
                      <div className="border-t dark:border-gray-700 p-2">
-                        <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">Sohoka</button>
+                        <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">{t('usermenu_logout')}</button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <button onClick={() => onNavigate('login')} className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] rounded-md hover:saturate-150 transition-all shadow-md transform hover:-translate-y-0.5">Injira</button>
+              <button onClick={() => onNavigate('login')} className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] rounded-md hover:saturate-150 transition-all shadow-md transform hover:-translate-y-0.5">{t('login_button')}</button>
             )}
           </div>
           
@@ -137,12 +152,12 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
                     <button onClick={() => setIsMobileMenuOpen(false)}><XIcon className="w-6 h-6"/></button>
                 </div>
                  <nav className="flex flex-col space-y-4">
-                    <button onClick={() => {onNavigate('home'); setIsMobileMenuOpen(false);}}>{T.home}</button>
-                    <button onClick={() => {onNavigate('bookingSearch'); setIsMobileMenuOpen(false);}}>{T.booking}</button>
-                    <button onClick={() => {onToggleCompaniesAside(); setIsMobileMenuOpen(false);}}>{T.companies}</button>
-                    <button onClick={() => {onNavigate('services'); setIsMobileMenuOpen(false);}}>{T.services}</button>
-                    <button onClick={() => {onNavigate('help'); setIsMobileMenuOpen(false);}}>{T.help}</button>
-                    <button onClick={() => {onNavigate('contact'); setIsMobileMenuOpen(false);}}>{T.contact}</button>
+                    <button onClick={() => {onNavigate('home'); setIsMobileMenuOpen(false);}}>{t('nav_home')}</button>
+                    <button onClick={() => {onNavigate('bookingSearch'); setIsMobileMenuOpen(false);}}>{t('nav_booking')}</button>
+                    <button onClick={() => {onToggleCompaniesAside(); setIsMobileMenuOpen(false);}}>{t('nav_companies')}</button>
+                    <button onClick={() => {onNavigate('services'); setIsMobileMenuOpen(false);}}>{t('nav_services')}</button>
+                    <button onClick={() => {onNavigate('help'); setIsMobileMenuOpen(false);}}>{t('nav_help')}</button>
+                    <button onClick={() => {onNavigate('contact'); setIsMobileMenuOpen(false);}}>{t('nav_contact')}</button>
 
                      <div className="border-t border-white/20 my-4"></div>
                      {user ? (
@@ -151,10 +166,10 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
                                 <img src={user.avatarUrl} alt="User" className="w-8 h-8 rounded-full" />
                                 <span>{user.name}</span>
                             </button>
-                            <button onClick={() => {onLogout(); setIsMobileMenuOpen(false);}} className="text-red-400 text-left">Sohoka</button>
+                            <button onClick={() => {onLogout(); setIsMobileMenuOpen(false);}} className="text-red-400 text-left">{t('usermenu_logout')}</button>
                          </>
                      ) : (
-                        <button onClick={() => {onNavigate('login'); setIsMobileMenuOpen(false);}} className="px-4 py-2 text-sm font-semibold bg-yellow-400 text-[#0033A0] rounded-md hover:bg-yellow-500 transition-colors">Injira</button>
+                        <button onClick={() => {onNavigate('login'); setIsMobileMenuOpen(false);}} className="px-4 py-2 text-sm font-semibold bg-yellow-400 text-[#0033A0] rounded-md hover:bg-yellow-500 transition-colors">{t('login_button')}</button>
                      )}
                  </nav>
             </div>

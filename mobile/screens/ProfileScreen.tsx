@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../hooks/useAuth';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ProfileOption = ({ label, icon, onPress }) => (
     <TouchableOpacity style={styles.option} onPress={onPress}>
@@ -14,6 +14,7 @@ const ProfileOption = ({ label, icon, onPress }) => (
 
 export default function ProfileScreen({ navigation }) {
     const { user, logout } = useAuth();
+    const { t } = useLanguage();
 
     return (
         <SafeAreaView style={styles.container}>
@@ -25,15 +26,15 @@ export default function ProfileScreen({ navigation }) {
                 </View>
                 
                 <View style={styles.menu}>
-                    <ProfileOption label="Edit Profile" icon="👤" onPress={() => navigation.navigate('EditProfile')} />
-                    <ProfileOption label="My Bookings" icon="🎟️" onPress={() => navigation.navigate('MyTickets')} />
-                    <ProfileOption label="Payment Methods" icon="💳" onPress={() => alert('Navigate to Payment Methods')} />
-                    <ProfileOption label="Settings" icon="⚙️" onPress={() => alert('Navigate to Settings')} />
-                    <ProfileOption label="Help Center" icon="❓" onPress={() => alert('Navigate to Help Center')} />
+                    <ProfileOption label={t('mobile_profile_edit')} icon="👤" onPress={() => navigation.navigate('EditProfile')} />
+                    <ProfileOption label={t('mobile_profile_bookings')} icon="🎟️" onPress={() => navigation.navigate(t('mobile_tab_tickets'))} />
+                    <ProfileOption label={t('mobile_profile_wallet')} icon="💳" onPress={() => navigation.navigate('Wallet')} />
+                    <ProfileOption label={t('mobile_profile_settings')} icon="⚙️" onPress={() => alert('Navigate to Settings')} />
+                    <ProfileOption label={t('mobile_profile_help')} icon="❓" onPress={() => alert('Navigate to Help Center')} />
                 </View>
 
                 <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-                    <Text style={styles.logoutButtonText}>Log Out</Text>
+                    <Text style={styles.logoutButtonText}>{t('mobile_profile_logout')}</Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LocationMarkerIcon, CalendarIcon, UserCircleIcon, ArrowRightIcon, PlusIcon, TagIcon, ArrowsUpDownIcon } from './icons';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface BookingFormProps {
   onSearch: (from: string, to: string) => void;
@@ -8,6 +9,7 @@ interface BookingFormProps {
 const locations = ['Kigali', 'Rubavu', 'Musanze', 'Huye', 'Rusizi', 'Nyagatare', 'Muhanga'];
 
 const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
+  const { t } = useLanguage();
   const [fromLocation, setFromLocation] = useState('Kigali');
   const [toLocation, setToLocation] = useState('Rubavu');
   const [journeyDate, setJourneyDate] = useState(new Date().toISOString().split('T')[0]);
@@ -41,12 +43,12 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-gray-800 dark:text-white">
       <div className="flex items-center space-x-4 mb-4">
-        <button type="button" onClick={() => setTripType('one-way')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'one-way' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>Urugendo Rumwe</button>
-        <button type="button" onClick={() => setTripType('round-trip')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'round-trip' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>Kugenda no Kugaruka</button>
+        <button type="button" onClick={() => setTripType('one-way')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'one-way' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>{t('form_one_way')}</button>
+        <button type="button" onClick={() => setTripType('round-trip')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'round-trip' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>{t('form_round_trip')}</button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
           <div className="relative">
-            <label htmlFor="from" className={formLabelClass}>Aho uherereye</label>
+            <label htmlFor="from" className={formLabelClass}>{t('form_from')}</label>
             <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
             <select
               id="from"
@@ -65,7 +67,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
           </div>
 
            <div className="relative">
-            <label htmlFor="to" className={formLabelClass}>Aho werekeje</label>
+            <label htmlFor="to" className={formLabelClass}>{t('form_to')}</label>
             <LocationMarkerIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
             <select
               id="to"
@@ -79,27 +81,27 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
       </div>
        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
-            <label htmlFor="date" className={formLabelClass}>Itariki</label>
+            <label htmlFor="date" className={formLabelClass}>{t('form_date')}</label>
             <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
             <input type="date" id="date" value={journeyDate} onChange={(e) => setJourneyDate(e.target.value)} className={formInputBaseClass}/>
           </div>
           <div className={`relative transition-opacity ${tripType === 'one-way' ? 'opacity-50' : 'opacity-100'}`}>
-            <label htmlFor="return-date" className={formLabelClass}>Itariki yo kugaruka</label>
+            <label htmlFor="return-date" className={formLabelClass}>{t('form_return_date')}</label>
             <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
             <input type="date" id="return-date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} disabled={tripType === 'one-way'} className={formInputBaseClass}/>
           </div>
       </div>
        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
-            <label className={formLabelClass}>Abagenzi</label>
+            <label className={formLabelClass}>{t('form_passengers')}</label>
             <button type="button" onClick={() => setIsPassengerDropdownOpen(!isPassengerDropdownOpen)} className={`${formInputBaseClass} text-left`}>
                  <UserCircleIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                 {passengers.adults} Mukuru(ba), {passengers.children} Mwana(ba)
+                 {passengers.adults} {t('form_adults')}, {passengers.children} {t('form_children')}
             </button>
              {isPassengerDropdownOpen && (
                 <div className="absolute top-full mt-2 w-full bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg shadow-xl p-4 z-20 text-white">
                     <div className="flex justify-between items-center">
-                        <p>Abakuru</p>
+                        <p>{t('form_adults_label')}</p>
                         <div className="flex items-center space-x-3">
                             <button type="button" onClick={() => handlePassengerChange('adults', 'dec')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">-</button>
                             <span className="w-4 text-center">{passengers.adults}</span>
@@ -107,7 +109,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
                         </div>
                     </div>
                      <div className="flex justify-between items-center mt-2">
-                        <p>Abana</p>
+                        <p>{t('form_children_label')}</p>
                         <div className="flex items-center space-x-3">
                             <button type="button" onClick={() => handlePassengerChange('children', 'dec')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">-</button>
                             <span className="w-4 text-center">{passengers.children}</span>
@@ -118,9 +120,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
             )}
           </div>
             <div className="relative">
-                <label className={formLabelClass}>Kode</label>
+                <label className={formLabelClass}>{t('form_promo_code')}</label>
                 <TagIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-                <input type="text" placeholder="Shyiramo kode" className={formInputBaseClass}/>
+                <input type="text" placeholder={t('form_promo_placeholder')} className={formInputBaseClass}/>
             </div>
        </div>
 
@@ -128,7 +130,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
         type="submit"
         className="w-full flex items-center justify-center px-8 py-4 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold hover:saturate-150 transition-all duration-300 shadow-lg text-lg transform hover:-translate-y-0.5"
       >
-        Shakisha Ingendo <ArrowRightIcon className="w-5 h-5 ml-2" />
+        {t('form_search_button')} <ArrowRightIcon className="w-5 h-5 ml-2" />
       </button>
     </form>
   );

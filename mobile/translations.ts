@@ -1,0 +1,99 @@
+// Merging web translations for mobile use
+export const translations = {
+  RW: {
+    'form_from': 'Uva',
+    'form_to': 'Ujya',
+    'form_passengers': 'Abagenzi',
+    'form_search_button': 'Shakisha Bisi',
+    'hero_title': 'Tegura Urugendo Rwawe',
+    'hero_subtitle': 'Kata itike ya bisi mu buryo bworoshye.',
+    'mobile_home_featured': 'Ingendo Zikunzwe',
+    // Tabs
+    'mobile_tab_home': 'Ahabanza',
+    'mobile_tab_tickets': 'Amatike',
+    'mobile_tab_services': 'Serivisi',
+    'mobile_tab_profile': 'Konti',
+    // My Tickets
+    'mobile_tickets_title': 'Amatike Yanjye',
+    'mobile_tickets_upcoming': 'Azaza',
+    'mobile_tickets_past': 'Zashize',
+    'mobile_tickets_empty': 'Nta tike zibonetse',
+    // Profile
+    'mobile_profile_edit': 'Hindura Umwirondoro',
+    'mobile_profile_bookings': 'Amatike Yanjye',
+    'mobile_profile_wallet': 'Ikofi Yanjye',
+    'mobile_profile_settings': 'Iboneza',
+    'mobile_profile_help': 'Ubufasha',
+    'mobile_profile_logout': 'Sohoka',
+    // Wallet
+    'mobile_wallet_title': 'Ikofi Yanjye',
+    'mobile_wallet_balance': 'Amafaranga asigaye',
+    'mobile_wallet_add': 'Ongeramo Amafaranga',
+    'mobile_wallet_history': 'Amateka y\'ibyakozwe',
+    'mobile_wallet_empty': 'Nta gikorwa kirakorwa.',
+  },
+  EN: {
+    'form_from': 'From',
+    'form_to': 'To',
+    'form_passengers': 'Passengers',
+    'form_search_button': 'Search Buses',
+    'hero_title': 'Plan Your Journey',
+    'hero_subtitle': 'Book your bus ticket easily.',
+    'mobile_home_featured': 'Featured Routes',
+    // Tabs
+    'mobile_tab_home': 'Home',
+    'mobile_tab_tickets': 'My Tickets',
+    'mobile_tab_services': 'Services',
+    'mobile_tab_profile': 'Profile',
+    // My Tickets
+    'mobile_tickets_title': 'My Tickets',
+    'mobile_tickets_upcoming': 'Upcoming',
+    'mobile_tickets_past': 'Past',
+    'mobile_tickets_empty': 'No tickets found for',
+    // Profile
+    'mobile_profile_edit': 'Edit Profile',
+    'mobile_profile_bookings': 'My Bookings',
+    'mobile_profile_wallet': 'My Wallet',
+    'mobile_profile_settings': 'Settings',
+    'mobile_profile_help': 'Help Center',
+    'mobile_profile_logout': 'Log Out',
+     // Wallet
+    'mobile_wallet_title': 'My Wallet',
+    'mobile_wallet_balance': 'Current Balance',
+    'mobile_wallet_add': 'Add Funds',
+    'mobile_wallet_history': 'Transaction History',
+    'mobile_wallet_empty': 'No transactions yet.',
+  },
+  FR: {
+    'form_from': 'De',
+    'form_to': 'À',
+    'form_passengers': 'Passagers',
+    'form_search_button': 'Chercher Bus',
+    'hero_title': 'Planifiez Votre Voyage',
+    'hero_subtitle': 'Réservez votre billet de bus facilement.',
+    'mobile_home_featured': 'Trajets Populaires',
+    // Tabs
+    'mobile_tab_home': 'Accueil',
+    'mobile_tab_tickets': 'Mes Billets',
+    'mobile_tab_services': 'Services',
+    'mobile_tab_profile': 'Profil',
+    // My Tickets
+    'mobile_tickets_title': 'Mes Billets',
+    'mobile_tickets_upcoming': 'À venir',
+    'mobile_tickets_past': 'Passés',
+    'mobile_tickets_empty': 'Aucun billet trouvé pour',
+     // Profile
+    'mobile_profile_edit': 'Modifier le Profil',
+    'mobile_profile_bookings': 'Mes Réservations',
+    'mobile_profile_wallet': 'Mon Portefeuille',
+    'mobile_profile_settings': 'Paramètres',
+    'mobile_profile_help': 'Centre d\'Aide',
+    'mobile_profile_logout': 'Déconnexion',
+    // Wallet
+    'mobile_wallet_title': 'Mon Portefeuille',
+    'mobile_wallet_balance': 'Solde Actuel',
+    'mobile_wallet_add': 'Ajouter des Fonds',
+    'mobile_wallet_history': 'Historique des Transactions',
+    'mobile_wallet_empty': 'Aucune transaction.',
+  }
+};

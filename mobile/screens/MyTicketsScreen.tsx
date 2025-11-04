@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BookingCard from '../components/BookingCard';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const mockUpcoming = [
   { id: '1', from: 'Kigali', to: 'Rubavu', company: 'Volcano Express', date: 'Oct 28', time: '07:00', seats: 'A5', qrValue: 'TICKET-001', logoUrl: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg' },
@@ -13,20 +14,21 @@ const mockPast = [
 
 export default function MyTicketsScreen({ navigation }) {
     const [activeTab, setActiveTab] = useState('upcoming');
+    const { t } = useLanguage();
     
     const ticketsToShow = activeTab === 'upcoming' ? mockUpcoming : mockPast;
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>My Tickets</Text>
+                <Text style={styles.headerTitle}>{t('mobile_tickets_title')}</Text>
             </View>
             <View style={styles.tabContainer}>
                 <TouchableOpacity style={[styles.tab, activeTab === 'upcoming' && styles.activeTab]} onPress={() => setActiveTab('upcoming')}>
-                    <Text style={[styles.tabText, activeTab === 'upcoming' && styles.activeTabText]}>Upcoming</Text>
+                    <Text style={[styles.tabText, activeTab === 'upcoming' && styles.activeTabText]}>{t('mobile_tickets_upcoming')}</Text>
                 </TouchableOpacity>
                  <TouchableOpacity style={[styles.tab, activeTab === 'past' && styles.activeTab]} onPress={() => setActiveTab('past')}>
-                    <Text style={[styles.tabText, activeTab === 'past' && styles.activeTabText]}>Past</Text>
+                    <Text style={[styles.tabText, activeTab === 'past' && styles.activeTabText]}>{t('mobile_tickets_past')}</Text>
                 </TouchableOpacity>
             </View>
             <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -40,7 +42,7 @@ export default function MyTicketsScreen({ navigation }) {
                 ))}
                  {ticketsToShow.length === 0 && (
                     <View style={styles.emptyState}>
-                        <Text style={styles.emptyText}>No {activeTab} tickets found.</Text>
+                        <Text style={styles.emptyText}>{t('mobile_tickets_empty')} {activeTab}.</Text>
                     </View>
                 )}
             </ScrollView>

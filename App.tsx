@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -31,6 +30,7 @@ import ServicesAside from './components/ServicesAside';
 import BookingSearchPage, { allSearchResults } from './BookingSearchPage';
 import BottomNavigation from './components/BottomNavigation';
 import TicketModal from './components/TicketModal';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 export type Page = 
   | 'home' | 'login' | 'register' | 'bookings' | 'scheduled' | 'search' 
@@ -58,7 +58,7 @@ const mockNextTrip = {
     company: 'Volcano Express',
 };
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [pageData, setPageData] = useState<any>(null);
   const [user, setUser] = useState<any | null>(null);
@@ -224,5 +224,13 @@ const App: React.FC = () => {
     </div>
   );
 };
+
+const App: React.FC = () => {
+    return (
+        <LanguageProvider>
+            <AppContent />
+        </LanguageProvider>
+    )
+}
 
 export default App;

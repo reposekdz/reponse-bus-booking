@@ -1,5 +1,6 @@
 import React from 'react';
 import { SearchIcon, CheckCircleIcon, TicketIcon, CreditCardIcon } from './icons';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface StepProps {
   icon: React.ReactNode;
@@ -18,33 +19,34 @@ const Step: React.FC<StepProps> = ({ icon, title, description }) => (
 );
 
 const HowItWorks: React.FC = () => {
+  const { t } = useLanguage();
   return (
     <section className="py-16 sm:py-24 bg-gradient-to-b from-yellow-50/30 to-white dark:from-gray-800/30 dark:to-gray-900">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight sm:text-4xl">Gukata itike mu ntambwe 4 zoroshye</h2>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">Urugendo rwawe rutaha ruri hafi yawe.</p>
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight sm:text-4xl">{t('howitworks_title')}</h2>
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">{t('howitworks_subtitle')}</p>
         </div>
         <div className="flex flex-col md:flex-row flex-wrap justify-center items-start gap-y-12 md:gap-x-8 lg:gap-x-16">
           <Step
             icon={<SearchIcon className="w-10 h-10" />}
-            title="Shakisha & Gereranya"
-            description="Bona mu buryo bworoshye bisi nziza ijyanye n'igihe cyawe n'ubushobozi bwawe."
+            title={t('howitworks_step1_title')}
+            description={t('howitworks_step1_desc')}
           />
           <Step
             icon={<CheckCircleIcon className="w-10 h-10" />}
-            title="Hitamo Umwanya"
-            description="Hitamo umwanya wawe mu modoka, hanyuma ukomeze kwishyura."
+            title={t('howitworks_step2_title')}
+            description={t('howitworks_step2_desc')}
           />
            <Step
             icon={<CreditCardIcon className="w-10 h-10" />}
-            title="Ishyura mu Bwizere"
-            description="Koresha MoMo, Ikarita, cyangwa Ikofi yawe ngo wishyure mu buryo butekanye."
+            title={t('howitworks_step3_title')}
+            description={t('howitworks_step3_desc')}
           />
           <Step
             icon={<TicketIcon className="w-10 h-10" />}
-            title="Bona Itike & Genda"
-            description="Emeza itike yawe ya elegitoronike ako kanya hanyuma witegure urugendo."
+            title={t('howitworks_step4_title')}
+            description={t('howitworks_step4_desc')}
           />
         </div>
       </div>
