@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const STEPS = ['Trip Details', 'Contact Info', 'Confirmation'];
@@ -12,14 +12,16 @@ export default function BusCharterScreen({ navigation }) {
         from: '', to: '', departureDate: '', passengers: '20', name: '', phone: ''
     });
 
-    const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
-    const handleBack = () => setCurrentStep(prev => Math.max(prev - 1, 1));
-    
-    const handleConfirm = () => {
-        console.log('Charter Request Submitted:', charterRequest);
-        handleNext();
+    const handleNext = () => {
+        if(currentStep === 3) {
+            Alert.alert("Request Sent", "A company representative will contact you shortly.");
+            navigation.goBack();
+        } else {
+             setCurrentStep(prev => prev + 1);
+        }
     };
-
+    const handleBack = () => setCurrentStep(prev => prev - 1);
+    
     const renderStepContent = () => {
         switch (currentStep) {
             case 1:

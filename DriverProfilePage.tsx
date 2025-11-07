@@ -16,15 +16,19 @@ const StatCard = ({ label, value, icon }) => (
 const getDocumentStatus = (expiryDate: string) => {
     const today = new Date();
     const expiry = new Date(expiryDate);
+    // To avoid timezone issues, compare dates only
+    today.setHours(0, 0, 0, 0);
+    expiry.setHours(0, 0, 0, 0);
+    
     const daysUntilExpiry = (expiry.getTime() - today.getTime()) / (1000 * 3600 * 24);
 
     if (daysUntilExpiry < 0) {
-        return { text: 'Expired', color: 'bg-red-500' };
+        return { text: 'Expired', color: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' };
     }
     if (daysUntilExpiry <= 30) {
-        return { text: 'Expiring Soon', color: 'bg-yellow-500' };
+        return { text: 'Expiring Soon', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' };
     }
-    return { text: 'Valid', color: 'bg-green-500' };
+    return { text: 'Valid', color: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' };
 };
 
 
@@ -126,9 +130,8 @@ const DriverProfilePage: React.FC<DriverProfilePageProps> = ({ driver }) => {
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Expires: {new Date(doc.expiry).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center space-x-2">
-                                                <div className={`w-2.5 h-2.5 rounded-full ${status.color}`}></div>
-                                                <span className="text-xs font-semibold">{status.text}</span>
+                                            <div className={`px-2 py-1 text-xs font-semibold rounded-full ${status.color}`}>
+                                                {status.text}
                                             </div>
                                         </div>
                                     )

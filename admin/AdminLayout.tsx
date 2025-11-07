@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Page } from '../App';
 import { ChartBarIcon, BuildingOfficeIcon, UsersIcon, BriefcaseIcon, SunIcon, MoonIcon, MegaphoneIcon, TagIcon, CurrencyDollarIcon } from '../components/icons';
@@ -6,7 +7,6 @@ import AdminDashboard from './AdminDashboard';
 import ManageCompanies from './ManageCompanies';
 import ManageDrivers from './ManageDrivers';
 import ManageAgents from './ManageAgents';
-import ManagePassengers from './ManagePassengers';
 import ManageUsers from './ManageUsers';
 import AdminFinancials from './AdminFinancials';
 import ManageAds from './ManageAds';
@@ -36,8 +36,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPage, navigate }) => {
             case 'adminCompanies': return <ManageCompanies />;
             case 'adminDrivers': return <ManageDrivers navigate={navigate} />;
             case 'adminAgents': return <ManageAgents navigate={navigate} />;
-            case 'adminPassengers': return <ManagePassengers />;
-            case 'adminUsers': return <ManageUsers />;
+            case 'adminUsers': return <ManageUsers navigate={navigate} />;
             case 'adminFinancials': return <AdminFinancials />;
             case 'adminAds': return <ManageAds />;
             case 'adminPromotions': return <ManagePromotions />;

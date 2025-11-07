@@ -1,16 +1,32 @@
 import React, { useState, useMemo } from 'react';
-import { UsersIcon, SearchIcon } from '../components/icons';
+import { UsersIcon, SearchIcon, EyeIcon } from '../components/icons';
+import { Page } from '../App';
 
 const mockUsers = [
-  { id: 1, name: 'Kalisa Jean', email: 'kalisa.j@example.com', role: 'passenger', status: 'Active', joinDate: '2023-01-15' },
+  { 
+    id: 1, name: 'Kalisa Jean', email: 'kalisa.j@example.com', role: 'passenger', status: 'Active', joinDate: '2023-01-15',
+    avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+    walletBalance: 15000,
+    bookingHistory: [
+      { id: 'TICKET-001', from: 'Kigali', to: 'Rubavu', company: 'Volcano Express', date: '2024-10-28', price: '9,000 FRW' },
+      { id: 'TICKET-003', from: 'Kigali', to: 'Musanze', company: 'Horizon Express', date: '2024-10-15', price: '3,500 FRW' },
+    ]
+  },
   { id: 2, name: 'John Doe', email: 'driver@volcano.rw', role: 'driver', status: 'Active', joinDate: '2022-03-10' },
   { id: 3, name: 'Jane Smith', email: 'jane.s@agent.rw', role: 'agent', status: 'Active', joinDate: '2022-09-01' },
   { id: 4, name: 'Admin User', email: 'admin@rwandabus.rw', role: 'admin', status: 'Active', joinDate: '2022-01-01' },
-  { id: 5, name: 'Mutesi Aline', email: 'mutesi.a@example.com', role: 'passenger', status: 'Suspended', joinDate: '2023-03-22' },
+  { 
+    id: 5, name: 'Mutesi Aline', email: 'mutesi.a@example.com', role: 'passenger', status: 'Suspended', joinDate: '2023-03-22',
+    avatarUrl: 'https://randomuser.me/api/portraits/women/33.jpg',
+    walletBalance: 2500,
+    bookingHistory: [
+       { id: 'TICKET-002', from: 'Huye', to: 'Kigali', company: 'RITCO', date: '2024-11-02', price: '3,000 FRW' },
+    ]
+  },
   { id: 6, name: 'Volcano Mgr', email: 'manager@volcano.rw', role: 'company', status: 'Active', joinDate: '2022-02-15' },
 ];
 
-const ManageUsers: React.FC = () => {
+const ManageUsers: React.FC<{ navigate: (page: Page, data?: any) => void }> = ({ navigate }) => {
     const [users, setUsers] = useState(mockUsers);
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('All');
@@ -24,6 +40,24 @@ const ManageUsers: React.FC = () => {
     
     const toggleStatus = (id: number) => {
         setUsers(users.map(user => user.id === id ? { ...user, status: user.status === 'Active' ? 'Suspended' : 'Active' } : user));
+    };
+    
+    const handleViewProfile = (user: any) => {
+        switch(user.role) {
+            case 'passenger':
+                navigate('passengerProfile', user);
+                break;
+            case 'driver':
+                 // This requires more complete driver data here. For now, it will navigate with partial data.
+                navigate('driverProfile', user);
+                break;
+            case 'agent':
+                 // This requires more complete agent data here. For now, it will navigate with partial data.
+                navigate('agentProfile', user);
+                break;
+            default:
+                alert(`Profile page for role '${user.role}' is not available.`);
+        }
     };
 
     return (
@@ -81,9 +115,12 @@ const ManageUsers: React.FC = () => {
                                             {user.status}
                                         </span>
                                     </td>
-                                    <td className="p-3">
+                                    <td className="p-3 flex items-center space-x-3">
                                         <button onClick={() => toggleStatus(user.id)} className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                                             {user.status === 'Active' ? 'Suspend' : 'Activate'}
+                                        </button>
+                                        <button onClick={() => handleViewProfile(user)} className="p-1 text-gray-500 hover:text-green-600" title="View Profile">
+                                            <EyeIcon className="w-5 h-5"/>
                                         </button>
                                     </td>
                                 </tr>

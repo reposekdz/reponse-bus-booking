@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const services = [
     { title: 'Send a Package', description: 'Reliable and fast parcel delivery.', icon: '📦', screen: 'PackageDelivery' },
@@ -26,10 +27,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onPress }) => (
 );
 
 export default function ServicesScreen({ navigation }) {
+    const { t } = useLanguage();
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Our Services</Text>
+                <Text style={styles.headerTitle}>{t('mobile_services_title')}</Text>
             </View>
             <ScrollView contentContainerStyle={styles.content}>
                 {services.map(service => (
