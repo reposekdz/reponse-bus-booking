@@ -46,6 +46,7 @@ import WhyChooseUs from './components/WhyChooseUs';
 import SpecialOffers from './components/SpecialOffers';
 import BookingConfirmationPage from './BookingConfirmationPage';
 import FavoritesPage from './FavoritesPage';
+import PriceAlertsPage from './PriceAlertsPage';
 
 
 export type Page = 
@@ -60,7 +61,7 @@ export type Page =
   | 'fleetMonitoring' | 'driverProfile' | 'agentProfile' | 'bookingSearch' | 'passengerProfile'
   | 'corporateTravel' | 'tourPackages' | 'travelInsurance' | 'giftCards' | 'adminAnnouncements'
   | 'hotelBooking' | 'eventTickets' | 'vehicleRentals' | 'vipLounge' | 'companyRouteAnalytics'
-  | 'bookingConfirmation' | 'favorites';
+  | 'bookingConfirmation' | 'favorites' | 'priceAlerts';
 
 // Mock User Data
 const mockUsers = {
@@ -181,7 +182,7 @@ const AppContent: React.FC = () => {
   };
   
   const handleSearch = (from?: string, to?: string) => {
-      navigate('search', { from, to });
+      navigate('bookingSearch', { from, to });
   }
 
   const renderPage = () => {
@@ -192,7 +193,7 @@ const AppContent: React.FC = () => {
       case 'seatSelection': return <SeatSelectionPage tripData={pageData} onConfirm={(bookingDetails) => navigate('bookingConfirmation', bookingDetails)} onBack={() => navigate('search')} />;
       case 'bookingConfirmation': return <BookingConfirmationPage bookingDetails={pageData} onNavigate={navigate} />;
       case 'bookings': return <BookingsPage onViewTicket={setViewingTicket} user={user} />;
-      case 'profile': return <ProfilePage onNavigate={navigate} user={user} />;
+      case 'profile': return <ProfilePage onNavigate={navigate} user={user} setUser={setUser} />;
       case 'scheduled': return <ScheduledTripsPage onSearch={handleSearch}/>;
       case 'companies': return <CompaniesPage onNavigate={navigate} />;
       case 'companyProfile': return <CompanyProfilePage company={pageData} onSelectTrip={handleSearch} />;
@@ -212,6 +213,7 @@ const AppContent: React.FC = () => {
       case 'vehicleRentals': return <VehicleRentalsPage onNavigate={navigate} />;
       case 'vipLounge': return <VipLoungePage onNavigate={navigate} />;
       case 'favorites': return <FavoritesPage onNavigate={navigate} />;
+      case 'priceAlerts': return <PriceAlertsPage onNavigate={navigate} user={user} />;
       
       case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions': case 'adminAnnouncements':
         return <AdminLayout currentPage={currentPage} navigate={navigate} />;

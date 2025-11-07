@@ -5,7 +5,7 @@ import StarRating from './components/StarRating';
 
 const mockCompanyData: { [key: string]: any } = {
   ritco: {
-    coverImage: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop',
+    coverImage: 'https://images.unsplash.com/photo/1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop',
     address: 'Kiyovu, Kigali, Rwanda',
     hours: 'Buri munsi: 05:00 - 22:00',
     contactEmail: 'info@ritco.rw',
@@ -19,7 +19,7 @@ const mockCompanyData: { [key: string]: any } = {
     description: "RITCO ni ikigo cya Leta gishinzwe gutwara abantu mu buryo bwa rusange, kizwiho kugira imodoka nini kandi zigezweho zitwara abantu mu gihugu hose.",
     fleet: [
       { id: 'ritco-1', name: 'Yutong Grand', capacity: 65, image: 'https://images.pexels.com/photos/18413861/pexels-photo-18413861/free-photo-of-a-bus-is-driving-down-a-road-in-the-mountains.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2', amenities: ['AC', 'Charging'], images360: ['https://images.pexels.com/photos/2174975/pexels-photo-2174975.jpeg', 'https://images.pexels.com/photos/18413861/pexels-photo-18413861/free-photo-of-a-bus-is-driving-down-a-road-in-the-mountains.jpeg'], specs: { engine: 'Cummins ISL9.5', power: '380 HP', features: 'Air Suspension, Reclining Seats' } },
-      { id: 'ritco-2', name: 'Scania Marcopolo', capacity: 70, image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop', amenities: ['AC'], images360: [], specs: { engine: 'Scania DC13', power: '410 HP', features: 'On-board restroom, Extra legroom' } },
+      { id: 'ritco-2', name: 'Scania Marcopolo', capacity: 70, image: 'https://images.unsplash.com/photo/1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop', amenities: ['AC'], images360: [], specs: { engine: 'Scania DC13', power: '410 HP', features: 'On-board restroom, Extra legroom' } },
     ],
     routes: [ { from: 'Kigali', to: 'Huye', price: '3,000 FRW' }, { from: 'Kigali', to: 'Nyungwe', price: '7,000 FRW' }, { from: 'Kigali', to: 'Rusizi', price: '8,000 FRW' }, { from: 'Huye', to: 'Kigali', price: '3,000 FRW' } ],
     services: [
@@ -52,7 +52,7 @@ const mockCompanyData: { [key: string]: any } = {
     ]
   },
   volcano: {
-    coverImage: 'https://images.unsplash.com/photo-1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop',
+    coverImage: 'https://images.unsplash.com/photo/1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop',
     address: 'Nyabugogo, Kigali, Rwanda',
     hours: 'Buri munsi: 04:30 - 23:00',
     contactEmail: 'contact@volcano.rw',
@@ -104,7 +104,7 @@ const mockCompanyData: { [key: string]: any } = {
 };
 
 const defaultCompanyData = {
-    coverImage: 'https://images.unsplash.com/photo-1616372819235-9b2e1577a2d4?q=80&w=2070&auto=format&fit=crop',
+    coverImage: 'https://images.unsplash.com/photo/1616372819235-9b2e1577a2d4?q=80&w=2070&auto=format&fit=crop',
     address: 'Amakuru ntazwi',
     hours: 'Amakuru ntazwi',
     contactEmail: 'not-available@example.com',

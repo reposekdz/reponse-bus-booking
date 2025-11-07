@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Page } from '../App';
-import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon, StarIcon } from './icons';
+import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon, StarIcon, BellAlertIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface HeaderProps {
@@ -85,10 +85,10 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
         </nav>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
-           <div className="relative hidden lg:block" ref={langRef}>
+           <div className="relative" ref={langRef}>
             <button onClick={() => setIsLangOpen(!isLangOpen)} className="flex items-center space-x-1 p-2 rounded-full hover:bg-white/10">
               <LanguageIcon className="w-5 h-5" />
-              <span className="text-xs font-bold">{currentLang?.code}</span>
+              <span className="text-xs font-bold hidden sm:inline">{currentLang?.code}</span>
               <ChevronDownIcon className={`w-4 h-4 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
             </button>
              <DropdownMenu isOpen={isLangOpen} className="w-48">
@@ -107,7 +107,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
             {theme === 'light' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
           </button>
 
-          <div className="relative hidden lg:block" ref={notificationsRef}>
+          <div className="relative" ref={notificationsRef}>
             <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="p-2 rounded-full hover:bg-white/10 relative">
               <BellIcon className="w-5 h-5" />
               <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white/20"></span>
@@ -154,6 +154,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
                     <div className="py-2">
                         <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><UserCircleIcon className="w-5 h-5 mr-3"/> {t('usermenu_profile')}</button>
                         <button onClick={() => { onNavigate('bookings'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><TicketIcon className="w-5 h-5 mr-3"/> {t('usermenu_bookings')}</button>
+                        <button onClick={() => { onNavigate('priceAlerts'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><BellAlertIcon className="w-5 h-5 mr-3"/> Price Alerts</button>
                         <button onClick={() => { onNavigate('favorites'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><StarIcon className="w-5 h-5 mr-3"/> My Favorites</button>
                     </div>
                      <div className="border-t border-white/20 p-2">

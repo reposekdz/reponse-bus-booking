@@ -48,10 +48,11 @@ interface BookingCardProps {
     booking: Booking;
     onViewTicket: (booking: Booking) => void;
     onRateTrip: (booking: Booking) => void;
+    onSetPriceAlert: (booking: Booking) => void;
     isPast: boolean;
 }
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRateTrip, isPast }) => (
+const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRateTrip, onSetPriceAlert, isPast }) => (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden my-4 transform hover:shadow-xl transition-shadow duration-300">
         <div className="flex flex-col sm:flex-row">
             <div className="p-5 flex-grow">
@@ -85,7 +86,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRate
                     <StarIcon className="w-4 h-4 mr-1.5"/>
                     Rate Trip
                 </button>
-                 <button onClick={() => alert(`Price alert set for ${booking.from} to ${booking.to}!`)} className="flex items-center text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                 <button onClick={() => onSetPriceAlert(booking)} className="flex items-center text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                     <BellAlertIcon className="w-4 h-4 mr-1.5"/>
                     Set Price Alert
                 </button>
@@ -118,6 +119,21 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket, user }) => {
       alert(`Thank you for your ${rating}-star rating!`);
       setRatingTrip(null);
   };
+  
+  const handleSetPriceAlert = (booking: Booking) => {
+    const newAlert = { from: booking.from, to: booking.to, initialPrice: booking.price };
+    const storedAlerts = localStorage.getItem('priceAlerts');
+    let alerts = storedAlerts ? JSON.parse(storedAlerts) : [];
+    
+    // Avoid duplicates
+    if (!alerts.some(a => a.from === newAlert.from && a.to === newAlert.to)) {
+        alerts.push(newAlert);
+        localStorage.setItem('priceAlerts', JSON.stringify(alerts));
+        alert(`Price alert set for ${newAlert.from} to ${newAlert.to}! We'll notify you of any price drops.`);
+    } else {
+        alert(`You already have a price alert for ${newAlert.from} to ${newAlert.to}.`);
+    }
+  };
 
   return (
     <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-screen">
@@ -142,12 +158,12 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket, user }) => {
             <div>
                 {activeTab === 'upcoming' && (
                     <div className="space-y-4">
-                        {upcomingBookings.map(booking => <BookingCard key={booking.id} booking={booking} onViewTicket={onViewTicket} onRateTrip={() => {}} isPast={false} />)}
+                        {upcomingBookings.map(booking => <BookingCard key={booking.id} booking={booking} onViewTicket={onViewTicket} onRateTrip={() => {}} onSetPriceAlert={handleSetPriceAlert} isPast={false} />)}
                     </div>
                 )}
                 {activeTab === 'past' && (
                     <div className="space-y-4 opacity-80">
-                        {pastBookings.map(booking => <BookingCard key={booking.id} booking={booking} onViewTicket={onViewTicket} onRateTrip={setRatingTrip} isPast={true} />)}
+                        {pastBookings.map(booking => <BookingCard key={booking.id} booking={booking} onViewTicket={onViewTicket} onRateTrip={setRatingTrip} onSetPriceAlert={handleSetPriceAlert} isPast={true} />)}
                     </div>
                 )}
             </div>

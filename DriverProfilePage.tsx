@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { PhoneIcon, EnvelopeIcon, MapPinIcon, CalendarIcon, BriefcaseIcon, ShieldCheckIcon, ClipboardDocumentListIcon, ChartPieIcon, CameraIcon } from './components/icons';
+import React, { useState, useMemo } from 'react';
+import { PhoneIcon, EnvelopeIcon, MapPinIcon, CalendarIcon, BriefcaseIcon, ShieldCheckIcon, ClipboardDocumentListIcon, ChartPieIcon, CameraIcon, BellAlertIcon } from './components/icons';
 
 const StatCard = ({ label, value, icon }) => (
     <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl flex items-center space-x-3">
@@ -47,12 +47,34 @@ const DriverProfilePage: React.FC<DriverProfilePageProps> = ({ driver }) => {
     
     const { performance, tripHistory, documents } = driver;
 
+    const documentsWithIssues = useMemo(() => {
+        if (!documents) return [];
+        return documents.filter(doc => {
+            const status = getDocumentStatus(doc.expiry);
+            return status.text === 'Expired' || status.text === 'Expiring Soon';
+        });
+    }, [documents]);
+
     return (
         <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-full py-12">
             <div className="container mx-auto px-6 max-w-4xl">
+                {documentsWithIssues.length > 0 && (
+                    <div className="bg-yellow-100 dark:bg-yellow-900/50 border-l-4 border-yellow-500 text-yellow-800 dark:text-yellow-200 p-4 rounded-r-lg mb-6 shadow-lg" role="alert">
+                        <div className="flex">
+                            <div className="py-1"><BellAlertIcon className="w-6 h-6 mr-4"/></div>
+                            <div>
+                                <p className="font-bold">Attention Required</p>
+                                <p className="text-sm">You have documents that are expired or expiring soon. Please contact your manager to update them.</p>
+                                <ul className="list-disc list-inside text-sm mt-2">
+                                    {documentsWithIssues.map(doc => <li key={doc.id}>{doc.name} ({getDocumentStatus(doc.expiry).text})</li>)}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
                     <div className="h-40 bg-blue-600 relative group">
-                        <img src={driver.coverUrl || 'https://images.unsplash.com/photo-1533104816-588941750c11?q=80&w=1974&auto=format&fit=crop'} alt="Cover" className="w-full h-full object-cover"/>
+                        <img src={driver.coverUrl || 'https://images.unsplash.com/photo/1533104816-588941750c11?q=80&w=1974&auto=format&fit=crop'} alt="Cover" className="w-full h-full object-cover"/>
                         <div className="absolute inset-0 bg-black/30"></div>
                          <button className="absolute top-2 right-2 flex items-center text-xs bg-black/40 text-white px-2 py-1 rounded-full hover:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
                             <CameraIcon className="w-4 h-4 mr-1"/> Edit Cover
