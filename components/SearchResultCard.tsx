@@ -1,7 +1,6 @@
 import React from 'react';
 import { ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, TagIcon } from './icons';
 
-// FIX: Removed the 'title' prop which is not a valid prop for these icon components.
 const AmenityIcon: React.FC<{ amenity: string }> = ({ amenity }) => {
     const iconClass = "w-4 h-4 text-gray-500 dark:text-gray-400";
     if (amenity === 'WiFi') return <WifiIcon className={iconClass} />;

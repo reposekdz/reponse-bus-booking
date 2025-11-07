@@ -9,7 +9,6 @@ const services = [
     { title: 'Lost & Found', description: 'Report or find a lost item.', icon: '🔍', screen: 'LostAndFound' },
 ];
 
-// FIX: Change component to React.FC and define props to correctly handle React's special `key` prop.
 interface ServiceCardProps {
     service: typeof services[0];
     onPress: () => void;
