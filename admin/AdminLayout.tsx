@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { Page } from '../App';
 import { ChartBarIcon, BuildingOfficeIcon, UsersIcon, BriefcaseIcon, SunIcon, MoonIcon, MegaphoneIcon, TagIcon, CurrencyDollarIcon } from '../components/icons';
@@ -11,6 +9,7 @@ import ManageUsers from './ManageUsers';
 import AdminFinancials from './AdminFinancials';
 import ManageAds from './ManageAds';
 import ManagePromotions from './ManagePromotions';
+import PlatformAnnouncements from './PlatformAnnouncements';
 
 interface AdminLayoutProps {
     currentPage: Page;
@@ -26,6 +25,7 @@ const navItems: { page: Page; label: string; icon: React.FC<any> }[] = [
     { page: 'adminUsers', label: 'All Users', icon: UsersIcon },
     { page: 'adminPromotions', label: 'Promotions', icon: TagIcon },
     { page: 'adminAds', label: 'Adverts', icon: MegaphoneIcon },
+    { page: 'adminAnnouncements', label: 'Announcements', icon: MegaphoneIcon },
 ];
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPage, navigate }) => {
@@ -40,6 +40,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPage, navigate }) => {
             case 'adminFinancials': return <AdminFinancials />;
             case 'adminAds': return <ManageAds />;
             case 'adminPromotions': return <ManagePromotions />;
+            case 'adminAnnouncements': return <PlatformAnnouncements />;
             default: return <AdminDashboard />;
         }
     };

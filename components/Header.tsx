@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Page } from '../App';
 import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -21,11 +21,24 @@ const NavLink: React.FC<{ page: Page; currentPage: Page; onNavigate: (page: Page
   </button>
 );
 
+const DropdownMenu: React.FC<{isOpen: boolean; children: React.ReactNode; className?: string}> = ({isOpen, children, className}) => (
+    <div 
+      className={`absolute right-0 mt-3 origin-top-right rounded-xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-600 dark:from-sky-600 dark:via-blue-700 dark:to-indigo-800 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-300 ease-in-out text-white ${className} ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}
+    >
+      {children}
+    </div>
+);
+
 const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout, theme, setTheme }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  
+  const langRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+
   const { language, setLanguage, t, languages } = useLanguage();
 
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
@@ -37,14 +50,22 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
 
   const currentLang = languages.find(l => l.code === language);
   
-  const DropdownMenu: React.FC<{isOpen: boolean; children: React.ReactNode; onMouseLeave: () => void; className?: string}> = ({isOpen, children, onMouseLeave, className}) => (
-      <div 
-        className={`absolute right-0 mt-3 origin-top-right rounded-xl bg-gradient-to-br from-blue-500 to-sky-400 dark:from-blue-700 dark:to-sky-600 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-300 ease-in-out text-white ${className} ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
-        onMouseLeave={onMouseLeave}
-      >
-        {children}
-      </div>
-  );
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+        setIsLangOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0033A0] via-[#00574B] to-[#204F46] text-white shadow-lg backdrop-blur-sm bg-opacity-90">
@@ -64,13 +85,13 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
         </nav>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
-           <div className="relative hidden lg:block">
-            <button onClick={() => setIsLangOpen(!isLangOpen)} onMouseEnter={() => setIsLangOpen(true)} className="flex items-center space-x-1 p-2 rounded-full hover:bg-white/10">
+           <div className="relative hidden lg:block" ref={langRef}>
+            <button onClick={() => setIsLangOpen(!isLangOpen)} className="flex items-center space-x-1 p-2 rounded-full hover:bg-white/10">
               <LanguageIcon className="w-5 h-5" />
               <span className="text-xs font-bold">{currentLang?.code}</span>
               <ChevronDownIcon className={`w-4 h-4 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
             </button>
-             <DropdownMenu isOpen={isLangOpen} onMouseLeave={() => setIsLangOpen(false)} className="w-48">
+             <DropdownMenu isOpen={isLangOpen} className="w-48">
                 <div className="py-1">
                     {languages.map(lang => (
                       <button key={lang.code} onClick={() => selectLanguage(lang)} className="flex items-center w-full text-left px-4 py-2 text-sm text-white hover:bg-white/20">
@@ -86,12 +107,12 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
             {theme === 'light' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
           </button>
 
-          <div className="relative hidden lg:block">
-            <button onMouseEnter={() => setIsNotificationsOpen(true)} onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="p-2 rounded-full hover:bg-white/10 relative">
+          <div className="relative hidden lg:block" ref={notificationsRef}>
+            <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="p-2 rounded-full hover:bg-white/10 relative">
               <BellIcon className="w-5 h-5" />
               <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white/20"></span>
             </button>
-            <DropdownMenu isOpen={isNotificationsOpen} onMouseLeave={() => setIsNotificationsOpen(false)} className="w-80">
+            <DropdownMenu isOpen={isNotificationsOpen} className="w-80">
                 <div className="p-3 font-bold border-b border-white/20">Notifications</div>
                 <div className="py-2 max-h-64 overflow-y-auto">
                     <div className="px-4 py-3 text-sm hover:bg-white/20 flex items-start space-x-3">
@@ -117,11 +138,11 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
           
           <div className="hidden lg:flex items-center">
             {user ? (
-              <div className="relative">
-                <button onMouseEnter={() => setIsUserMenuOpen(true)} onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="flex items-center space-x-2 p-1 rounded-full hover:bg-white/10">
+              <div className="relative" ref={userMenuRef}>
+                <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="flex items-center space-x-2 p-1 rounded-full hover:bg-white/10">
                   <img src={user.avatarUrl} alt="User" className="w-8 h-8 rounded-full" />
                 </button>
-                <DropdownMenu isOpen={isUserMenuOpen} onMouseLeave={() => setIsUserMenuOpen(false)}>
+                <DropdownMenu isOpen={isUserMenuOpen}>
                     <div className="p-4 border-b border-white/20">
                         <p className="font-bold">{user.name}</p>
                         <p className="text-xs opacity-80">{user.email}</p>

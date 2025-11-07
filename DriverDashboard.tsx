@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, MegaphoneIcon } from './components/icons';
+import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, MegaphoneIcon, CalendarIcon } from './components/icons';
 import { Page } from './App';
 import DriverSettingsPage from './DriverSettingsPage';
 import { mockCompaniesData } from './admin/AdminDashboard';
@@ -46,6 +46,8 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
     
     const driverCompany = mockCompaniesData.find(c => c.name === driverData.company) || mockCompaniesData[0];
+    const upcomingTrips = driverData.tripHistory.filter(t => t.status === 'Upcoming');
+
 
     const handleScan = () => {
         setScanResult(null);
@@ -175,17 +177,30 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                                 <p className="opacity-80 mt-2">Submit a maintenance request for your assigned bus.</p>
                             </button>
                          </div>
-                         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                            <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><MegaphoneIcon className="w-6 h-6 mr-3 text-indigo-400"/> Company Announcements</h2>
-                             <div className="space-y-4">
-                                {mockAnnouncements.map(ann => (
-                                    <div key={ann.id} className="border-l-4 border-indigo-400 pl-4 py-2">
-                                        <p className="text-sm text-gray-700 dark:text-gray-300">{ann.text}</p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{new Date(ann.date).toDateString()}</p>
-                                    </div>
-                                ))}
+                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                                <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><CalendarIcon className="w-6 h-6 mr-3 text-green-400"/> My Weekly Schedule</h2>
+                                <div className="space-y-3">
+                                    {upcomingTrips.length > 0 ? upcomingTrips.map(trip => (
+                                        <div key={trip.id} className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                                            <p className="font-semibold text-sm dark:text-white">{trip.route}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(trip.date).toDateString()}</p>
+                                        </div>
+                                    )) : <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming trips assigned.</p>}
+                                </div>
                             </div>
-                        </div>
+                             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+                                <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><MegaphoneIcon className="w-6 h-6 mr-3 text-indigo-400"/> Company Announcements</h2>
+                                <div className="space-y-4">
+                                    {mockAnnouncements.map(ann => (
+                                        <div key={ann.id} className="border-l-4 border-indigo-400 pl-4 py-2">
+                                            <p className="text-sm text-gray-700 dark:text-gray-300">{ann.text}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{new Date(ann.date).toDateString()}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                         </div>
                     </div>
                 );
         }

@@ -32,6 +32,10 @@ import DriverProfilePage from './DriverProfilePage';
 import AgentProfilePage from './AgentProfilePage';
 import PassengerProfilePage from './PassengerProfilePage';
 import LostAndFoundPage from './LostAndFoundPage';
+import CorporateTravelPage from './CorporateTravelPage';
+import TourPackagesPage from './TourPackagesPage';
+import GiftCardsPage from './GiftCardsPage';
+import TravelInsurancePage from './TravelInsurancePage';
 
 
 export type Page = 
@@ -43,7 +47,8 @@ export type Page =
   | 'adminUsers' | 'adminFinancials' | 'adminAds' 
   | 'adminPromotions' | 'companyBuses' | 'companyDrivers' | 'companyRoutes' 
   | 'companyPassengers' | 'companyFinancials' | 'companySettings' 
-  | 'fleetMonitoring' | 'driverProfile' | 'agentProfile' | 'bookingSearch' | 'passengerProfile';
+  | 'fleetMonitoring' | 'driverProfile' | 'agentProfile' | 'bookingSearch' | 'passengerProfile'
+  | 'corporateTravel' | 'tourPackages' | 'travelInsurance' | 'giftCards' | 'adminAnnouncements';
 
 // Mock User Data
 const mockUsers = {
@@ -185,8 +190,12 @@ const AppContent: React.FC = () => {
       case 'busCharter': return <BusCharterPage onNavigate={navigate} />;
       case 'lostAndFound': return <LostAndFoundPage onNavigate={navigate} />;
       case 'bookingSearch': return <BookingSearchPage onSearch={handleSearch} navigate={navigate} />;
+      case 'corporateTravel': return <CorporateTravelPage onNavigate={navigate} />;
+      case 'tourPackages': return <TourPackagesPage onNavigate={navigate} />;
+      case 'travelInsurance': return <TravelInsurancePage onNavigate={navigate} />;
+      case 'giftCards': return <GiftCardsPage onNavigate={navigate} />;
       
-      case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions':
+      case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions': case 'adminAnnouncements':
         return <AdminLayout currentPage={currentPage} navigate={navigate} />;
         
       case 'companyDashboard': case 'companyBuses': case 'companyDrivers': case 'companyRoutes': case 'companyPassengers': case 'companyFinancials': case 'companySettings': case 'fleetMonitoring':
@@ -214,7 +223,7 @@ const AppContent: React.FC = () => {
     }
   };
   
-  const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile', 'passengerProfile'].includes(currentPage);
+  const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'adminAnnouncements', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile', 'passengerProfile'].includes(currentPage);
   const showBottomNav = !isDashboard && ['home', 'bookingSearch', 'companies', 'profile', 'services'].includes(currentPage);
 
   return (

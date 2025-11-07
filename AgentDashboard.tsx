@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, FormEvent } from 'react';
 import { 
     SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, ArrowDownLeftIcon,
@@ -32,34 +31,23 @@ const StatCard = ({ title, value, icon, format = 'currency' }) => (
     </div>
 );
 
-const BarChart = ({ data, dataKey, labelKey, title, colorClass }) => {
-    const maxValue = Math.max(...data.map(d => d[dataKey]));
+const DailyGoal = ({ current, goal }) => {
+    const percentage = Math.min((current / goal) * 100, 100);
     return (
         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-            <h3 className="font-bold mb-4 dark:text-white">{title}</h3>
-            <div className="flex items-end h-64 space-x-2">
-                {data.map(item => (
-                    <div key={item[labelKey]} className="flex-1 flex flex-col items-center justify-end group">
-                        <div className="text-xs font-bold text-gray-800 dark:text-white bg-white/50 dark:bg-black/20 px-2 py-1 rounded-md mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {new Intl.NumberFormat('fr-RW').format(item[dataKey])}
-                        </div>
-                        <div className={`w-full ${colorClass} rounded-t-lg hover:opacity-80 transition-opacity`} style={{height: `${(item[dataKey] / (maxValue || 1)) * 100}%`}}></div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item[labelKey]}</div>
-                    </div>
-                ))}
+            <h3 className="font-bold mb-2 dark:text-white">Today's Deposit Goal</h3>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                <div className="bg-gradient-to-r from-green-400 to-blue-500 h-4 rounded-full" style={{ width: `${percentage}%` }}></div>
+            </div>
+            <div className="flex justify-between items-center mt-2 text-sm">
+                <span className="font-bold text-green-600 dark:text-green-400">{new Intl.NumberFormat('fr-RW').format(current)}</span>
+                <span className="text-gray-500 dark:text-gray-400">Goal: {new Intl.NumberFormat('fr-RW').format(goal)}</span>
             </div>
         </div>
-    );
-};
-
+    )
+}
 
 const DashboardView = ({ agentData, transactions }) => {
-    const dailyDeposits = [
-        { day: 'M', amount: 150000 }, { day: 'T', amount: 220000 }, { day: 'W', amount: 180000 },
-        { day: 'Th', amount: 250000 }, { day: 'F', amount: 350000 }, { day: 'Sa', amount: 450000 },
-        { day: 'Su', amount: 320000 }
-    ];
-
     const totalDeposits = transactions.reduce((sum, tx) => sum + tx.amount, 0);
     const totalCommission = transactions.reduce((sum, tx) => sum + tx.commission, 0);
     const uniquePassengers = new Set(transactions.map(tx => tx.passengerSerial)).size;
@@ -75,11 +63,11 @@ const DashboardView = ({ agentData, transactions }) => {
             </div>
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                    <BarChart data={dailyDeposits} dataKey="amount" labelKey="day" title="Amafaranga Yabikijwe mu Cyumweru" colorClass="bg-blue-300 dark:bg-blue-800/80"/>
+                    <DailyGoal current={totalDeposits} goal={200000} />
                 </div>
                 <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
                     <h3 className="font-bold mb-4 dark:text-white">Ibikorwa bya Vuba</h3>
-                    <div className="space-y-4 h-[22rem] overflow-y-auto custom-scrollbar">
+                    <div className="space-y-4 h-[10rem] overflow-y-auto custom-scrollbar">
                         {transactions.slice(0, 10).map(tx => (
                             <div key={tx.id} className="flex items-center space-x-3">
                                 <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-full">
