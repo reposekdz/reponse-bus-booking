@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Page } from '../App';
-import { SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon, StarIcon, BellAlertIcon, SparklesIcon } from './icons';
+import { GoBusLogo, SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon, StarIcon, BellAlertIcon, SparklesIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface HeaderProps {
@@ -71,7 +71,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, user, onLogout
     <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-[#0033A0] via-[#00574B] to-[#204F46] text-white shadow-lg backdrop-blur-sm bg-opacity-90 animated-gradient-bg">
       <div className="container mx-auto px-6 h-20 flex justify-between items-center">
         <button onClick={() => onNavigate('home')} className="group flex items-center gap-2 text-2xl font-extrabold tracking-tight transition-transform duration-300 hover:scale-105">
-          <BusIcon className="w-8 h-8 transition-transform duration-500 group-hover:-translate-x-1 group-hover:text-yellow-300" />
+          <GoBusLogo className="w-9 h-9 transition-transform duration-500 group-hover:rotate-[-10deg]" />
           <span>Go<span className="text-yellow-300">Bus</span></span>
         </button>
 

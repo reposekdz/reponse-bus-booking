@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
-import { ArrowLeftIcon, ArrowRightIcon, BusIcon } from './components/icons';
+import { ArrowLeftIcon, ArrowRightIcon } from './components/icons';
 
 type SeatStatus = 'available' | 'occupied' | 'selected';
 type SeatType = 'window' | 'aisle' | 'standard' | 'extra-legroom';
 
-const Seat: React.FC<{ status: SeatStatus; id: string; type: SeatType; onSelect: (id: string) => void }> = ({ status, id, type, onSelect }) => {
+const getSeatPrice = (type: SeatType, basePrice: number): number => {
+    switch (type) {
+        case 'window':
+            return basePrice + 200;
+        case 'aisle':
+            return basePrice + 100;
+        case 'extra-legroom':
+            return basePrice + 500;
+        default:
+            return basePrice;
+    }
+};
+
+
+const Seat: React.FC<{ status: SeatStatus; id: string; type: SeatType; onSelect: (id: string) => void; basePrice: number }> = ({ status, id, type, onSelect, basePrice }) => {
   const isSelectable = status === 'available' || status === 'selected';
   
   let seatClass = 'w-10 h-10 rounded-md flex items-center justify-center font-bold text-xs cursor-pointer transition-all duration-200';
@@ -21,7 +35,10 @@ const Seat: React.FC<{ status: SeatStatus; id: string; type: SeatType; onSelect:
   if (type === 'aisle') tooltipText = 'Aisle Seat';
   if (type === 'extra-legroom') tooltipText = 'Extra Legroom';
 
-  return <button data-tooltip={tooltipText} onClick={() => isSelectable && onSelect(id)} className={seatClass} disabled={!isSelectable}>{id}</button>;
+  const price = getSeatPrice(type, basePrice);
+  const fullTooltip = `${tooltipText} - ${new Intl.NumberFormat('fr-RW').format(price)} RWF`;
+
+  return <button data-tooltip={fullTooltip} onClick={() => isSelectable && onSelect(id)} className={seatClass} disabled={!isSelectable}>{id}</button>;
 };
 
 const initialSeats: { id: string; status: SeatStatus, type: SeatType }[][] = [
@@ -59,15 +76,24 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [usePoints, setUsePoints] = useState(false);
   
-  const trip = tripData || { price: 4500, dynamicPrice: 4700, company: 'Volcano Express', from: 'Kigali', to: 'Rubavu', departureTime: '07:00' }; // Fallback for direct access
-
+  const trip = tripData || { price: 4500, company: 'Volcano Express', from: 'Kigali', to: 'Rubavu', departureTime: '07:00' }; // Fallback for direct access
+  const basePrice = trip.dynamicPrice || trip.price;
+  
   const handleSelectSeat = (id: string) => {
     setSelectedSeats(prev => 
       prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
     );
   };
   
-  const totalPrice = selectedSeats.length * (trip.dynamicPrice || trip.price);
+  const allSeats = seats.flat();
+
+  const totalPrice = selectedSeats.reduce((total, seatId) => {
+      const seat = allSeats.find(s => s.id === seatId);
+      if (seat) {
+          return total + getSeatPrice(seat.type, basePrice);
+      }
+      return total;
+  }, 0);
   
   const availablePoints = user?.loyaltyPoints || 0;
   // Assuming 1 point = 1 RWF for discount
@@ -105,7 +131,7 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
                                 <div key={rowIndex} className="flex justify-around">
                                     {row.map(seat => seat.id === 'aisle' 
                                         ? <div key={seat.id} className="w-10 h-10" /> 
-                                        : <Seat key={seat.id} id={seat.id} type={seat.type} status={selectedSeats.includes(seat.id) ? 'selected' : seat.status} onSelect={handleSelectSeat} />
+                                        : <Seat key={seat.id} id={seat.id} type={seat.type} status={selectedSeats.includes(seat.id) ? 'selected' : seat.status} onSelect={handleSelectSeat} basePrice={basePrice} />
                                     )}
                                 </div>
                             ))}
@@ -123,7 +149,7 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
                          <div className="space-y-3 pb-4">
                              <p><strong>Ikigo:</strong> {trip.company}</p>
                              <p><strong>Imyanya Wahisemo:</strong> {selectedSeats.length > 0 ? selectedSeats.join(', ') : 'Ntawahisemo'}</p>
-                             <p><strong>Igiciro cy'umwanya:</strong> {new Intl.NumberFormat('fr-RW').format(trip.dynamicPrice || trip.price)} RWF</p>
+                             <p><strong>Igiciro fatizo:</strong> {new Intl.NumberFormat('fr-RW').format(basePrice)} RWF</p>
                          </div>
                          {availablePoints > 0 && selectedSeats.length > 0 && (
                             <div className="border-t dark:border-gray-700 pt-4 mt-4">

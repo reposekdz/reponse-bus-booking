@@ -2,6 +2,19 @@ import React from 'react';
 
 type IconProps = React.SVGProps<SVGSVGElement>;
 
+export const GoBusLogo: React.FC<IconProps> = (props) => (
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+        <defs>
+            <linearGradient id="logoGradient" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#00AEEF"/>
+                <stop offset="1" stopColor="#00B47E"/>
+            </linearGradient>
+        </defs>
+        <path d="M18 0C8.058 0 0 8.058 0 18s8.058 18 18 18 18-8.058 18-18S27.942 0 18 0zM8.5 25.5V10.5h11.25c4.14 0 7.5 3.36 7.5 7.5s-3.36 7.5-7.5 7.5H8.5zm15-7.5c0-2.07-1.68-3.75-3.75-3.75H12.25v7.5h7.5c2.07 0 3.75-1.68 3.75-3.75z" fill="url(#logoGradient)"/>
+    </svg>
+);
+
+
 export const SunIcon: React.FC<IconProps> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M12 21a9 9 0 110-18 9 9 0 010 18z" />
