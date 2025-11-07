@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, MegaphoneIcon, CalendarIcon, ChatBubbleLeftRightIcon } from './components/icons';
+import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, MegaphoneIcon, CalendarIcon, ChatBubbleLeftRightIcon, CheckCircleIcon } from './components/icons';
 import { Page } from './App';
 import DriverSettingsPage from './DriverSettingsPage';
 import { mockCompaniesData } from './admin/AdminDashboard';
@@ -40,6 +40,42 @@ const mockMessages = [
     { id: 1, from: 'Manager', text: 'John, please call me when you reach the Nyabugogo terminal.', time: '10:15 AM'},
     { id: 2, from: 'You', text: 'Will do.', time: '10:16 AM'},
 ];
+
+const checklistItems = [
+    { id: 'tires', label: 'Check Tire Pressure' },
+    { id: 'fuel', label: 'Verify Fuel Level' },
+    { id: 'lights', label: 'Test Headlights & Signals' },
+    { id: 'clean', label: 'Interior is Clean' },
+];
+
+const PreTripChecklist = ({ onComplete }) => {
+    const [checkedItems, setCheckedItems] = useState<string[]>([]);
+    
+    const handleToggle = (id: string) => {
+        setCheckedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    };
+    
+    const allChecked = checkedItems.length === checklistItems.length;
+
+    return (
+         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
+            <h2 className="text-xl font-bold dark:text-white mb-4">Pre-Trip Checklist</h2>
+            <div className="space-y-3">
+                {checklistItems.map(item => (
+                    <label key={item.id} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer">
+                        <input type="checkbox" checked={checkedItems.includes(item.id)} onChange={() => handleToggle(item.id)} className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500"/>
+                        <span className={`flex-1 ${checkedItems.includes(item.id) ? 'line-through text-gray-400' : 'dark:text-gray-200'}`}>{item.label}</span>
+                         {checkedItems.includes(item.id) && <CheckCircleIcon className="w-6 h-6 text-green-500" />}
+                    </label>
+                ))}
+            </div>
+            <button onClick={onComplete} disabled={!allChecked} className="w-full mt-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Confirm & Start Trip
+            </button>
+        </div>
+    );
+};
+
 
 const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setTheme, driverData, allCompanies, onPassengerBoarding, navigate }) => {
     const [view, setView] = useState('dashboard');
@@ -170,17 +206,22 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                  return (
                     <div className="space-y-8">
                          <h1 className="text-3xl font-bold dark:text-gray-200">Dashboard</h1>
-                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <button onClick={() => setView('boarding')} className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-left">
-                                <QrCodeIcon className="w-12 h-12 mb-4"/>
-                                <h2 className="text-2xl font-bold">Start Passenger Boarding</h2>
-                                <p className="opacity-80 mt-2">Scan tickets to verify and board passengers for the current trip.</p>
-                            </button>
-                            <button onClick={() => setIsReportModalOpen(true)} className="bg-gradient-to-br from-yellow-500 to-orange-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-left">
-                                <WrenchScrewdriverIcon className="w-12 h-12 mb-4"/>
-                                <h2 className="text-2xl font-bold">Report Vehicle Issue</h2>
-                                <p className="opacity-80 mt-2">Submit a maintenance request for your assigned bus.</p>
-                            </button>
+                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-1">
+                                <PreTripChecklist onComplete={() => alert("Checklist confirmed! Trip can now start.")} />
+                            </div>
+                            <div className="lg:col-span-2 space-y-6">
+                                <button onClick={() => setView('boarding')} className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-left w-full">
+                                    <QrCodeIcon className="w-12 h-12 mb-4"/>
+                                    <h2 className="text-2xl font-bold">Start Passenger Boarding</h2>
+                                    <p className="opacity-80 mt-2">Scan tickets to verify and board passengers for the current trip.</p>
+                                </button>
+                                <button onClick={() => setIsReportModalOpen(true)} className="bg-gradient-to-br from-yellow-500 to-orange-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-left w-full">
+                                    <WrenchScrewdriverIcon className="w-12 h-12 mb-4"/>
+                                    <h2 className="text-2xl font-bold">Report Vehicle Issue</h2>
+                                    <p className="opacity-80 mt-2">Submit a maintenance request for your assigned bus.</p>
+                                </button>
+                            </div>
                          </div>
                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">

@@ -155,6 +155,7 @@ const DepositView = ({ onAgentDeposit, passengerSerialCode, agentPin }) => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+    const quickDepositAmounts = [1000, 2000, 5000, 10000, 20000];
 
     const handleFindPassenger = () => {
         setError('');
@@ -270,6 +271,16 @@ const DepositView = ({ onAgentDeposit, passengerSerialCode, agentPin }) => {
                                 className="w-full mt-1 p-3 border rounded-lg text-2xl font-bold dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-green-500 focus:outline-none"
                                 required
                             />
+                        </div>
+                         <div>
+                            <label className="text-xs font-medium text-gray-400">Quick Add</label>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                                {quickDepositAmounts.map(quickAmount => (
+                                    <button key={quickAmount} type="button" onClick={() => setAmount(String(Number(amount || 0) + quickAmount))} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-sm font-semibold rounded-full hover:bg-gray-300 dark:hover:bg-gray-600">
+                                        +{new Intl.NumberFormat('fr-RW').format(quickAmount)}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                         {error && <p className="text-red-500 text-sm">{error}</p>}
                         <button type="submit" disabled={isDepositing} className="w-full px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition text-lg">

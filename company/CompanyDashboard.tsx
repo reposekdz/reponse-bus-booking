@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChartBarIcon, UsersIcon, BusIcon, MapIcon, WalletIcon } from '../components/icons';
+import { ChartBarIcon, UsersIcon, BusIcon, MapIcon, WalletIcon, StarIcon } from '../components/icons';
 import PinModal from '../components/PinModal';
 
 const StatCard = ({ title, value, icon }) => (
@@ -19,8 +19,9 @@ const StatCard = ({ title, value, icon }) => (
 // Mock data moved inside for component self-containment
 const companyMockData = {
     drivers: [
-        { id: 'd1', name: 'John Doe', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active' },
-        { id: 'd3', name: 'Mary Anne', assignedBusId: 'RAE 789 A', phone: '0788555666', status: 'On Leave' },
+        { id: 'd1', name: 'John Doe', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active', onTimeRate: 98.5, rating: 4.8, avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
+        { id: 'd3', name: 'Mary Anne', assignedBusId: 'RAE 789 A', phone: '0788555666', status: 'On Leave', onTimeRate: 99.1, rating: 4.9, avatarUrl: 'https://randomuser.me/api/portraits/women/6.jpg' },
+        { id: 'd4', name: 'Chris P.', assignedBusId: 'RAB 456 C', phone: '0788444555', status: 'Active', onTimeRate: 97.2, rating: 4.7, avatarUrl: 'https://randomuser.me/api/portraits/men/8.jpg' },
     ],
     buses: [
         { id: 'b1', plate: 'RAD 123 B', model: 'Yutong Explorer', capacity: 55, status: 'On Route', maintenanceDate: '2024-12-15', route: 'Kigali - Rubavu', progress: 75 },
@@ -48,6 +49,8 @@ const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ companyPin }) => {
         setIsPinModalOpen(false);
         alert('Payouts Authorized Successfully!');
     };
+
+    const driverLeaderboard = [...drivers].sort((a,b) => b.rating - a.rating);
 
     return (
         <div>
@@ -80,24 +83,23 @@ const CompanyDashboard: React.FC<CompanyDashboardProps> = ({ companyPin }) => {
                     </div>
                 </div>
                  <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                     <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center">
-                        <WalletIcon className="w-6 h-6 mr-3 text-green-500"/>
-                        Financials
-                    </h2>
-                    <div className="space-y-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Authorize company expenses and payroll securely.</p>
-                         <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
-                            <p className="text-sm font-semibold dark:text-gray-200">Pending Payouts</p>
-                            <p className="text-2xl font-bold text-gray-800 dark:text-white">1,850,000 RWF</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">For {drivers.length} drivers (Oct 2024)</p>
-                        </div>
-                        <button 
-                            onClick={() => setIsPinModalOpen(true)}
-                            className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
-                        >
-                            Authorize Payouts
-                        </button>
-                    </div>
+                     <h2 className="text-xl font-bold dark:text-white mb-4">Driver Performance Leaderboard</h2>
+                     <div className="space-y-3">
+                        {driverLeaderboard.map((driver, index) => (
+                            <div key={driver.id} className="flex items-center space-x-3 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                                <span className="font-bold text-lg text-gray-400 w-5">#{index + 1}</span>
+                                <img src={driver.avatarUrl} alt={driver.name} className="w-10 h-10 rounded-full"/>
+                                <div className="flex-1">
+                                    <p className="font-semibold text-sm dark:text-white">{driver.name}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">On-Time: {driver.onTimeRate}%</p>
+                                </div>
+                                <div className="flex items-center font-bold text-yellow-500">
+                                    <StarIcon className="w-4 h-4 mr-1"/>
+                                    <span>{driver.rating}</span>
+                                </div>
+                            </div>
+                        ))}
+                     </div>
                 </div>
             </div>
             {isPinModalOpen && (

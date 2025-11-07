@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { TicketIcon, ChevronRightIcon, QrCodeIcon, ArrowPathIcon, ShareIcon, BellAlertIcon } from './components/icons';
+import { TicketIcon, ChevronRightIcon, QrCodeIcon, ArrowPathIcon, ShareIcon, BellAlertIcon, StarIcon } from './components/icons';
+import Modal from './components/Modal';
+import StarRating from './components/StarRating';
 
 const upcomingBookings = [
     { id: 'TICKET-001', from: 'Kigali', to: 'Rubavu', company: 'Volcano Express', date: '28 Ukwakira, 2024', time: '07:00 AM', seats: 'A5, A6', price: '9,000 FRW', passenger: 'Kalisa Jean', busPlate: 'RAD 123 B' },
@@ -12,13 +14,44 @@ const pastBookings = [
 
 type Booking = typeof upcomingBookings[0];
 
+const RateTripModal: React.FC<{ booking: Booking, onClose: () => void, onSubmit: (rating: number, comment: string) => void }> = ({ booking, onClose, onSubmit }) => {
+    const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState('');
+
+    const handleSubmit = () => {
+        onSubmit(rating, comment);
+    };
+
+    return (
+        <Modal isOpen={true} onClose={onClose} title={`Rate Your Trip to ${booking.to}`}>
+            <div className="space-y-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">How was your journey with {booking.company} on {booking.date}?</p>
+                <div className="flex justify-center py-2">
+                    <StarRating rating={rating} onRatingChange={setRating} isInteractive={true} size="large" />
+                </div>
+                <div>
+                    <label className="text-sm font-medium">Comments (optional)</label>
+                    <textarea value={comment} onChange={e => setComment(e.target.value)} rows={3} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700" placeholder="Tell us more..."/>
+                </div>
+                <div className="flex justify-end pt-2">
+                    <button onClick={handleSubmit} disabled={rating === 0} className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+                        Submit Rating
+                    </button>
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
+
 interface BookingCardProps {
     booking: Booking;
     onViewTicket: (booking: Booking) => void;
+    onRateTrip: (booking: Booking) => void;
     isPast: boolean;
 }
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, isPast }) => (
+const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRateTrip, isPast }) => (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden my-4 transform hover:shadow-xl transition-shadow duration-300">
         <div className="flex flex-col sm:flex-row">
             <div className="p-5 flex-grow">
@@ -48,6 +81,10 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, isPast
          <div className="bg-gray-100 dark:bg-gray-700/50 px-5 py-2 flex items-center justify-end space-x-4">
             {isPast ? (
                 <>
+                 <button onClick={() => onRateTrip(booking)} className="flex items-center text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    <StarIcon className="w-4 h-4 mr-1.5"/>
+                    Rate Trip
+                </button>
                  <button onClick={() => alert(`Price alert set for ${booking.from} to ${booking.to}!`)} className="flex items-center text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                     <BellAlertIcon className="w-4 h-4 mr-1.5"/>
                     Set Price Alert
@@ -69,10 +106,18 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, isPast
 
 interface BookingsPageProps {
     onViewTicket: (ticket: any) => void;
+    user: any;
 }
 
-const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket }) => {
+const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket, user }) => {
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [ratingTrip, setRatingTrip] = useState<Booking | null>(null);
+
+  const handleRatingSubmit = (rating: number, comment: string) => {
+      console.log('Rating submitted:', { bookingId: ratingTrip?.id, rating, comment });
+      alert(`Thank you for your ${rating}-star rating!`);
+      setRatingTrip(null);
+  };
 
   return (
     <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-screen">
@@ -97,16 +142,23 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket }) => {
             <div>
                 {activeTab === 'upcoming' && (
                     <div className="space-y-4">
-                        {upcomingBookings.map(booking => <BookingCard key={booking.id} booking={booking} onViewTicket={onViewTicket} isPast={false} />)}
+                        {upcomingBookings.map(booking => <BookingCard key={booking.id} booking={booking} onViewTicket={onViewTicket} onRateTrip={() => {}} isPast={false} />)}
                     </div>
                 )}
                 {activeTab === 'past' && (
                     <div className="space-y-4 opacity-80">
-                        {pastBookings.map(booking => <BookingCard key={booking.id} booking={booking} onViewTicket={onViewTicket} isPast={true} />)}
+                        {pastBookings.map(booking => <BookingCard key={booking.id} booking={booking} onViewTicket={onViewTicket} onRateTrip={setRatingTrip} isPast={true} />)}
                     </div>
                 )}
             </div>
         </main>
+         {ratingTrip && (
+            <RateTripModal 
+                booking={ratingTrip} 
+                onClose={() => setRatingTrip(null)}
+                onSubmit={handleRatingSubmit}
+            />
+        )}
     </div>
   );
 };

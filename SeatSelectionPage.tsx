@@ -38,7 +38,7 @@ for (let i = 3; i <= 12; i++) {
 
 interface SeatSelectionPageProps {
   tripData: any;
-  onConfirm: (selectedSeats: string[]) => void;
+  onConfirm: (bookingDetails: any) => void;
   onBack: () => void;
 }
 
@@ -46,7 +46,7 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
   const [seats, setSeats] = useState(initialSeats);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   
-  const trip = tripData || { price: 4500, company: 'Volcano Express' }; // Fallback for direct access
+  const trip = tripData || { price: 4500, company: 'Volcano Express', from: 'Kigali', to: 'Rubavu', departureTime: '07:00' }; // Fallback for direct access
 
   const handleSelectSeat = (id: string) => {
     setSelectedSeats(prev => 
@@ -55,6 +55,18 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
   };
   
   const totalPrice = selectedSeats.length * trip.price;
+
+  const handleConfirmClick = () => {
+    // In a real app, payment would be handled here. We'll simulate success.
+    const bookingDetails = {
+      ...trip,
+      seats: selectedSeats.join(', '),
+      totalPrice: totalPrice,
+      bookingId: `RB-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      passengerName: 'Kalisa Jean' // Mocked logged-in user
+    };
+    onConfirm(bookingDetails);
+  };
 
   return (
     <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-full py-12">
@@ -96,7 +108,7 @@ const SeatSelectionPage: React.FC<SeatSelectionPageProps> = ({ tripData, onConfi
                              <p className="text-lg font-bold">Igiciro Cyose:</p>
                              <p className="text-3xl font-extrabold text-green-600 dark:text-green-400">{new Intl.NumberFormat('fr-RW').format(totalPrice)} RWF</p>
                          </div>
-                         <button onClick={() => onConfirm(selectedSeats)} disabled={selectedSeats.length === 0} className="mt-6 w-full flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold hover:saturate-150 transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5">
+                         <button onClick={handleConfirmClick} disabled={selectedSeats.length === 0} className="mt-6 w-full flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold hover:saturate-150 transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5">
                             Komeza <ArrowRightIcon className="w-5 h-5 ml-2" />
                         </button>
                     </div>
