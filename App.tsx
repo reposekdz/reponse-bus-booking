@@ -48,7 +48,38 @@ const mockUsers = {
   passenger: { name: 'Kalisa Jean', email: 'passenger@rwandabus.rw', role: 'passenger', avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg', walletBalance: 15000, pin: '1234' },
   company: { name: 'Volcano Express', email: 'manager@volcano.rw', role: 'company', avatarUrl: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg', pin: '2024' },
   admin: { name: 'Admin User', email: 'admin@rwandabus.rw', role: 'admin', avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg' },
-  driver: { id: 'd1', name: 'John Doe', email: 'driver@volcano.rw', role: 'driver', avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg', company: 'Volcano Express', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active', joinDate: '2022-03-10', bio: 'Experienced driver with over 10 years on the Kigali-Rubavu route. Safety is my priority.', certifications: [{id: 'CERT-001', name: 'Defensive Driving', expiry: '2025-12-31'}]},
+  driver: { 
+    id: 'd1', 
+    name: 'John Doe', 
+    email: 'driver@volcano.rw', 
+    role: 'driver', 
+    avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg', 
+    company: 'Volcano Express', 
+    assignedBusId: 'RAD 123 B', 
+    phone: '0788111222', 
+    status: 'Active', 
+    joinDate: '2022-03-10', 
+    bio: 'Experienced driver with over 10 years on the Kigali-Rubavu route. Safety is my priority.', 
+    documents: [
+      {id: 'DL-RW-12345', name: 'Driver\'s License Category D', expiry: '2026-08-15'},
+      {id: 'CERT-001', name: 'Defensive Driving', expiry: '2025-12-31'},
+      {id: 'NID-98765', name: 'National ID', expiry: '2030-01-01'},
+      {id: 'BADGE-042', name: 'Public Transport Badge', expiry: '2024-11-20'}, // Expiring soon
+    ],
+    performance: {
+        onTimeRate: 98.5,
+        completionRate: 100,
+        averageRating: 4.8,
+        safetyScore: 99,
+        totalTrips: 245,
+    },
+    tripHistory: [
+        {id: 'TRIP-501', route: 'Kigali - Rubavu', date: '2024-10-28', status: 'Completed', passengers: 54},
+        {id: 'TRIP-502', route: 'Kigali - Musanze', date: '2024-10-27', status: 'Completed', passengers: 28},
+        {id: 'TRIP-503', route: 'Kigali - Huye', date: '2024-10-26', status: 'Completed', passengers: 62},
+        {id: 'TRIP-504', route: 'Kigali - Rubavu', date: '2024-10-29', status: 'Upcoming', passengers: 0},
+    ]
+  },
   agent: { id: 'a1', name: 'Jane Smith', email: 'jane.s@agent.rw', role: 'agent', avatarUrl: 'https://randomuser.me/api/portraits/women/5.jpg', location: 'Nyabugogo', commissionRate: 0.05, totalDeposits: 2500000, pin: '5678', phone: '0788777888' }
 };
 

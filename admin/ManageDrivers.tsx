@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { BusIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon, EyeIcon } from '../components/icons';
 import { Page } from '../App';
@@ -107,8 +108,8 @@ const ManageDrivers: React.FC<{ navigate: (page: Page, data?: any) => void; }> =
                             <tr>
                                 <th className="p-3">Driver Name</th>
                                 <th className="p-3">Company</th>
-                                <th className="p-3">Assigned Bus</th>
-                                <th className="p-3">Phone</th>
+                                <th className="p-3">Rating</th>
+                                <th className="p-3">On-Time %</th>
                                 <th className="p-3">Status</th>
                                 <th className="p-3">Actions</th>
                             </tr>
@@ -125,8 +126,8 @@ const ManageDrivers: React.FC<{ navigate: (page: Page, data?: any) => void; }> =
                                         </div>
                                     </td>
                                     <td>{getCompanyName(driver.companyId)}</td>
-                                    <td>{driver.assignedBusId}</td>
-                                    <td>{driver.phone}</td>
+                                    <td className="font-semibold dark:text-gray-300">{driver.performance.averageRating || 'N/A'}/5</td>
+                                    <td className="font-semibold text-green-600 dark:text-green-400">{driver.performance.onTimeRate || 'N/A'}%</td>
                                     <td>
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${driver.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'}`}>
                                             {driver.status}

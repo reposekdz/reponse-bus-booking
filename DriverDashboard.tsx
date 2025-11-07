@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
-import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon } from './components/icons';
+import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon } from './components/icons';
 import { Page } from './App';
-import DriverSettingsPage from './DriverSettingsPage'; // New Import
-// FIX: Import mockCompaniesData to resolve 'Cannot find name' error.
+import DriverSettingsPage from './DriverSettingsPage';
 import { mockCompaniesData } from './admin/AdminDashboard';
+import DriverPerformance from './components/DriverPerformance';
+import DriverTripHistory from './components/DriverTripHistory';
+import VehicleReportModal from './components/VehicleReportModal';
 
 interface DriverDashboardProps {
     onLogout: () => void;
@@ -35,11 +36,11 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
     const [scannedTicket, setScannedTicket] = useState('');
     const [scanResult, setScanResult] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const [passengers, setPassengers] = useState(mockCurrentTrip.passengers);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
     
-    const driverCompany = mockCompaniesData.find(c => c.id === 'volcano') || mockCompaniesData[0];
-
+    const driverCompany = mockCompaniesData.find(c => c.name === driverData.company) || mockCompaniesData[0];
 
     const handleScan = () => {
         setScanResult(null);
@@ -80,7 +81,6 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
         } else {
             setScannedTicket('INVALID-ID');
         }
-        // Use timeout to ensure state update before scan
         setTimeout(handleScan, 50);
     };
 
@@ -147,6 +147,10 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                          </div>
                     </div>
                 );
+            case 'performance':
+                return <DriverPerformance performance={driverData.performance} />;
+            case 'history':
+                return <DriverTripHistory tripHistory={driverData.tripHistory} />;
             case 'settings':
                 return <DriverSettingsPage driverData={driverData} companyData={driverCompany} theme={theme} setTheme={setTheme} />;
             case 'dashboard':
@@ -154,7 +158,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                  return (
                     <div>
                          <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Dashboard</h1>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <button onClick={() => setView('boarding')} className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-left">
                                 <QrCodeIcon className="w-12 h-12 mb-4"/>
                                 <h2 className="text-2xl font-bold">Start Passenger Boarding</h2>
@@ -164,6 +168,11 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                                 <h2 className="text-2xl font-bold dark:text-white">Trip Details</h2>
                                 <p className="mt-2 text-gray-600 dark:text-gray-400">More trip details and actions will be shown here.</p>
                             </div>
+                            <button onClick={() => setIsReportModalOpen(true)} className="bg-gradient-to-br from-yellow-500 to-orange-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-left">
+                                <WrenchScrewdriverIcon className="w-12 h-12 mb-4"/>
+                                <h2 className="text-2xl font-bold">Report Vehicle Issue</h2>
+                                <p className="opacity-80 mt-2">Submit a maintenance request for your assigned bus.</p>
+                            </button>
                          </div>
                     </div>
                 );
@@ -177,6 +186,8 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                 <nav className="flex-1 px-4 py-6 space-y-2">
                     <NavLink viewName="dashboard" label="Dashboard" icon={ChartBarIcon} />
                     <NavLink viewName="boarding" label="Passenger Boarding" icon={QrCodeIcon} />
+                    <NavLink viewName="performance" label="My Performance" icon={ChartPieIcon} />
+                    <NavLink viewName="history" label="Trip History" icon={ClipboardDocumentListIcon} />
                     <button onClick={() => navigate('driverProfile')} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative text-gray-400 hover:text-white hover:bg-white/5`}>
                         <div className={`absolute left-0 top-0 h-full w-1 rounded-r-full bg-yellow-400 transition-all duration-300 scale-y-0 group-hover:scale-y-50`}></div>
                         <UsersIcon className="w-6 h-6 mr-4 transition-transform duration-300 group-hover:scale-110" />
@@ -197,6 +208,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                    {renderContent()}
                 </main>
             </div>
+            {isReportModalOpen && <VehicleReportModal busId={driverData.assignedBusId} onClose={() => setIsReportModalOpen(false)} />}
         </div>
     );
 };

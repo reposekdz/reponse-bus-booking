@@ -1,3 +1,5 @@
+
+
 import React from 'react';
 import { ChartBarIcon, UsersIcon, BuildingOfficeIcon, BriefcaseIcon } from '../components/icons';
 import ActivityFeed from '../components/ActivityFeed';
@@ -11,9 +13,45 @@ export const mockCompaniesData = [
 ];
 
 export const mockDriversData = [
-    { id: 'd1', name: 'John Doe', companyId: 'volcano', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active', avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg' },
-    { id: 'd2', name: 'Peter Jones', companyId: 'ritco', assignedBusId: 'RAF 456 C', phone: '0788333444', status: 'Active', avatarUrl: 'https://randomuser.me/api/portraits/men/5.jpg' },
-    { id: 'd3', name: 'Mary Anne', companyId: 'volcano', assignedBusId: 'RAE 789 A', phone: '0788555666', status: 'On Leave', avatarUrl: 'https://randomuser.me/api/portraits/women/6.jpg' },
+    { 
+        id: 'd1', 
+        name: 'John Doe', 
+        companyId: 'volcano', 
+        assignedBusId: 'RAD 123 B', 
+        phone: '0788111222', 
+        status: 'Active', 
+        avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg',
+        performance: { onTimeRate: 98.5, averageRating: 4.8, completionRate: 100, safetyScore: 99, totalTrips: 245 },
+        tripHistory: [
+            {id: 'TRIP-501', route: 'Kigali - Rubavu', date: '2024-10-28', status: 'Completed', passengers: 54},
+            {id: 'TRIP-504', route: 'Kigali - Rubavu', date: '2024-10-29', status: 'Upcoming', passengers: 0},
+        ],
+        documents: [{id: 'DL-RW-12345', name: 'Driver\'s License Category D', expiry: '2026-08-15'}]
+    },
+    { 
+        id: 'd2', 
+        name: 'Peter Jones', 
+        companyId: 'ritco', 
+        assignedBusId: 'RAF 456 C', 
+        phone: '0788333444', 
+        status: 'Active', 
+        avatarUrl: 'https://randomuser.me/api/portraits/men/5.jpg',
+        performance: { onTimeRate: 95.2, averageRating: 4.6, completionRate: 99, safetyScore: 95, totalTrips: 180 },
+        tripHistory: [{id: 'TRIP-601', route: 'Kigali - Huye', date: '2024-10-28', status: 'Completed', passengers: 60}],
+        documents: [{id: 'DL-RW-67890', name: 'Driver\'s License Category D', expiry: '2027-01-20'}]
+    },
+    { 
+        id: 'd3', 
+        name: 'Mary Anne', 
+        companyId: 'volcano', 
+        assignedBusId: 'RAE 789 A', 
+        phone: '0788555666', 
+        status: 'On Leave', 
+        avatarUrl: 'https://randomuser.me/api/portraits/women/6.jpg',
+        performance: { onTimeRate: 99.1, averageRating: 4.9, completionRate: 100, safetyScore: 100, totalTrips: 312 },
+        tripHistory: [{id: 'TRIP-701', route: 'Kigali - Musanze', date: '2024-10-27', status: 'Completed', passengers: 25}],
+        documents: [{id: 'DL-RW-11223', name: 'Driver\'s License Category D', expiry: '2025-05-10'}]
+    },
 ];
 
 
