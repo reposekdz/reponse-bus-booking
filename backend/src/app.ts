@@ -7,7 +7,7 @@ const app = express();
 
 // Core Middleware
 app.use(cors());
-// FIX: Resolve "No overload matches this call" error by explicitly providing the root path.
+// FIX: Resolve "No overload matches this call" error by explicitly providing the root path '/' for middleware.
 // This helps TypeScript's compiler resolve the correct function overload for `app.use`.
 app.use('/', express.json());
 app.use('/', express.urlencoded({ extended: true }));

@@ -21,21 +21,21 @@ export const getCompanyDetails = asyncHandler(async (req: any, res: any) => {
 // --- Driver Management for Companies ---
 
 export const getMyDrivers = asyncHandler(async (req: any, res: any) => {
-    const drivers = await companyService.getDriversByCompany(req.user.company);
+    const drivers = await companyService.getDriversByCompany(req.user.company_id);
     res.status(200).json({ success: true, data: drivers });
 });
 
 export const createDriverForMyCompany = asyncHandler(async (req: any, res: any) => {
-    const driver = await companyService.createDriver(req.body, req.user.company);
+    const driver = await companyService.createDriver(req.body, req.user.company_id);
     res.status(201).json({ success: true, data: driver });
 });
 
 export const updateDriverForMyCompany = asyncHandler(async (req: any, res: any) => {
-    const driver = await companyService.updateDriver(req.params.id, req.body, req.user.company);
+    const driver = await companyService.updateDriver(req.params.id, req.body, req.user.company_id);
     res.status(200).json({ success: true, data: driver });
 });
 
 export const deleteDriverForMyCompany = asyncHandler(async (req: any, res: any) => {
-    await companyService.deleteDriver(req.params.id, req.user.company);
+    await companyService.deleteDriver(req.params.id, req.user.company_id);
     res.status(200).json({ success: true, data: {} });
 });

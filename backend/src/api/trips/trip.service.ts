@@ -25,7 +25,7 @@ async function getAvailableSeatsForTrips(tripIds: number[]) {
         GROUP BY t.id, b.capacity
     `, tripIds);
 
-    const availableSeatsMap = {};
+    const availableSeatsMap: { [key: number]: number } = {};
     (seatCounts as any[]).forEach(row => {
         availableSeatsMap[row.trip_id] = row.capacity - row.booked_seats;
     });
@@ -46,7 +46,7 @@ export const findTrips = async (query: TripQuery) => {
             r.base_price, r.estimated_duration_minutes,
             c.name as company_name, c.logo_url,
             b.model, b.amenities,
-            d.name as driver_name, d.avatar_url
+            d.name as driver_name, d.avatar_url as driver_avatar_url
         FROM trips t
         JOIN routes r ON t.route_id = r.id
         JOIN companies c ON r.company_id = c.id
@@ -109,7 +109,7 @@ export const findTripById = async (id: string) => {
     const [bookedSeats] = await pool.query('SELECT seat_number FROM seats WHERE trip_id = ?', [id]);
     const bookedSeatSet = new Set((bookedSeats as any[]).map(s => s.seat_number));
 
-    const seatMap = {};
+    const seatMap: { [key: string]: string } = {};
     for (let i = 1; i <= Math.ceil(trip.capacity / 4); i++) {
         for (const char of ['A', 'B', 'C', 'D']) {
              // Don't create more seats than capacity
@@ -170,6 +170,12 @@ export const confirmPassengerBoarding = async (data: BoardingData) => {
     
     await pool.query('UPDATE bookings SET status = "Completed" WHERE id = ?', [booking.id]);
     
+    // Log the boarding action
+    await pool.query(
+        'INSERT INTO boardings (booking_id, trip_id, driver_id) VALUES (?, ?, ?)',
+        [booking.id, tripId, driverId]
+    );
+
     // Emit a real-time notification to the specific passenger
     const notificationMessage = `Welcome, ${booking.passenger_name}! You have successfully boarded the bus for ${trip.origin} to ${trip.destination}.`;
     io.to(booking.passenger_id.toString()).emit('passengerBoarded', {

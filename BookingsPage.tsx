@@ -48,6 +48,7 @@ interface BookingCardProps {
 const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRateTrip, onActivate, isPast, isActivatable }) => {
     const { trip } = booking;
     const { route } = trip;
+    const { user } = useAuth();
     
     const ticketDetails = {
         id: booking.bookingId,
@@ -58,7 +59,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRate
         time: new Date(trip.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         seats: booking.seats.join(', '),
         price: `${new Intl.NumberFormat('fr-RW').format(booking.totalPrice)} RWF`,
-        passenger: 'Kalisa Jean', // This should come from user context
+        passenger: user?.name,
         busPlate: 'N/A' // This data isn't in the model yet
     };
 
@@ -145,7 +146,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket }) => {
         try {
             const data = await api.getMyBookings();
             setBookings(data);
-        } catch (err) {
+        } catch (err: any) {
             setError(err.message || "Failed to fetch bookings.");
         } finally {
             setIsLoading(false);

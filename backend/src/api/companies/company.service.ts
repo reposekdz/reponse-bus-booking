@@ -29,7 +29,7 @@ export const getCompanyDetailsById = async (id: string) => {
     }
     const company = companyRows[0];
 
-    const [fleet] = await pool.query('SELECT * FROM buses WHERE company_id = ?', [companyId]);
+    const [fleet] = await pool.query('SELECT *, image_url as image FROM buses WHERE company_id = ?', [companyId]);
     const [routes] = await pool.query('SELECT *, origin as `from`, destination as `to` FROM routes WHERE company_id = ?', [companyId]);
     const [services] = await pool.query('SELECT * FROM services WHERE company_id = ?', [companyId]);
     const [promotions] = await pool.query('SELECT * FROM promotions WHERE company_id = ?', [companyId]);

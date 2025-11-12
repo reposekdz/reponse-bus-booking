@@ -4,7 +4,7 @@ import * as mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 
 const tables = [
-    'gallery', 'services', 'promotions', 'reviews', 'seats', 'wallet_transactions', 'wallets', 'bookings', 'trips',
+    'gallery', 'services', 'promotions', 'reviews', 'boardings', 'seats', 'wallet_transactions', 'wallets', 'bookings', 'trips',
     'routes', 'buses', 'users', 'companies', 'messages', 'site_settings', 'featured_destinations'
 ];
 
@@ -13,7 +13,7 @@ const clearDatabase = async (connection: mysql.PoolConnection) => {
     for (const table of tables) {
         try {
             await connection.query(`DROP TABLE IF EXISTS ${table};`);
-        } catch (e) {
+        } catch (e: any) {
             console.warn(`Could not drop table ${table}:`, e.message);
         }
     }
@@ -60,7 +60,7 @@ export const seedDatabase = async () => {
         const [ritcoManagerRes] = await connection.query<mysql.ResultSetHeader>("INSERT INTO users (name, email, password_hash, role, pin) VALUES ('RITCO Manager', 'company2@gobus.rw', ?, 'company', ?)", [password_hash, pin_hash]);
         const ritcoManagerId = ritcoManagerRes.insertId;
         
-        const [adminRes] = await connection.query<mysql.ResultSetHeader>("INSERT INTO users (name, email, password_hash, role) VALUES ('Admin User', 'admin@gobus.rw', ?, 'admin')", [password_hash]);
+        await connection.query<mysql.ResultSetHeader>("INSERT INTO users (name, email, password_hash, role) VALUES ('Admin User', 'admin@gobus.rw', ?, 'admin')", [password_hash]);
 
         // 2. Create Companies
         const [volcanoRes] = await connection.query<mysql.ResultSetHeader>("INSERT INTO companies (name, owner_id, status, logo_url, cover_url, description) VALUES ('Volcano Express', ?, 'Active', 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg', 'https://images.unsplash.com/photo-1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop', 'Volcano Express is one of the most popular transport companies in Rwanda, known for its excellent service, cleanliness, and punctuality, serving many major routes.')", [volcanoManagerId]);
@@ -81,7 +81,7 @@ export const seedDatabase = async () => {
         // 4. Create Buses
         const [bus1Res] = await connection.query<mysql.ResultSetHeader>("INSERT INTO buses (company_id, plate_number, model, capacity, amenities, image_url) VALUES (?, 'RAD 123 B', 'Yutong Explorer', 55, 'AC,Charging', 'https://images.pexels.com/photos/2418491/pexels-photo-2418491.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')", [volcanoId]);
         const bus1Id = bus1Res.insertId;
-        const [bus2Res] = await connection.query<mysql.ResultSetHeader>("INSERT INTO buses (company_id, plate_number, model, capacity, amenities, image_url) VALUES (?, 'RAE 456 C', 'Scania Marcopolo', 65, 'AC,WiFi,TV', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop')", [ritcoId]);
+        const [bus2Res] = await connection.query<mysql.ResultSetHeader>("INSERT INTO buses (company_id, plate_number, model, capacity, amenities, image_url) VALUES (?, 'RAE 456 C', 'Scania Marcopolo', 65, 'AC,WiFi,TV', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d_5957?q=80&w=2048&auto=format&fit=crop')", [ritcoId]);
         const bus2Id = bus2Res.insertId;
         
         // 5. Create Routes
@@ -99,18 +99,19 @@ export const seedDatabase = async () => {
 
         const departure2 = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 30, 0);
         const arrival2 = new Date(departure2.getTime() + 150 * 60000);
-        await connection.query("INSERT INTO trips (route_id, bus_id, driver_id, departure_time, arrival_time) VALUES (?, ?, ?, ?, ?)", [route2Id, bus2Id, driver2Id, departure2, arrival2]);
+        const [trip2Res] = await connection.query<mysql.ResultSetHeader>("INSERT INTO trips (route_id, bus_id, driver_id, departure_time, arrival_time) VALUES (?, ?, ?, ?, ?)", [route2Id, bus2Id, driver2Id, departure2, arrival2]);
+        const trip2Id = trip2Res.insertId;
         
         // 7. Site Settings & Content
-        await connection.query("INSERT INTO site_settings (setting_key, setting_value) VALUES ('hero_image', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop')");
-        await connection.query("INSERT INTO featured_destinations (from_location, to_location, price, image_data_uri) VALUES ('Kigali', 'Rubavu', 4500, 'https://images.unsplash.com/photo-1590632313655-e9c5220c4273?q=80&w=2070&auto=format&fit=crop')");
+        await connection.query("INSERT INTO site_settings (setting_key, setting_value) VALUES ('hero_image', 'https://images.unsplash.com/photo-1544620347-c4fd4a3d_5957?q=80&w=2048&auto=format&fit=crop')");
         
         // 8. Reviews, Promotions, Services
         await connection.query("INSERT INTO reviews (company_id, user_id, rating, comment) VALUES (?, ?, ?, ?)", [volcanoId, passengerId, 5, 'Nta kundi navuga, Volcano ni abahanga! Buri gihe serivisi ni nziza.']);
-        await connection.query("INSERT INTO reviews (company_id, user_id, rating, comment) VALUES (?, ?, ?, ?)", [ritcoId, passengerId, 4, 'Bagerageza kugera ku gihe, ariko interineti ya WiFi ntiyakoraga neza.']);
-        await connection.query("INSERT INTO promotions (company_id, title, code, expiry_date) VALUES (?, 'Weekend Getaway Discount', 'WEEKEND10', '2024-12-31')", [volcanoId]);
-        await connection.query("INSERT INTO services (company_id, name, description, icon) VALUES (?, 'Package Delivery', 'Reliable parcel delivery.', 'ArchiveBoxIcon')", [ritcoId]);
-        await connection.query("INSERT INTO gallery (company_id, image_url, category) VALUES (?, 'https://volcanoexpress.co.rw/wp-content/uploads/2021/02/DJI_0028-1.jpg', 'exterior')", [volcanoId]);
+
+        // 9. Create a Booking to test boarding
+        const [bookingRes] = await connection.query<mysql.ResultSetHeader>("INSERT INTO bookings (user_id, trip_id, booking_id, total_price, status) VALUES (?, ?, ?, ?, ?)", [passengerId, trip1Id, 'GB-TEST1', 4500, 'Confirmed']);
+        const bookingId = bookingRes.insertId;
+        await connection.query("INSERT INTO seats (booking_id, trip_id, seat_number) VALUES (?, ?, ?)", [bookingId, trip1Id, 'A5']);
 
         console.log('Seeding complete.');
     } catch (error) {
