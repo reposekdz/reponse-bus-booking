@@ -21,6 +21,7 @@ export type RootStackParamList = {
   BookingConfirmation: BookingConfirmationParams;
   TicketDetails: TicketDetailsParams;
   DriverBoarding: undefined;
+  DriverTripHistory: undefined;
   BusCharter: undefined;
   LostAndFound: undefined;
   PackageDelivery: undefined;

@@ -78,6 +78,12 @@ export const translations = {
     'footer_legal_privacy': 'Ibigendanye n\'ibanga',
     'footer_legal_cookies': 'Amakuru kuri \'Cookies\'',
     'footer_copyright': '© 2024 Rwanda Bus. Uburenganzira bwose burasigasiriwe.',
+    // Driver Trip History
+    'driver_history_title': 'Amateka y\'Ingendo Zanjye',
+    'driver_history_date': 'Itariki',
+    'driver_history_route': 'Urugendo',
+    'driver_history_passengers': 'Abagenzi',
+    'driver_history_status': 'Uko byagenze',
   },
   EN: {
     // Header & Nav
@@ -158,6 +164,12 @@ export const translations = {
     'footer_legal_privacy': 'Privacy Policy',
     'footer_legal_cookies': 'Cookie Policy',
     'footer_copyright': '© 2024 Rwanda Bus. All rights reserved.',
+     // Driver Trip History
+    'driver_history_title': 'My Trip History',
+    'driver_history_date': 'Date',
+    'driver_history_route': 'Route',
+    'driver_history_passengers': 'Passengers',
+    'driver_history_status': 'Status',
   },
   FR: {
     // Header & Nav
@@ -238,5 +250,11 @@ export const translations = {
     'footer_legal_privacy': 'Politique de Confidentialité',
     'footer_legal_cookies': 'Politique de Cookies',
     'footer_copyright': '© 2024 Rwanda Bus. Tous droits réservés.',
+    // Driver Trip History
+    'driver_history_title': 'Mon Historique de Trajets',
+    'driver_history_date': 'Date',
+    'driver_history_route': 'Trajet',
+    'driver_history_passengers': 'Passagers',
+    'driver_history_status': 'Statut',
   }
 };

@@ -35,6 +35,7 @@ import AgentProfileScreen from '../screens/agent/AgentProfileScreen';
 import DriverDashboardScreen from '../screens/driver/DriverDashboardScreen';
 import BoardingScreen from '../screens/driver/BoardingScreen';
 import DriverSettingsScreen from '../screens/driver/DriverSettingsScreen';
+import DriverTripHistoryScreen from '../screens/driver/DriverTripHistoryScreen';
 
 
 // Company Screens
@@ -92,6 +93,7 @@ function PassengerTabs() {
 }
 
 function DriverTabs() {
+    const { t } = useLanguage();
      return (
         <Tab.Navigator screenOptions={({ route }) => ({
             headerShown: false,
@@ -99,12 +101,14 @@ function DriverTabs() {
                 let iconName;
                 if (route.name === 'Dashboard') iconName = 'chart-bar';
                 else if (route.name === 'Boarding') iconName = 'qr-code';
+                else if (route.name === t('mobile_tab_history')) iconName = 'clipboard-document-list';
                 else if (route.name === 'Settings') iconName = 'user-circle';
                 return <Icon name={iconName} size={size} color={color} />;
             },
         })}>
             <Tab.Screen name="Dashboard" component={DriverDashboardScreen} />
             <Tab.Screen name="Boarding" component={BoardingScreen} />
+            <Tab.Screen name={t('mobile_tab_history')} component={DriverTripHistoryScreen} />
             <Tab.Screen name="Settings" component={DriverSettingsScreen} />
         </Tab.Navigator>
     );
@@ -189,6 +193,7 @@ export default function AppNavigator() {
                     <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
                     <Stack.Screen name="TicketDetails" component={TicketDetailsScreen} />
                     <Stack.Screen name="DriverBoarding" component={BoardingScreen} />
+                    <Stack.Screen name="DriverTripHistory" component={DriverTripHistoryScreen} />
                     <Stack.Screen name="BusCharter" component={BusCharterScreen} />
                     <Stack.Screen name="LostAndFound" component={LostAndFoundScreen} />
                     <Stack.Screen name="PackageDelivery" component={PackageDeliveryScreen} />

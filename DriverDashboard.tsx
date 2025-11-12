@@ -129,7 +129,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
     
     const driverCompany = mockCompaniesData.find(c => c.name === driverData.company) || mockCompaniesData[0];
-    const upcomingTrips = driverData.tripHistory.filter(t => t.status === 'Upcoming');
+    const upcomingTrips = (driverData.tripHistory || []).filter(t => t.status === 'Upcoming');
 
 
     const handleScan = async () => {
@@ -243,7 +243,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
             case 'performance':
                 return <DriverPerformance performance={driverData.performance} />;
             case 'history':
-                return <DriverTripHistory tripHistory={driverData.tripHistory} />;
+                return <DriverTripHistory />;
             case 'settings':
                 return <DriverSettingsPage driverData={driverData} companyData={driverCompany} theme={theme} setTheme={setTheme} />;
             case 'dashboard':
@@ -305,7 +305,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                                     <button onClick={() => setView('history')} className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">View All</button>
                                 </div>
                                 <div className="space-y-3">
-                                    {driverData.tripHistory.filter(trip => trip.status === 'Completed').slice(0, 3).map(trip => (
+                                    {(driverData.tripHistory || []).filter(trip => trip.status === 'Completed').slice(0, 3).map(trip => (
                                         <div key={trip.id} className="flex justify-between items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                                             <div>
                                                 <p className="font-semibold text-sm dark:text-white">{trip.route}</p>
@@ -317,7 +317,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                                             </div>
                                         </div>
                                     ))}
-                                    {driverData.tripHistory.filter(trip => trip.status === 'Completed').length === 0 && (
+                                    {(driverData.tripHistory || []).filter(trip => trip.status === 'Completed').length === 0 && (
                                         <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No completed trips found.</p>
                                     )}
                                 </div>

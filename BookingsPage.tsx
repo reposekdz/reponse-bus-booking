@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { TicketIcon, QrCodeIcon, ArrowPathIcon, ShareIcon, StarIcon, CheckCircleIcon } from './components/icons';
 import Modal from './components/Modal';
 import StarRating from './components/StarRating';
-import * as api from '../services/apiService';
-import { useAuth } from '../contexts/AuthContext';
+import * as api from './services/apiService';
+import { useAuth } from './contexts/AuthContext';
 
 const RateTripModal: React.FC<{ booking: any, onClose: () => void, onSubmit: (rating: number, comment: string) => void }> = ({ booking, onClose, onSubmit }) => {
     const [rating, setRating] = useState(0);

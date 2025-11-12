@@ -1,3 +1,4 @@
+
 import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
 import { io } from '../../server';
@@ -73,12 +74,13 @@ export const findTrips = async (query: TripQuery) => {
         },
         bus: {
             model: trip.model,
-            amenities: trip.amenities,
+            amenities: trip.amenities ? (trip.amenities as string).split(',') : [],
         },
         driver: {
             name: trip.driver_name,
-            avatarUrl: trip.avatar_url,
-        }
+            avatarUrl: trip.driver_avatar_url,
+        },
+        seatMap: {} // To match the old structure, will be populated on detail view
     }));
 
 
@@ -108,8 +110,10 @@ export const findTripById = async (id: string) => {
     const bookedSeatSet = new Set((bookedSeats as any[]).map(s => s.seat_number));
 
     const seatMap = {};
-    for (let i = 1; i <= trip.capacity / 4; i++) {
+    for (let i = 1; i <= Math.ceil(trip.capacity / 4); i++) {
         for (const char of ['A', 'B', 'C', 'D']) {
+             // Don't create more seats than capacity
+            if (Object.keys(seatMap).length >= trip.capacity) break;
             const seatId = `${i}${char}`;
             seatMap[seatId] = bookedSeatSet.has(seatId) ? 'occupied' : 'available';
         }
@@ -166,9 +170,10 @@ export const confirmPassengerBoarding = async (data: BoardingData) => {
     
     await pool.query('UPDATE bookings SET status = "Completed" WHERE id = ?', [booking.id]);
     
-    const message = `Welcome, ${booking.passenger_name}! You have successfully boarded the bus for ${trip.origin} to ${trip.destination}.`;
+    // Emit a real-time notification to the specific passenger
+    const notificationMessage = `Welcome, ${booking.passenger_name}! You have successfully boarded the bus for ${trip.origin} to ${trip.destination}.`;
     io.to(booking.passenger_id.toString()).emit('passengerBoarded', {
-        message: message,
+        message: notificationMessage,
         route: `${trip.origin} to ${trip.destination}`
     });
 

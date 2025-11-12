@@ -13,6 +13,7 @@ const iconMap = {
     'qr-code': '📲',
     'bus': '🚌',
     'users': '👥',
+    'clipboard-document-list': '📜',
 };
 
 type IconName = keyof typeof iconMap;

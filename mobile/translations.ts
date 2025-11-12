@@ -14,6 +14,7 @@ export const translations = {
     'mobile_tab_tickets': 'Amatike',
     'mobile_tab_services': 'Serivisi',
     'mobile_tab_profile': 'Konti',
+    'mobile_tab_history': 'Amateka',
     // My Tickets
     'mobile_tickets_title': 'Amatike Yanjye',
     'mobile_tickets_upcoming': 'Azaza',
@@ -40,6 +41,8 @@ export const translations = {
     'mobile_service_charter_desc': 'Kodesha bisi ku birori byawe.',
     'mobile_service_lost': 'Ibintu Byatakaye',
     'mobile_service_lost_desc': 'Menyesha cyangwa shakisha ikintu cyatakaye.',
+    // Driver History
+    'mobile_driver_history_title': 'Amateka y\'Ingendo',
   },
   EN: {
     'form_from': 'From',
@@ -54,6 +57,7 @@ export const translations = {
     'mobile_tab_tickets': 'My Tickets',
     'mobile_tab_services': 'Services',
     'mobile_tab_profile': 'Profile',
+    'mobile_tab_history': 'History',
     // My Tickets
     'mobile_tickets_title': 'My Tickets',
     'mobile_tickets_upcoming': 'Upcoming',
@@ -80,6 +84,8 @@ export const translations = {
     'mobile_service_charter_desc': 'Rent a bus for your group event.',
     'mobile_service_lost': 'Lost & Found',
     'mobile_service_lost_desc': 'Report or find a lost item.',
+    // Driver History
+    'mobile_driver_history_title': 'Trip History',
   },
   FR: {
     'form_from': 'De',
@@ -94,6 +100,7 @@ export const translations = {
     'mobile_tab_tickets': 'Mes Billets',
     'mobile_tab_services': 'Services',
     'mobile_tab_profile': 'Profil',
+    'mobile_tab_history': 'Historique',
     // My Tickets
     'mobile_tickets_title': 'Mes Billets',
     'mobile_tickets_upcoming': 'À venir',
@@ -120,5 +127,7 @@ export const translations = {
     'mobile_service_charter_desc': 'Louez un bus pour votre événement de groupe.',
     'mobile_service_lost': 'Objets Trouvés',
     'mobile_service_lost_desc': 'Signalez ou retrouvez un objet perdu.',
+     // Driver History
+    'mobile_driver_history_title': 'Historique des Trajets',
   }
 };

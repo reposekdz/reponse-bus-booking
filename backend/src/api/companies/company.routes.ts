@@ -1,5 +1,6 @@
+
 import { Router } from 'express';
-import { getCompanies, getCompanyById, getMyDrivers, createDriverForMyCompany, updateDriverForMyCompany, deleteDriverForMyCompany } from './company.controller';
+import { getCompanies, getCompanyById, getMyDrivers, createDriverForMyCompany, updateDriverForMyCompany, deleteDriverForMyCompany, getCompanyDetails } from './company.controller';
 import { protect, authorize } from '../../middleware/auth.middleware';
 
 const router = Router();
@@ -7,6 +8,7 @@ const router = Router();
 // Public routes
 router.route('/').get(getCompanies);
 router.route('/:id').get(getCompanyById);
+router.route('/:id/details').get(getCompanyDetails); // New detailed endpoint
 
 // Protected routes for company managers
 router.route('/mydrivers')

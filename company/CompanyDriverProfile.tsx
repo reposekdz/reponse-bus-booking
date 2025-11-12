@@ -57,7 +57,7 @@ const CompanyDriverProfile: React.FC<CompanyDriverProfileProps> = ({ driver, onB
                     <img src={driver.avatarUrl} alt={driver.name} className="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-gray-700 object-cover"/>
                     <div className="text-center sm:text-left">
                         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{driver.name}</h1>
-                        <p className="font-semibold text-blue-600 dark:text-blue-400">{driver.company?.name || 'No Company Assigned'}</p>
+                        <p className="font-semibold text-blue-600 dark:text-blue-400">{driver.company_name || 'No Company Assigned'}</p>
                         <p className="text-gray-600 dark:text-gray-400 mt-1">{driver.email}</p>
                     </div>
                 </div>

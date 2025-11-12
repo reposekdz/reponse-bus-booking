@@ -1,3 +1,4 @@
+
 // services/apiService.ts - REAL BACKEND API CLIENT
 
 const BASE_URL = '/api/v1';
@@ -15,10 +16,6 @@ const handleResponse = async (response: Response) => {
     }
     return data;
 };
-
-// FIX: Added simulateLatency helper function.
-const simulateLatency = (ms = 500) => new Promise(res => setTimeout(res, ms));
-
 
 // Main fetch function
 const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
@@ -82,6 +79,10 @@ export const getCompanies = async () => {
 };
 export const getCompanyById = async (id: string) => {
     const { data } = await apiFetch(`/companies/${id}`);
+    return data;
+};
+export const getCompanyProfileDetails = async (id: string) => {
+    const { data } = await apiFetch(`/companies/${id}/details`);
     return data;
 };
 export const getSetting = (key: string) => apiFetch(`/settings/${key}`);
@@ -160,6 +161,13 @@ export const companyGetMyDrivers = async () => {
 export const companyCreateDriver = (driverData: any) => apiFetch('/companies/mydrivers', { method: 'POST', body: JSON.stringify(driverData) });
 export const companyUpdateDriver = (id: string, driverData: any) => apiFetch(`/companies/mydrivers/${id}`, { method: 'PUT', body: JSON.stringify(driverData) });
 export const companyDeleteDriver = (id: string) => apiFetch(`/companies/mydrivers/${id}`, { method: 'DELETE' });
+
+
+// --- DRIVER ---
+export const driverGetMyHistory = async () => {
+    const { data } = await apiFetch('/drivers/my-history');
+    return data;
+};
 
 
 // --- DEBUG ---

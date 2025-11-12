@@ -9,6 +9,7 @@ import walletRoutes from '../api/wallet/wallet.routes';
 import messageRoutes from '../api/messages/message.routes';
 import settingsRoutes from '../api/settings/settings.routes';
 import destinationRoutes from '../api/destinations/destinations.routes';
+import driverRoutes from '../api/drivers/driver.routes';
 
 const router = Router();
 
@@ -23,6 +24,7 @@ router.use('/wallet', walletRoutes);
 router.use('/messages', messageRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/destinations', destinationRoutes);
+router.use('/drivers', driverRoutes);
 
 
 export default router;
