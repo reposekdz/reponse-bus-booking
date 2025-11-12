@@ -8,8 +8,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 const CompanyForm = ({ company, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
         name: company?.name || '',
-        ownerEmail: company?.owner?.email || '',
         ownerName: company?.owner?.name || '',
+        ownerEmail: company?.owner?.email || '',
         password: '', // Only for new companies
         contactEmail: company?.contact?.email || '',
         contactPhone: company?.contact?.phone || '',
@@ -38,7 +38,7 @@ const CompanyForm = ({ company, onSave, onCancel }) => {
                 <input type="text" name="ownerName" value={formData.ownerName} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
             </div>
              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Manager's Email</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Manager's Email (Login)</label>
                 <input type="email" name="ownerEmail" value={formData.ownerEmail} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required disabled={isEditing} />
             </div>
             {!isEditing && (
@@ -66,7 +66,6 @@ const ManageCompanies: React.FC = () => {
     const fetchCompanies = async () => {
         try {
             setIsLoading(true);
-            // FIX: Use the correct admin-specific API function to fetch companies.
             const data = await api.adminGetCompanies();
             setCompanies(data);
         } catch(e) {

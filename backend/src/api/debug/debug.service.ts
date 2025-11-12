@@ -24,8 +24,33 @@ export const seedDatabase = async () => {
     const passengerUser = await User.create({ name: 'Kalisa Jean', email: 'passenger@gobus.rw', password: 'password', role: 'passenger', walletBalance: 50000, loyaltyPoints: 1250 });
     const volcanoManager = await User.create({ name: 'Volcano Manager', email: 'company@gobus.rw', password: 'password', role: 'company' });
     const ritcoManager = await User.create({ name: 'RITCO Manager', email: 'company2@gobus.rw', password: 'password', role: 'company' });
-    const driverUser1 = await User.create({ name: 'John Doe', email: 'driver1@gobus.rw', password: 'password', role: 'driver' });
-    const driverUser2 = await User.create({ name: 'Mary Anne', email: 'driver2@gobus.rw', password: 'password', role: 'driver' });
+    const driverUser1 = await User.create({
+        name: 'John Doe',
+        email: 'driver1@gobus.rw',
+        password: 'password',
+        role: 'driver',
+        avatarUrl: 'https://randomuser.me/api/portraits/men/4.jpg',
+        assignedBusId: 'RAD 123 B',
+        performance: { onTimeRate: 98, safetyScore: 95, averageRating: 4.8 },
+        documents: [
+            { name: 'Driving Permit', expiry: new Date('2025-12-31') },
+            { name: 'Vehicle Insurance', expiry: new Date('2024-11-30') },
+            { name: 'Good Conduct', expiry: new Date('2023-10-01') }, // Expired
+        ]
+    });
+    const driverUser2 = await User.create({
+        name: 'Mary Anne',
+        email: 'driver2@gobus.rw',
+        password: 'password',
+        role: 'driver',
+        avatarUrl: 'https://randomuser.me/api/portraits/women/6.jpg',
+        assignedBusId: 'RAE 456 C',
+        performance: { onTimeRate: 99, safetyScore: 99, averageRating: 4.9 },
+        documents: [
+            { name: 'Driving Permit', expiry: new Date('2026-05-20') },
+            { name: 'Vehicle Insurance', expiry: new Date('2024-12-15') },
+        ]
+    });
     const adminUser = await User.create({ name: 'Admin User', email: 'admin@gobus.rw', password: 'password', role: 'admin' });
 
     // 2. Create Companies

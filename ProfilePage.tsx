@@ -1,9 +1,74 @@
 import React, { useState, useRef } from 'react';
 import { Page } from './App';
-import { CameraIcon, TicketIcon, WalletIcon, StarIcon, BellAlertIcon, SparklesIcon, CogIcon } from './components/icons';
+import { CameraIcon, TicketIcon, WalletIcon, StarIcon, BellAlertIcon, SparklesIcon, CogIcon, LockClosedIcon } from './components/icons';
 import WalletTopUpModal from './components/WalletTopUpModal';
 import { useLanguage } from './contexts/LanguageContext';
 import { useAuth } from './contexts/AuthContext';
+import * as api from './services/apiService';
+
+const SecuritySettings = () => {
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handlePasswordChange = async (e) => {
+        e.preventDefault();
+        if (newPassword !== confirmPassword) {
+            setError("New passwords do not match.");
+            return;
+        }
+        if (newPassword.length < 6) {
+            setError("New password must be at least 6 characters long.");
+            return;
+        }
+        setError('');
+        setSuccess('');
+        setIsLoading(true);
+        try {
+            await api.updatePassword({ currentPassword, newPassword });
+            setSuccess('Password updated successfully!');
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (err) {
+            setError(err.message || 'Failed to update password.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    return (
+        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg mt-6">
+            <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><LockClosedIcon className="w-6 h-6 mr-3 text-red-500"/> Security</h2>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div>
+                    <label className="text-xs font-semibold text-gray-500">Current Password</label>
+                    <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className="text-xs font-semibold text-gray-500">New Password</label>
+                        <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
+                    </div>
+                     <div>
+                        <label className="text-xs font-semibold text-gray-500">Confirm New Password</label>
+                        <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
+                    </div>
+                </div>
+                {error && <p className="text-red-500 text-sm font-semibold">{error}</p>}
+                {success && <p className="text-green-500 text-sm font-semibold">{success}</p>}
+                <div className="text-right">
+                    <button type="submit" disabled={isLoading} className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+                        {isLoading ? 'Updating...' : 'Update Password'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+};
 
 interface ProfilePageProps {
   onNavigate: (page: Page, data?: any) => void;
@@ -114,6 +179,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
                          </div>
                     </div>
                 </div>
+                {user.role === 'passenger' && <SecuritySettings />}
             </div>
         </div>
         {isTopUpOpen && (

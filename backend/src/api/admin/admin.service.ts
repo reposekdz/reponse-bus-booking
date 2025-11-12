@@ -4,24 +4,31 @@ import { AppError } from '../../utils/AppError';
 
 // --- Company Services ---
 export const createCompany = async (companyData: any) => {
-    const { name, email, phone, address, ownerEmail } = companyData;
+    const { name, ownerName, ownerEmail, password, ...contactDetails } = companyData;
 
-    // Find the user who will own this company
-    const owner = await User.findOne({ email: ownerEmail });
-    if (!owner) {
-        throw new AppError(`User with email ${ownerEmail} not found to be assigned as owner.`, 404);
+    // Check if a user with this email already exists
+    const userExists = await User.findOne({ email: ownerEmail });
+    if (userExists) {
+        throw new AppError('A user with this email already exists and cannot be assigned as a company owner.', 400);
     }
-    if (owner.role !== 'company') {
-        throw new AppError(`User role must be 'company' to own a company.`, 400);
-    }
+    
+    // Create the company manager user
+    const owner = await User.create({
+        name: ownerName,
+        email: ownerEmail,
+        password: password,
+        role: 'company',
+    });
 
     const company = await Company.create({
         name,
-        contact: { email, phone, address },
+        contact: contactDetails,
         owner: owner._id,
+        status: 'Active'
     });
     
     // Link company back to user
+    // FIX: Cast company._id to 'any' to resolve ObjectId type mismatch error.
     owner.company = company._id as any;
     await owner.save();
 
@@ -94,14 +101,11 @@ export const deleteDriverById = async (id: string) => {
 
 // --- Agent Services ---
 export const createAgent = async (agentData: any) => {
-    const { name, email, password, phone, companyId } = agentData;
+    const { name, email, password, phone, location, commissionRate, avatarUrl } = agentData;
     
-    // For agents, company is not strictly required, but can be an association
-    if (companyId) {
-        const company = await Company.findById(companyId);
-        if (!company) {
-            throw new AppError('Company to associate agent with not found', 404);
-        }
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+        throw new AppError('User with this email already exists.', 400);
     }
     
     const agent = await User.create({
@@ -110,7 +114,9 @@ export const createAgent = async (agentData: any) => {
         password,
         phone,
         role: 'agent',
-        company: companyId || null
+        location,
+        commissionRate,
+        avatarUrl,
     });
 
     const agentResponse = agent.toObject();
@@ -118,6 +124,29 @@ export const createAgent = async (agentData: any) => {
 
     return agentResponse;
 };
+
+export const getAllAgents = async () => {
+    return User.find({ role: 'agent' });
+};
+
+export const updateAgentById = async (id: string, updateData: any) => {
+    delete updateData.password; // Password should be changed through a separate process
+    const agent = await User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+    if (!agent || agent.role !== 'agent') {
+        throw new AppError('Agent not found', 404);
+    }
+    return agent;
+};
+
+export const deleteAgentById = async (id: string) => {
+    const agent = await User.findById(id);
+    if (!agent || agent.role !== 'agent') {
+        throw new AppError('Agent not found', 404);
+    }
+    await agent.deleteOne();
+    return;
+};
+
 
 // --- User Services ---
 export const getAllUsers = async () => {

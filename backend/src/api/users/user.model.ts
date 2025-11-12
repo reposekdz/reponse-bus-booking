@@ -1,6 +1,6 @@
 import mongoose, { Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import config from '../../config';
 
 // FIX: Define and export IUser interface for type safety and augmentation.
@@ -16,6 +16,17 @@ export interface IUser extends Document {
     loyaltyPoints: number;
     pin?: string;
     company?: mongoose.Schema.Types.ObjectId;
+    // Driver-specific
+    assignedBusId?: string;
+    performance?: {
+        onTimeRate: number;
+        safetyScore: number;
+        averageRating: number;
+    };
+    documents?: {
+        name: string;
+        expiry: Date;
+    }[];
     getSignedJwtToken(): string;
     matchPassword(enteredPassword: string): Promise<boolean>;
 }
@@ -78,14 +89,28 @@ const UserSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',
         required: false,
-    }
+    },
+    // Driver-specific fields
+    assignedBusId: { // Plate number
+        type: String,
+        required: false,
+    },
+    performance: {
+        onTimeRate: { type: Number, default: 95 },
+        safetyScore: { type: Number, default: 98 },
+        averageRating: { type: Number, default: 4.5 },
+    },
+    documents: [{
+        name: String,
+        expiry: Date,
+    }],
 }, {
     timestamps: true
 });
 
 // Encrypt password using bcrypt before saving
 // FIX: Removed 'this: IUser' typing to let mongoose infer the context which includes methods like 'isModified'.
-UserSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function (this: any, next) {
     if (!this.isModified('password')) {
         return next();
     }
@@ -97,15 +122,16 @@ UserSchema.pre('save', async function (next) {
 
 // Sign JWT and return
 // FIX: Removed 'this: IUser' typing and explicitly cast expiresIn to string to resolve overload issue.
-UserSchema.methods.getSignedJwtToken = function () {
+UserSchema.methods.getSignedJwtToken = function (this: any) {
+    // FIX: Cast options to SignOptions to resolve overload error with jwt.sign.
     return jwt.sign({ id: this._id }, config.jwt.secret, {
-        expiresIn: config.jwt.expiresIn as string,
-    });
+        expiresIn: config.jwt.expiresIn,
+    } as SignOptions);
 };
 
 // Match user entered password to hashed password in database
 // FIX: Removed 'this: IUser' typing to let mongoose infer the context.
-UserSchema.methods.matchPassword = async function (enteredPassword: string) {
+UserSchema.methods.matchPassword = async function (this: any, enteredPassword: string) {
     if (!this.password) {
         return false;
     }

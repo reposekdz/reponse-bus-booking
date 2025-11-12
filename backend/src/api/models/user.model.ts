@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import config from '../../config';
 
 const UserSchema = new mongoose.Schema({
@@ -45,10 +45,11 @@ UserSchema.pre('save', async function (next) {
 
 // Sign JWT and return
 UserSchema.methods.getSignedJwtToken = function () {
-    // FIX: Explicitly cast expiresIn to string to resolve overload issue with jwt.sign.
+    // FIX: Removed redundant 'as string' cast. The type is correctly handled in the config file.
+    // FIX: Cast options to SignOptions to resolve overload error with jwt.sign.
     return jwt.sign({ id: this._id }, config.jwt.secret, {
-        expiresIn: config.jwt.expiresIn as string,
-    });
+        expiresIn: config.jwt.expiresIn,
+    } as SignOptions);
 };
 
 // Match user entered password to hashed password in database

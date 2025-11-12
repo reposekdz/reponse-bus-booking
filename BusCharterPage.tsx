@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Page } from './App';
 import { ArrowRightIcon, CheckCircleIcon, ChevronRightIcon } from './components/icons';
-import { mockCompaniesData } from './lib/api';
+import * as api from './services/apiService';
 
 const STEPS = ['Select Company', 'Trip Details', 'Contact Info', 'Confirmation'];
 
 const BusCharterPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavigate }) => {
     const [currentStep, setCurrentStep] = useState(1);
+    const [companies, setCompanies] = useState<any[]>([]);
     const [charterRequest, setCharterRequest] = useState({
         companyId: '',
+        companyName: '',
         from: '',
         to: '',
         departureDate: '',
@@ -19,6 +21,18 @@ const BusCharterPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavi
         phone: '',
         email: ''
     });
+
+    useEffect(() => {
+        const fetchCompanies = async () => {
+            try {
+                const data = await api.getCompanies();
+                setCompanies(data);
+            } catch (error) {
+                console.error("Failed to fetch companies", error);
+            }
+        };
+        fetchCompanies();
+    }, []);
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -39,8 +53,8 @@ const BusCharterPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavi
                 return (
                     <div className="space-y-4">
                         <h3 className="font-semibold dark:text-white">Select a bus company for your charter</h3>
-                        {mockCompaniesData.filter(c => c.status === 'Active').map(company => (
-                             <button key={company.id} type="button" onClick={() => { setCharterRequest(r => ({...r, companyId: company.id})); handleNext(); }} className="w-full p-4 border-2 rounded-lg text-left flex items-center space-x-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors dark:border-gray-600">
+                        {companies.map(company => (
+                             <button key={company._id} type="button" onClick={() => { setCharterRequest(r => ({...r, companyId: company._id, companyName: company.name})); handleNext(); }} className="w-full p-4 border-2 rounded-lg text-left flex items-center space-x-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors dark:border-gray-600">
                                 <img src={company.logoUrl} alt={company.name} className="w-12 h-12 object-contain bg-gray-100 rounded-full p-1"/>
                                 <span className="font-bold flex-grow text-lg dark:text-white">{company.name}</span>
                                 <ChevronRightIcon className="w-6 h-6 text-gray-400"/>
@@ -80,7 +94,7 @@ const BusCharterPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavi
                         <h2 className="text-2xl font-bold dark:text-white">Request Sent!</h2>
                         <p className="text-gray-500 dark:text-gray-400 mt-2">Thank you for your request. The company will contact you shortly with a quote and further details.</p>
                         <div className="mt-6 text-left bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                            <p><strong>Company:</strong> {mockCompaniesData.find(c => c.id === charterRequest.companyId)?.name}</p>
+                            <p><strong>Company:</strong> {charterRequest.companyName}</p>
                             <p><strong>Route:</strong> {charterRequest.from} to {charterRequest.to}</p>
                             <p><strong>Date:</strong> {charterRequest.departureDate}</p>
                             <p><strong>Passengers:</strong> {charterRequest.passengers}</p>

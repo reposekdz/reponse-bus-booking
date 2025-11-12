@@ -1,7 +1,33 @@
-import React from 'react';
-import { MapPinIcon, PhoneIcon, EnvelopeIcon, FacebookIcon, TwitterIcon, LinkedinIcon, ChatBubbleLeftRightIcon } from './components/icons';
+import React, { useState } from 'react';
+import { MapPinIcon, PhoneIcon, EnvelopeIcon, FacebookIcon, TwitterIcon, LinkedinIcon, ChatBubbleLeftRightIcon, PaperAirplaneIcon, CheckCircleIcon } from './components/icons';
+import * as api from './services/apiService';
 
 const ContactPage: React.FC = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setSuccess(false);
+    try {
+      await api.submitContactMessage(formData);
+      setSuccess(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (err) {
+      setError(err.message || 'Failed to send message. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <header className="bg-white dark:bg-gray-800/50 shadow-sm pt-12 pb-8">
@@ -65,31 +91,40 @@ const ContactPage: React.FC = () => {
                 <section className="lg:w-2/3 xl:w-3/4">
                      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
                         <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Ohereza Ubutumwa</h2>
-                         <form className="space-y-6" onSubmit={(e) => {e.preventDefault(); alert("Ubutumwa bwoherejwe!")}}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">Amazina Yuzuye</label>
-                                    <input type="text" id="name" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" required />
+                        {success ? (
+                             <div className="text-center p-8 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <CheckCircleIcon className="w-12 h-12 text-green-500 mx-auto mb-4"/>
+                                <h3 className="font-bold text-xl dark:text-white">Message Sent!</h3>
+                                <p className="text-gray-600 dark:text-gray-300 mt-2">Thank you for contacting us. We will get back to you shortly.</p>
+                            </div>
+                        ) : (
+                            <form className="space-y-6" onSubmit={handleSubmit}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">Amazina Yuzuye</label>
+                                        <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" required />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="email-contact" className="text-sm font-medium text-gray-700 dark:text-gray-300">Imeri</label>
+                                        <input type="email" id="email-contact" name="email" value={formData.email} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" required />
+                                    </div>
                                 </div>
                                 <div>
-                                    <label htmlFor="email-contact" className="text-sm font-medium text-gray-700 dark:text-gray-300">Imeri</label>
-                                    <input type="email" id="email-contact" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" required />
+                                    <label htmlFor="subject" className="text-sm font-medium text-gray-700 dark:text-gray-300">Impamvu</label>
+                                    <input type="text" id="subject" name="subject" value={formData.subject} onChange={handleChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Ikibazo ku itike" required />
                                 </div>
-                            </div>
-                            <div>
-                                <label htmlFor="subject" className="text-sm font-medium text-gray-700 dark:text-gray-300">Impamvu</label>
-                                <input type="text" id="subject" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" placeholder="e.g., Ikibazo ku itike" required />
-                            </div>
-                            <div>
-                                <label htmlFor="message" className="text-sm font-medium text-gray-700 dark:text-gray-300">Ubutumwa</label>
-                                <textarea id="message" rows={5} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" required></textarea>
-                            </div>
-                            <div>
-                                <button type="submit" className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-[#0033A0] bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-300 shadow-lg">
-                                    Ohereza Ubutumwa
-                                </button>
-                            </div>
-                        </form>
+                                <div>
+                                    <label htmlFor="message" className="text-sm font-medium text-gray-700 dark:text-gray-300">Ubutumwa</label>
+                                    <textarea id="message" name="message" value={formData.message} onChange={handleChange} rows={5} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600" required></textarea>
+                                </div>
+                                {error && <p className="text-red-500 text-sm">{error}</p>}
+                                <div>
+                                    <button type="submit" disabled={isLoading} className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-[#0033A0] bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-300 shadow-lg disabled:opacity-50">
+                                        {isLoading ? 'Sending...' : <>Ohereza Ubutumwa <PaperAirplaneIcon className="w-5 h-5 ml-2"/></>}
+                                    </button>
+                                </div>
+                            </form>
+                        )}
                     </div>
                 </section>
             </div>

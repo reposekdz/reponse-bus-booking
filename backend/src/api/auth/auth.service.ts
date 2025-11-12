@@ -2,20 +2,15 @@ import User from '../users/user.model';
 import { AppError } from '../../utils/AppError';
 
 export const registerUser = async (userData: any) => {
-    const { name, email, password, role } = userData;
-
-    // A protection layer so users can't register as admins
-    const allowedRoles = ['passenger', 'driver', 'agent', 'company'];
-    if (role && !allowedRoles.includes(role)) {
-        throw new AppError(`Role '${role}' is not a valid registration role.`, 400);
-    }
+    const { name, email, password, phone } = userData;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
         throw new AppError('User already exists', 400);
     }
-
-    const user = await User.create({ name, email, password, role });
+    
+    // Force role to passenger for public registration
+    const user = await User.create({ name, email, password, phone, role: 'passenger' });
 
     const token = user.getSignedJwtToken();
     
@@ -45,4 +40,25 @@ export const loginUser = async (loginData: any) => {
     delete userResponse.password;
 
     return { user: userResponse, token };
+};
+
+export const updatePassword = async (userId: string, currentPassword, newPassword) => {
+    if (!currentPassword || !newPassword) {
+        throw new AppError('Please provide current and new passwords', 400);
+    }
+
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+        throw new AppError('User not found', 404);
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+
+    if (!isMatch) {
+        throw new AppError('Incorrect current password', 401);
+    }
+
+    user.password = newPassword;
+    await user.save();
 };

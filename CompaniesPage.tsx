@@ -1,10 +1,20 @@
 
 
+
+
 import React, { useState, useMemo } from 'react';
 import StarRating from './components/StarRating';
 import { SearchIcon, ChevronRightIcon, StarIcon } from './components/icons';
 import type { Page } from './App';
-import { mockCompaniesData } from './lib/api';
+// FIX: The mockCompaniesData is no longer available from a central file.
+// A temporary mock is provided here to ensure component functionality.
+// In a real application, this would be replaced with a proper API call.
+const mockCompaniesData = [
+    { id: 'volcano', name: 'Volcano Express', totalPassengers: 3500000, routesCount: 30, totalRevenue: 5000000000, logoUrl: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg', description: 'Volcano Express is a popular choice for many travelers in Rwanda.', coverUrl: 'https://images.unsplash.com/photo-1593256398246-8853b3815c32?q=80&w=2070&auto=format&fit=crop' },
+    { id: 'ritco', name: 'RITCO', totalPassengers: 2000000, routesCount: 25, totalRevenue: 4000000000, logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/04/ritco-logo.jpg', description: 'RITCO is a government-owned company providing public transport services.', coverUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop' },
+    { id: 'horizon', name: 'Horizon Express', totalPassengers: 1500000, routesCount: 20, totalRevenue: 3000000000, logoUrl: 'https://media.glassdoor.com/sqll/378426/horizon-group-squarelogo-1430932480922.png', description: 'Horizon Express offers comfortable travel across various routes.', coverUrl: 'https://images.unsplash.com/photo-1605641793224-6512a_d8363b?q=80&w=1974&auto=format&fit=crop' },
+];
+
 
 interface CompaniesPageProps {
   onNavigate: (page: Page, data?: any) => void;

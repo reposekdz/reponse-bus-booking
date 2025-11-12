@@ -6,6 +6,9 @@ import {
     updateCompany,
     deleteCompany,
     createAgent,
+    getAgents,
+    updateAgent,
+    deleteAgent,
     getUsers,
     createDriver,
     getDrivers,
@@ -38,7 +41,13 @@ router.route('/drivers/:id')
 
 // Agent management
 router.route('/agents')
-    .post(createAgent);
+    .post(createAgent)
+    .get(getAgents);
+
+router.route('/agents/:id')
+    .put(updateAgent)
+    .delete(deleteAgent);
+
 
 // User management
 router.route('/users')

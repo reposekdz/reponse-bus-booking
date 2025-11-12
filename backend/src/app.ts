@@ -1,4 +1,6 @@
-import express, { Request, Response } from 'express';
+
+
+import express from 'express';
 import cors from 'cors';
 import apiRouter from './routes';
 import { errorHandler } from './middleware/error.middleware';
@@ -7,6 +9,10 @@ const app = express();
 
 // Core Middleware
 app.use(cors());
+// FIX: To resolve "No overload matches this call" and type conflict errors,
+// explicit type imports for Request/Response were removed from the 'express' import.
+// This allows TypeScript to correctly infer the types for middleware.
+// The redundant '/' path argument is also removed for cleaner code.
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -14,14 +20,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1', apiRouter);
 
 // Health Check
-// FIX: Add explicit Request and Response types to resolve overload ambiguity.
-app.get('/health', (req: Request, res: Response) => {
+// FIX: Removed explicit types from 'req' and 'res' to rely on type inference,
+// which resolves type conflicts and aligns with the fix at the import level.
+app.get('/health', (req, res) => {
     res.status(200).json({ status: 'UP' });
 });
 
 // 404 Handler
-// FIX: Add explicit Request and Response types to resolve overload ambiguity.
-app.use((req: Request, res: Response) => {
+// FIX: Removed explicit types from 'req' and 'res' to rely on type inference.
+app.use((req, res) => {
     res.status(404).json({ message: 'Not Found' });
 });
 

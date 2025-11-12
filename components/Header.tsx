@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { io } from 'socket.io-client';
 import { Page } from '../App';
-import { GoBusLogo, SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon, StarIcon, BellAlertIcon, SparklesIcon } from './icons';
+import { GoBusLogo, SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon, StarIcon, BellAlertIcon, SparklesIcon, CheckCircleIcon, ArchiveBoxIcon, BriefcaseIcon, MapIcon, ShieldCheckIcon, CreditCardIcon, QuestionMarkCircleIcon, BuildingStorefrontIcon, KeyIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -42,14 +43,30 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [notifications, setNotifications] = useState(mockNotifications);
   
   const langRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const servicesRef = useRef<HTMLDivElement>(null);
 
   const { language, setLanguage, t, languages } = useLanguage();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+
+  const servicesMenuItems = [
+      { page: 'packageDelivery', label: 'Package Delivery', icon: ArchiveBoxIcon },
+      { page: 'busCharter', label: 'Bus Charter', icon: BusIcon },
+      { page: 'corporateTravel', label: 'Corporate Travel', icon: BriefcaseIcon },
+      { page: 'tourPackages', label: 'Tour Packages', icon: MapIcon },
+      { page: 'lostAndFound', label: 'Lost & Found', icon: QuestionMarkCircleIcon },
+      { page: 'hotelBooking', label: 'Hotel Booking', icon: BuildingStorefrontIcon },
+      { page: 'eventTickets', label: 'Event Tickets', icon: TicketIcon },
+      { page: 'vehicleRentals', label: 'Vehicle Rentals', icon: KeyIcon },
+      { page: 'vipLounge', label: 'VIP Lounge Access', icon: SparklesIcon },
+      { page: 'travelInsurance', label: 'Travel Insurance', icon: ShieldCheckIcon },
+      { page: 'giftCards', label: 'Gift Cards', icon: CreditCardIcon },
+  ];
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -68,15 +85,42 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
       setNotifications(notifications.map(n => ({...n, read: true})));
   }
 
-  // Simulate receiving a new notification via WebSocket
+  // Effect to handle real-time passenger boarding notifications via Socket.IO
   useEffect(() => {
-      const notificationInterval = setInterval(() => {
-          const newNotif = { id: Date.now(), type: 'info', message: `New bus schedule added for Volcano Express.`, read: false, icon: BusIcon };
-          setNotifications(prev => [newNotif, ...prev]);
-      }, 30000); // New notification every 30 seconds
-      
-      return () => clearInterval(notificationInterval);
-  }, []);
+    if (!user || !token) {
+        return;
+    }
+
+    // Connect to the socket server (assumes same origin)
+    const socket = io();
+
+    socket.on('connect', () => {
+        console.log('Socket connected:', socket.id);
+        // Authenticate the socket connection with our JWT
+        socket.emit('authenticate', token);
+    });
+
+    // Listen for real-time boarding notifications
+    socket.on('passengerBoarded', (data: { message: string; route: string }) => {
+        const newNotif = { 
+            id: Date.now(), 
+            type: 'boarding', 
+            message: data.message, 
+            read: false, 
+            icon: CheckCircleIcon 
+        };
+        setNotifications(prev => [newNotif, ...prev]);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Socket disconnected');
+    });
+
+    // Cleanup on component unmount
+    return () => {
+        socket.disconnect();
+    };
+  }, [user, token]); // Re-run effect if user or token changes
 
   const currentLang = languages.find(l => l.code === language);
   
@@ -91,6 +135,9 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
       }
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false);
+      }
+      if (servicesRef.current && !servicesRef.current.contains(event.target as Node)) {
+          setIsServicesOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -109,7 +156,31 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
           <NavLink page="home" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_home')}</NavLink>
           <NavLink page="bookingSearch" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_booking')}</NavLink>
           <NavLink page="companies" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_companies')}</NavLink>
-          <NavLink page="services" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_services')}</NavLink>
+          
+           <div className="relative" ref={servicesRef}>
+              <button 
+                  onClick={() => setIsServicesOpen(!isServicesOpen)}
+                  className={`px-4 py-2 text-sm font-semibold transition-colors duration-200 flex items-center ${currentPage.toLowerCase().includes('service') ? 'text-yellow-300' : 'text-white hover:text-yellow-200'}`}
+              >
+                  {t('nav_services')}
+                  <ChevronDownIcon className={`w-4 h-4 ml-1 transition-transform ${isServicesOpen ? 'rotate-180' : ''}`} />
+              </button>
+              <DropdownMenu isOpen={isServicesOpen} className="w-64">
+                  <div className="py-2">
+                      {servicesMenuItems.map(item => (
+                          <button
+                              key={item.page}
+                              onClick={() => { onNavigate(item.page as Page); setIsServicesOpen(false); }}
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"
+                          >
+                              <item.icon className="w-5 h-5 mr-3 opacity-80"/>
+                              {item.label}
+                          </button>
+                      ))}
+                  </div>
+              </DropdownMenu>
+          </div>
+
           <NavLink page="help" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_help')}</NavLink>
           <NavLink page="contact" currentPage={currentPage} onNavigate={onNavigate}>{t('nav_contact')}</NavLink>
         </nav>

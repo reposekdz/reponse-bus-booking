@@ -6,6 +6,7 @@ import bookingRoutes from '../api/bookings/booking.routes';
 import companyRoutes from '../api/companies/company.routes';
 import debugRoutes from '../api/debug/debug.routes';
 import walletRoutes from '../api/wallet/wallet.routes';
+import messageRoutes from '../api/messages/message.routes';
 
 const router = Router();
 
@@ -17,6 +18,7 @@ router.use('/bookings', bookingRoutes);
 router.use('/companies', companyRoutes);
 router.use('/debug', debugRoutes);
 router.use('/wallet', walletRoutes);
+router.use('/messages', messageRoutes);
 
 
 export default router;

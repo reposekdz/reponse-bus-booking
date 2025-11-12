@@ -1,5 +1,66 @@
-import React, { useMemo, useState } from 'react';
-import { PhoneIcon, EnvelopeIcon, MapPinIcon, CalendarIcon, CogIcon, SearchIcon, ArrowDownLeftIcon, CameraIcon } from './components/icons';
+import React, { useMemo, useState, useRef } from 'react';
+import { PhoneIcon, EnvelopeIcon, MapPinIcon, CalendarIcon, CogIcon, SearchIcon, ArrowDownLeftIcon, CameraIcon, LockClosedIcon } from './components/icons';
+import * as api from './services/apiService';
+
+const SecuritySettings = () => {
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handlePasswordChange = async (e) => {
+        e.preventDefault();
+        if (newPassword !== confirmPassword) {
+            setError("New passwords do not match.");
+            return;
+        }
+        setError('');
+        setSuccess('');
+        setIsLoading(true);
+        try {
+            await api.updatePassword({ currentPassword, newPassword });
+            setSuccess('Password updated successfully!');
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (err) {
+            setError(err.message || 'Failed to update password.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    return (
+        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg mt-6">
+            <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><LockClosedIcon className="w-6 h-6 mr-3 text-red-500"/> Security</h2>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div>
+                    <label className="text-xs font-semibold text-gray-500">Current Password</label>
+                    <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className="text-xs font-semibold text-gray-500">New Password</label>
+                        <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
+                    </div>
+                     <div>
+                        <label className="text-xs font-semibold text-gray-500">Confirm New Password</label>
+                        <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
+                    </div>
+                </div>
+                {error && <p className="text-red-500 text-sm font-semibold">{error}</p>}
+                {success && <p className="text-green-500 text-sm font-semibold">{success}</p>}
+                <div className="text-right">
+                    <button type="submit" disabled={isLoading} className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+                        {isLoading ? 'Updating...' : 'Update Password'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+};
 
 const StatCard = ({ title, value, format = 'currency' }) => (
     <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-xl">
@@ -13,6 +74,9 @@ const StatCard = ({ title, value, format = 'currency' }) => (
 
 const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agent, allTransactions }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [profileData, setProfileData] = useState(agent);
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+    const coverInputRef = useRef<HTMLInputElement>(null);
 
     const agentTransactions = useMemo(() => {
         if (!agent) return [];
@@ -28,7 +92,7 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
         );
     }, [agentTransactions, searchTerm])
 
-    if (!agent) {
+    if (!profileData) {
         return (
             <div className="flex items-center justify-center h-full">
                 <p>Agent not found.</p>
@@ -38,27 +102,46 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
     
     const agentTotalDeposits = agentTransactions.reduce((acc, tx) => acc + tx.amount, 0);
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const url = reader.result as string;
+                if (type === 'avatar') {
+                    setProfileData(prev => ({...prev, avatarUrl: url}));
+                } else {
+                    setProfileData(prev => ({...prev, coverUrl: url}));
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+
     return (
         <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-full py-12">
             <div className="container mx-auto px-6 max-w-6xl">
                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
                     <div className="h-40 bg-green-600 relative group">
-                        <img src={agent.coverUrl || 'https://images.unsplash.com/photo-1614323992655-037a34c19a31?q=80&w=2070&auto=format&fit=crop'} alt="Cover" className="w-full h-full object-cover"/>
+                        <img src={profileData.coverUrl || 'https://images.unsplash.com/photo-1614323992655-037a34c19a31?q=80&w=2070&auto=format&fit=crop'} alt="Cover" className="w-full h-full object-cover"/>
                         <div className="absolute inset-0 bg-black/30"></div>
-                         <button className="absolute top-2 right-2 flex items-center text-xs bg-black/40 text-white px-2 py-1 rounded-full hover:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button onClick={() => coverInputRef.current?.click()} className="absolute top-2 right-2 flex items-center text-xs bg-black/40 text-white px-2 py-1 rounded-full hover:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
                             <CameraIcon className="w-4 h-4 mr-1"/> Edit Cover
                         </button>
+                        <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'cover')} />
                     </div>
                      <div className="px-6 pb-6 relative">
                         <div className="flex items-end -mt-16">
                             <div className="relative group">
-                                <img src={agent.avatarUrl} alt={agent.name} className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 object-cover"/>
-                                <button className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                <img src={profileData.avatarUrl} alt={profileData.name} className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 object-cover"/>
+                                <button onClick={() => avatarInputRef.current?.click()} className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                     <CameraIcon className="w-6 h-6"/>
                                 </button>
+                                <input type="file" ref={avatarInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'avatar')} />
                             </div>
                              <div className="ml-6">
-                                <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{agent.name}</h1>
+                                <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{profileData.name}</h1>
                                 <p className="text-gray-600 dark:text-gray-400">Agent Wemewe</p>
                             </div>
                         </div>
@@ -72,15 +155,15 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
                              <h3 className="font-bold text-lg dark:text-white mb-4">Amakuru bwite</h3>
                              <div className="space-y-4">
                                 <div className="text-gray-700 dark:text-gray-300 space-y-2 text-sm">
-                                    <p className="flex items-center"><EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400"/> {agent.email}</p>
-                                    <p className="flex items-center"><PhoneIcon className="w-4 h-4 mr-2 text-gray-400"/> {agent.phone}</p>
-                                    <p className="flex items-center"><MapPinIcon className="w-4 h-4 mr-2 text-gray-400"/> {agent.location}</p>
+                                    <p className="flex items-center"><EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400"/> {profileData.email}</p>
+                                    <p className="flex items-center"><PhoneIcon className="w-4 h-4 mr-2 text-gray-400"/> {profileData.phone}</p>
+                                    <p className="flex items-center"><MapPinIcon className="w-4 h-4 mr-2 text-gray-400"/> {profileData.location}</p>
                                 </div>
                                 <div className="border-t dark:border-gray-700 pt-4">
                                     <h4 className="font-semibold dark:text-gray-200 mb-2">Performance Analytics</h4>
                                      <div className="grid grid-cols-2 gap-4">
                                         <StatCard title="Total Deposits" value={agentTotalDeposits} />
-                                        <StatCard title="Commission Rate" value={`${agent.commissionRate * 100}%`} format="string" />
+                                        <StatCard title="Commission Rate" value={`${profileData.commissionRate * 100}%`} format="string" />
                                     </div>
                                 </div>
                              </div>
@@ -119,6 +202,7 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
                         </div>
                     </div>
                  </div>
+                 <SecuritySettings />
             </div>
         </div>
     );

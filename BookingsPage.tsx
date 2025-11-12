@@ -37,29 +37,29 @@ const RateTripModal: React.FC<{ booking: any, onClose: () => void, onSubmit: (ra
 
 interface BookingCardProps {
     booking: any;
-    onViewTicket: (ticketDetails: any) => void;
+    onViewTicket: (ticketDetails: any, isActive: boolean) => void;
     onRateTrip: (booking: any) => void;
+    onActivate: (ticketId: string) => void;
     isPast: boolean;
+    isActivatable: boolean;
 }
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRateTrip, isPast }) => {
+const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRateTrip, onActivate, isPast, isActivatable }) => {
     const { trip } = booking;
     const { route } = trip;
     
-    const handleViewTicket = () => {
-        onViewTicket({
-            id: booking.bookingId,
-            from: route.from,
-            to: route.to,
-            company: route.company.name,
-            date: new Date(trip.departureTime).toLocaleDateString(),
-            time: new Date(trip.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            seats: booking.seats.join(', '),
-            price: `${new Intl.NumberFormat('fr-RW').format(booking.totalPrice)} RWF`,
-            passenger: 'Kalisa Jean', // This should come from user context
-            busPlate: 'N/A' // This data isn't in the model yet
-        });
-    }
+    const ticketDetails = {
+        id: booking.bookingId,
+        from: route.from,
+        to: route.to,
+        company: route.company.name,
+        date: new Date(trip.departureTime).toLocaleDateString(),
+        time: new Date(trip.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        seats: booking.seats.join(', '),
+        price: `${new Intl.NumberFormat('fr-RW').format(booking.totalPrice)} RWF`,
+        passenger: 'Kalisa Jean', // This should come from user context
+        busPlate: 'N/A' // This data isn't in the model yet
+    };
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden my-4 transform hover:shadow-xl transition-shadow duration-300">
@@ -82,13 +82,23 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRate
                     </div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-5 flex items-center justify-center sm:w-40">
-                    <button onClick={handleViewTicket} className="flex flex-col items-center text-blue-600 dark:text-blue-400 font-semibold text-sm hover:opacity-80">
+                    <button onClick={() => onViewTicket(ticketDetails, false)} className="flex flex-col items-center text-blue-600 dark:text-blue-400 font-semibold text-sm hover:opacity-80">
                         <QrCodeIcon className="w-8 h-8 mb-1" />
                         <span>View Ticket</span>
                     </button>
                 </div>
             </div>
-            <div className="bg-gray-100 dark:bg-gray-700/50 px-5 py-2 flex items-center justify-end">
+            <div className="bg-gray-100 dark:bg-gray-700/50 px-5 py-2 flex items-center justify-between">
+                <div>
+                     {isActivatable && (
+                        <button 
+                            onClick={() => { onActivate(booking.bookingId); onViewTicket(ticketDetails, true); }}
+                            className="bg-green-500 text-white font-bold py-1 px-3 rounded-full text-xs hover:bg-green-600 interactive-button"
+                        >
+                            Activate Ticket
+                        </button>
+                    )}
+                </div>
                 <div className="flex items-center justify-end space-x-4">
                     {isPast ? (
                         <>
@@ -115,7 +125,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRate
 
 
 interface BookingsPageProps {
-    onViewTicket: (ticket: any) => void;
+    onViewTicket: (ticket: any, isActive: boolean) => void;
 }
 
 const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket }) => {
@@ -124,6 +134,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket }) => {
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -164,7 +175,22 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket }) => {
 
       return (
         <div className="space-y-4">
-            {bookingsToDisplay.map(booking => <BookingCard key={booking._id} booking={booking} onViewTicket={onViewTicket} onRateTrip={setRatingTrip} isPast={activeTab === 'past'} />)}
+            {bookingsToDisplay.map(booking => {
+                 const departureTime = new Date(booking.trip.departureTime);
+                 const hoursUntilDeparture = (departureTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+                 const isActivatable = activeTab === 'upcoming' && hoursUntilDeparture > 0 && hoursUntilDeparture <= 24;
+                 return (
+                    <BookingCard 
+                        key={booking._id} 
+                        booking={booking} 
+                        onViewTicket={onViewTicket} 
+                        onRateTrip={setRatingTrip} 
+                        onActivate={setActiveTicketId}
+                        isPast={activeTab === 'past'}
+                        isActivatable={isActivatable}
+                    />
+                );
+            })}
         </div>
       );
   }

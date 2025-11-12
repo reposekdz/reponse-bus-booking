@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
-import { UsersIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon } from '../components/icons';
+import React, { useState, useEffect } from 'react';
+import { UsersIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon, EyeIcon } from '../components/icons';
 import Modal from '../components/Modal';
+import * as api from '../services/apiService';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { Page } from '../App';
+
 
 const DriverForm = ({ driver, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
-        name: '',
-        phone: '',
-        assignedBusId: '',
-        status: 'Active',
-        ...driver
+        name: driver?.name || '',
+        email: driver?.email || '',
+        phone: driver?.phone || '',
+        password: '',
+        status: driver?.status || 'Active',
     });
+    const isEditing = !!driver;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -28,22 +33,26 @@ const DriverForm = ({ driver, onSave, onCancel }) => {
                 <input type="text" name="name" value={formData.name} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
             </div>
              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email (Login)</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required disabled={isEditing}/>
+            </div>
+            {!isEditing && (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Password</label>
+                    <input type="password" name="password" value={formData.password} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required/>
+                </div>
+            )}
+             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
                 <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
             </div>
-             <div className="grid grid-cols-2 gap-4">
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Assigned Bus ID</label>
-                    <input type="text" name="assignedBusId" value={formData.assignedBusId} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" />
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                    <select name="status" value={formData.status} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
-                        <option>Active</option>
-                        <option>On Leave</option>
-                        <option>Inactive</option>
-                    </select>
-                </div>
+             <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                <select name="status" value={formData.status} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                    <option>Active</option>
+                    <option>On Leave</option>
+                    <option>Suspended</option>
+                </select>
             </div>
             <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-semibold border rounded-lg dark:border-gray-600">Cancel</button>
@@ -53,43 +62,77 @@ const DriverForm = ({ driver, onSave, onCancel }) => {
     );
 };
 
-const initialDrivers = [
-    { id: 'd1', name: 'John Doe', assignedBusId: 'RAD 123 B', phone: '0788111222', status: 'Active' },
-    { id: 'd3', name: 'Mary Anne', assignedBusId: 'RAE 789 A', phone: '0788555666', status: 'On Leave' },
-];
-
 interface CompanyDriversProps {
     companyId: string;
+    navigate: (page: Page, data?: any) => void;
 }
 
-const CompanyDrivers: React.FC<CompanyDriversProps> = ({ companyId }) => {
-    const [drivers, setDrivers] = useState(initialDrivers);
+const CompanyDrivers: React.FC<CompanyDriversProps> = ({ companyId, navigate }) => {
+    const [drivers, setDrivers] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentDriver, setCurrentDriver] = useState<any | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string|null>(null);
+
+    const fetchDrivers = async () => {
+        setIsLoading(true);
+        try {
+            const data = await api.companyGetMyDrivers();
+            setDrivers(data);
+        } catch (err) {
+            setError(err.message || 'Failed to load drivers.');
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchDrivers();
+    }, []);
 
     const openModal = (driver = null) => {
         setCurrentDriver(driver);
         setIsModalOpen(true);
     };
 
-    const handleSave = (driverData) => {
-        if (currentDriver) {
-            setDrivers(drivers.map(d => d.id === currentDriver.id ? { ...d, ...driverData } : d));
-        } else {
-            setDrivers([...drivers, { ...driverData, id: `driver-${Date.now()}`, companyId }]);
-        }
+    const handleSave = async (driverData) => {
         setIsModalOpen(false);
+        setIsLoading(true);
+        try {
+            if (currentDriver) {
+                await api.companyUpdateDriver(currentDriver._id, driverData);
+            } else {
+                await api.companyCreateDriver(driverData);
+            }
+            fetchDrivers();
+        } catch (err) {
+            setError(err.message || 'Failed to save driver.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleDelete = (id: string) => {
         if (window.confirm("Are you sure you want to delete this driver?")) {
-            setDrivers(drivers.filter(d => d.id !== id));
+            const deleteAsync = async () => {
+                setIsLoading(true);
+                try {
+                    await api.companyDeleteDriver(id);
+                    fetchDrivers();
+                } catch (err) {
+                    setError(err.message || 'Failed to delete driver.');
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            deleteAsync();
         }
     };
     
     return (
         <div>
+            {isLoading && <LoadingSpinner />}
             <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Manage Drivers</h1>
             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
                  <div className="flex justify-between items-center mb-4">
@@ -108,6 +151,8 @@ const CompanyDrivers: React.FC<CompanyDriversProps> = ({ companyId }) => {
                     </button>
                 </div>
 
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -120,19 +165,20 @@ const CompanyDrivers: React.FC<CompanyDriversProps> = ({ companyId }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {drivers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.phone.includes(searchTerm)).map(driver => (
-                                <tr key={driver.id} className="border-t dark:border-gray-700">
+                            {drivers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || (d.phone && d.phone.includes(searchTerm))).map(driver => (
+                                <tr key={driver._id} className="border-t dark:border-gray-700">
                                     <td className="p-3 font-semibold dark:text-white">{driver.name}</td>
                                     <td>{driver.phone}</td>
-                                    <td>{driver.assignedBusId}</td>
+                                    <td>{driver.assignedBusId || 'N/A'}</td>
                                     <td>
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${driver.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'}`}>
                                             {driver.status}
                                         </span>
                                     </td>
                                     <td className="flex space-x-2 p-3">
+                                        <button onClick={() => navigate('companyDriverProfile', driver)} className="p-1 text-gray-500 hover:text-green-600" title="View Profile"><EyeIcon className="w-5 h-5"/></button>
                                         <button onClick={() => openModal(driver)} className="p-1 text-gray-500 hover:text-blue-600"><PencilSquareIcon className="w-5 h-5"/></button>
-                                        <button onClick={() => handleDelete(driver.id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
+                                        <button onClick={() => handleDelete(driver._id)} className="p-1 text-gray-500 hover:text-red-600"><TrashIcon className="w-5 h-5"/></button>
                                     </td>
                                 </tr>
                             ))}

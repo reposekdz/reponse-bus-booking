@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -52,7 +51,6 @@ import PaymentPage from './PaymentPage';
 import WalletPage from './WalletPage';
 import { useAuth } from './contexts/AuthContext';
 import * as api from './services/apiService';
-import { mockCompaniesData } from './lib/api';
 
 
 export type Page = 
@@ -67,7 +65,8 @@ export type Page =
   | 'fleetMonitoring' | 'driverProfile' | 'agentProfile' | 'bookingSearch' | 'passengerProfile'
   | 'corporateTravel' | 'tourPackages' | 'travelInsurance' | 'giftCards' | 'adminAnnouncements'
   | 'hotelBooking' | 'eventTickets' | 'vehicleRentals' | 'vipLounge' | 'companyRouteAnalytics'
-  | 'bookingConfirmation' | 'favorites' | 'priceAlerts' | 'loyalty' | 'wallet';
+  | 'bookingConfirmation' | 'favorites' | 'priceAlerts' | 'loyalty' | 'wallet' | 'companyDriverProfile'
+  | 'adminMessages';
 
 
 const AppContent: React.FC = () => {
@@ -75,7 +74,25 @@ const AppContent: React.FC = () => {
   const [pageData, setPageData] = useState<any>(null);
   const { user, logout, isLoading } = useAuth();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [viewingTicket, setViewingTicket] = useState<any | null>(null);
+  const [viewingTicket, setViewingTicket] = useState<{ ticket: any; isActive: boolean } | null>(null);
+  const [favoriteTripIds, setFavoriteTripIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const storedFavorites = localStorage.getItem('favoriteTrips');
+    if (storedFavorites) {
+        setFavoriteTripIds(JSON.parse(storedFavorites));
+    }
+    
+    const handleFavoritesChange = () => {
+        const updatedFavorites = localStorage.getItem('favoriteTrips');
+        setFavoriteTripIds(updatedFavorites ? JSON.parse(updatedFavorites) : []);
+    };
+
+    window.addEventListener('favoritesChanged', handleFavoritesChange);
+    return () => {
+        window.removeEventListener('favoritesChanged', handleFavoritesChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -100,6 +117,16 @@ const AppContent: React.FC = () => {
     navigate('home');
   };
   
+  const handleToggleFavorite = (tripId: string) => {
+      const newFavorites = favoriteTripIds.includes(tripId)
+          ? favoriteTripIds.filter(id => id !== tripId)
+          : [...favoriteTripIds, tripId];
+      
+      setFavoriteTripIds(newFavorites);
+      localStorage.setItem('favoriteTrips', JSON.stringify(newFavorites));
+      window.dispatchEvent(new CustomEvent('favoritesChanged'));
+  };
+
   const handleSearch = (from?: string, to?: string, date?: string) => {
       navigate('bookingSearch', { from, to, date });
   }
@@ -115,23 +142,15 @@ const AppContent: React.FC = () => {
         return <LoginPage onNavigate={navigate} />;
     }
 
-    // FIX: Add mock handlers for missing dashboard props
-    const onPassengerBoarding = (ticketId: string) => {
-        console.log(`Boarding passenger with ticket: ${ticketId}`);
-    };
-    const onAgentDeposit = (serialCode: string, amount: number) => {
-        console.log(`Depositing ${amount} for serial ${serialCode}`);
-        return { success: true, passengerName: 'Mock Passenger', commission: amount * 0.05 };
-    };
-
     switch (currentPage) {
       case 'login': return <LoginPage onNavigate={navigate} />;
       case 'register': return <RegisterPage onNavigate={navigate} />;
-      case 'search': return <SearchResultsPage results={pageData} onTripSelect={(tripId) => navigate('seatSelection', { tripId })} />;
+      {/* FIX: Add missing favoriteTripIds and onToggleFavorite props */}
+      case 'search': return <SearchResultsPage results={pageData} onTripSelect={(tripId) => navigate('seatSelection', { tripId })} favoriteTripIds={favoriteTripIds} onToggleFavorite={handleToggleFavorite} />;
       case 'seatSelection': return <SeatSelectionPage tripId={pageData.tripId} onConfirm={(bookingDetails) => navigate('payment', bookingDetails)} onBack={() => navigate('bookingSearch')} />;
       case 'payment': return <PaymentPage bookingDetails={pageData} onNavigate={navigate} />;
       case 'bookingConfirmation': return <BookingConfirmationPage bookingDetails={pageData} onNavigate={navigate} />;
-      case 'bookings': return <BookingsPage onViewTicket={setViewingTicket} />;
+      case 'bookings': return <BookingsPage onViewTicket={(ticket, isActive) => setViewingTicket({ ticket, isActive })} />;
       case 'profile': return <ProfilePage onNavigate={navigate} />;
       case 'scheduled': return <ScheduledTripsPage onSearch={handleSearch}/>;
       case 'companies': return <CompaniesPage onNavigate={navigate} />;
@@ -156,19 +175,17 @@ const AppContent: React.FC = () => {
       case 'loyalty': return <LoyaltyPage user={user} onNavigate={navigate} />;
       case 'wallet': return <WalletPage onNavigate={navigate} />;
       
-      case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions': case 'adminAnnouncements':
-        return user?.role === 'admin' ? <AdminLayout currentPage={currentPage} navigate={navigate} /> : <p>Access Denied</p>;
+      case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions': case 'adminAnnouncements': case 'adminMessages':
+        return user?.role === 'admin' ? <AdminLayout currentPage={currentPage} navigate={navigate} theme={theme} setTheme={setTheme} onLogout={handleLogout}/> : <p>Access Denied</p>;
         
-      case 'companyDashboard': case 'companyBuses': case 'companyDrivers': case 'companyRoutes': case 'companyPassengers': case 'companyFinancials': case 'companySettings': case 'fleetMonitoring': case 'companyRouteAnalytics':
-        return user?.role === 'company' ? <CompanyLayout currentPage={currentPage} navigate={navigate} companyData={user} /> : <p>Access Denied</p>;
+      case 'companyDashboard': case 'companyBuses': case 'companyDrivers': case 'companyRoutes': case 'companyPassengers': case 'companyFinancials': case 'companySettings': case 'fleetMonitoring': case 'companyRouteAnalytics': case 'companyDriverProfile':
+        return user?.role === 'company' ? <CompanyLayout currentPage={currentPage} navigate={navigate} pageData={pageData} companyData={user} theme={theme} setTheme={setTheme} onLogout={handleLogout}/> : <p>Access Denied</p>;
         
       case 'driverDashboard':
-        // FIX: Pass all required props to DriverDashboard
-        return user?.role === 'driver' ? <DriverDashboard driverData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} allCompanies={mockCompaniesData} onPassengerBoarding={onPassengerBoarding} /> : <p>Access Denied</p>;
+        return user?.role === 'driver' ? <DriverDashboard driverData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>Access Denied</p>;
 
       case 'agentDashboard':
-        // FIX: Pass all required props to AgentDashboard
-        return user?.role === 'agent' ? <AgentDashboard agentData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} onAgentDeposit={onAgentDeposit} passengerSerialCode="UM1234" transactions={[]} /> : <p>Access Denied</p>;
+        return user?.role === 'agent' ? <AgentDashboard agentData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>Access Denied</p>;
         
       case 'driverProfile': return <DriverProfilePage driver={pageData} />;
       case 'agentProfile': return <AgentProfilePage agent={pageData} allTransactions={[]} />;
@@ -193,7 +210,7 @@ const AppContent: React.FC = () => {
     }
   };
   
-  const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'adminAnnouncements', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile', 'passengerProfile', 'companyRouteAnalytics'].includes(currentPage);
+  const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'adminAnnouncements', 'adminMessages', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile', 'passengerProfile', 'companyRouteAnalytics', 'companyDriverProfile'].includes(currentPage);
   const isFullScreenPage = ['bookingConfirmation'].includes(currentPage);
   const showHeader = !isDashboard && !isFullScreenPage;
   const showFooter = !isDashboard && !isFullScreenPage;
@@ -218,7 +235,7 @@ const AppContent: React.FC = () => {
         </main>
         {showFooter && <Footer />}
         
-        {viewingTicket && <TicketModal ticket={viewingTicket} onClose={() => setViewingTicket(null)} />}
+        {viewingTicket && <TicketModal ticket={viewingTicket.ticket} isActive={viewingTicket.isActive} onClose={() => setViewingTicket(null)} />}
 
         {showBottomNav && (
             <>

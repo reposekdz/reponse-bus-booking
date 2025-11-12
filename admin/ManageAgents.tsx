@@ -1,23 +1,22 @@
-
 import React, { useState, useEffect } from 'react';
 import { BriefcaseIcon, SearchIcon, PlusIcon, PencilSquareIcon, TrashIcon, EyeIcon, ArrowUpTrayIcon } from '../components/icons';
 import Modal from '../components/Modal';
 import { Page } from '../App';
-
-const mockAgents = [
-    { id: 'a1', name: 'Jane Smith', email: 'jane.s@agent.rw', phone: '0788777888', location: 'Nyabugogo', commissionRate: 0.05, totalDeposits: 2500000, status: 'Active', avatarUrl: 'https://randomuser.me/api/portraits/women/5.jpg' },
-    { id: 'a2', name: 'Peter Kamari', email: 'peter.k@agent.rw', phone: '0788999000', location: 'Remera', commissionRate: 0.05, totalDeposits: 1800000, status: 'Active', avatarUrl: 'https://randomuser.me/api/portraits/men/7.jpg' }
-];
+import * as api from '../services/apiService';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const AgentForm = ({ agent, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
-        name: '',
-        location: '',
-        commissionRate: 0.05,
-        status: 'Active',
-        avatarUrl: '',
-        ...agent
+        name: agent?.name || '',
+        email: agent?.email || '',
+        phone: agent?.phone || '',
+        password: '',
+        location: agent?.location || '',
+        commissionRate: (agent?.commissionRate || 0.05) * 100,
+        status: agent?.status || 'Active',
+        avatarUrl: agent?.avatarUrl || '',
     });
+    const isEditing = !!agent;
     const [avatarPreview, setAvatarPreview] = useState(formData.avatarUrl);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -40,7 +39,7 @@ const AgentForm = ({ agent, onSave, onCancel }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(formData);
+        onSave({ ...formData, commissionRate: formData.commissionRate / 100 });
     };
 
     return (
@@ -54,23 +53,22 @@ const AgentForm = ({ agent, onSave, onCancel }) => {
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Agent Name</label>
+                <label className="block text-sm font-medium">Agent Name</label>
                 <input type="text" name="name" value={formData.name} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
-                <input type="text" name="location" value={formData.location} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                <label className="block text-sm font-medium">Email (Login)</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required disabled={isEditing} />
             </div>
-             <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Commission Rate (%)</label>
-                <input type="number" name="commissionRate" value={formData.commissionRate * 100} onChange={e => setFormData(prev => ({...prev, commissionRate: parseFloat(e.target.value) / 100}))} step="0.1" className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
-            </div>
+            {!isEditing && (
+                 <div>
+                    <label className="block text-sm font-medium">Initial Password</label>
+                    <input type="password" name="password" value={formData.password} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                </div>
+            )}
             <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                <select name="status" value={formData.status} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
-                    <option>Active</option>
-                    <option>Inactive</option>
-                </select>
+                <label className="block text-sm font-medium">Location</label>
+                <input type="text" name="location" value={formData.location} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
             </div>
             <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={onCancel} className="px-4 py-2 text-sm font-semibold border rounded-lg dark:border-gray-600">Cancel</button>
@@ -81,57 +79,70 @@ const AgentForm = ({ agent, onSave, onCancel }) => {
 };
 
 const ManageAgents: React.FC<{ navigate: (page: Page, data?: any) => void; }> = ({ navigate }) => {
-    const [agents, setAgents] = useState(mockAgents);
+    const [agents, setAgents] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentAgent, setCurrentAgent] = useState<any | null>(null);
-    const [liveStatuses, setLiveStatuses] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string|null>(null);
+
+    const fetchAgents = async () => {
+        setIsLoading(true);
+        try {
+            const data = await api.adminGetAllAgents();
+            setAgents(data);
+        } catch(e) {
+            setError((e as Error).message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const statusOptions = ['Online', 'Idle', 'Offline'];
-        const updateStatuses = () => {
-            const newStatuses = {};
-            agents.forEach(agent => {
-                newStatuses[agent.id] = statusOptions[Math.floor(Math.random() * statusOptions.length)];
-            });
-            setLiveStatuses(newStatuses);
-        };
-        updateStatuses();
-        const interval = setInterval(updateStatuses, 15000); // Update every 15s
-        return () => clearInterval(interval);
-    }, [agents]);
+        fetchAgents();
+    }, []);
+
 
     const openModal = (agent = null) => {
         setCurrentAgent(agent);
         setIsModalOpen(true);
     };
 
-    const handleSave = (agentData) => {
-        if (currentAgent) {
-            setAgents(agents.map(a => a.id === currentAgent.id ? { ...a, ...agentData } : a));
-        } else {
-            setAgents([...agents, { ...agentData, id: `agent-${Date.now()}`, totalDeposits: 0 }]);
-        }
+    const handleSave = async (agentData) => {
         setIsModalOpen(false);
+        setIsLoading(true);
+        try {
+            if (currentAgent) {
+                await api.adminUpdateAgent(currentAgent._id, agentData);
+            } else {
+                await api.adminCreateAgent(agentData);
+            }
+            await fetchAgents();
+        } catch(e) {
+            setError((e as Error).message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this agent?")) {
-            setAgents(agents.filter(a => a.id !== id));
+            setIsLoading(true);
+            try {
+                await api.adminDeleteAgent(id);
+                await fetchAgents();
+            } catch(e) {
+                setError((e as Error).message);
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
     
-    const statusIndicator = (status) => {
-        switch(status) {
-            case 'Online': return 'bg-green-500';
-            case 'Idle': return 'bg-yellow-500';
-            case 'Offline': return 'bg-gray-500';
-            default: return 'bg-gray-500';
-        }
-    };
 
     return (
         <div>
+            {isLoading && <LoadingSpinner />}
             <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Manage Agents</h1>
             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
                  <div className="flex justify-between items-center mb-4">
@@ -149,16 +160,14 @@ const ManageAgents: React.FC<{ navigate: (page: Page, data?: any) => void; }> = 
                         <PlusIcon className="w-5 h-5 mr-2" /> Add Agent
                     </button>
                 </div>
-
+                 {error && <p className="text-red-500">{error}</p>}
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th className="p-3">Agent Name</th>
                                 <th className="p-3">Location</th>
-                                <th className="p-3">Commission Rate</th>
-                                <th className="p-3">Total Deposits</th>
-                                <th className="p-3">Live Status</th>
+                                <th className="p-3">Status</th>
                                 <th className="p-3">Actions</th>
                             </tr>
                         </thead>
@@ -170,13 +179,8 @@ const ManageAgents: React.FC<{ navigate: (page: Page, data?: any) => void; }> = 
                                         {agent.name}
                                     </td>
                                     <td>{agent.location}</td>
-                                    <td>{agent.commissionRate * 100}%</td>
-                                    <td>{new Intl.NumberFormat('fr-RW').format(agent.totalDeposits)} RWF</td>
                                     <td>
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-2.5 h-2.5 rounded-full ${statusIndicator(liveStatuses[agent.id])}`}></div>
-                                            <span className="text-xs font-medium">{liveStatuses[agent.id]}</span>
-                                        </div>
+                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${agent.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{agent.status}</span>
                                     </td>
                                     <td className="flex space-x-1 p-3">
                                         <button onClick={() => navigate('agentProfile', agent)} className="p-1 text-gray-500 hover:text-green-600" title="View Profile"><EyeIcon className="w-5 h-5"/></button>
@@ -187,6 +191,7 @@ const ManageAgents: React.FC<{ navigate: (page: Page, data?: any) => void; }> = 
                             ))}
                         </tbody>
                     </table>
+                     {agents.length === 0 && !isLoading && <p className="text-center p-4 text-gray-500">No agents found.</p>}
                 </div>
             </div>
              <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentAgent ? "Edit Agent" : "Add New Agent"}>

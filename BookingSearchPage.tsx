@@ -1,9 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowRightIcon, FilterIcon, StarIcon } from './components/icons';
+import { ArrowRightIcon, FilterIcon, StarIcon, WifiIcon, AcIcon, PowerIcon, BuildingOfficeIcon } from './components/icons';
 import SearchResultsPage from './SearchResultsPage';
 import { Page } from './App';
 import * as api from './services/apiService';
 import SearchResultSkeleton from './components/SearchResultSkeleton';
+// FIX: Removed broken import. Company data will be fetched from the API.
+
+const allAmenities = ['WiFi', 'AC', 'Charging'];
 
 interface BookingSearchPageProps {
   searchParams: { from?: string; to?: string; date?: string; };
@@ -18,10 +21,14 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [companies, setCompanies] = useState<any[]>([]);
   
   const [sortOrder, setSortOrder] = useState('fastest');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [favoriteTrips, setFavoriteTrips] = useState<string[]>([]);
+  const [favoriteTripIds, setFavoriteTripIds] = useState<string[]>([]);
+  const [amenityFilters, setAmenityFilters] = useState<string[]>([]);
+  const [companyFilters, setCompanyFilters] = useState<string[]>([]);
+  const [timeFilters, setTimeFilters] = useState<string[]>([]);
 
   const fetchTrips = async () => {
       if (!fromLocation || !toLocation || !journeyDate) return;
@@ -39,35 +46,77 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
   
   useEffect(() => {
     fetchTrips();
+    const fetchCompanies = async () => {
+        try {
+            const companyData = await api.getCompanies();
+            setCompanies(companyData);
+        } catch (e) {
+            console.error("Failed to fetch companies for filter", e);
+        }
+    };
+    fetchCompanies();
   }, [fromLocation, toLocation, journeyDate]);
 
+  const loadFavorites = () => {
+    const storedFavorites = localStorage.getItem('favoriteTrips');
+    setFavoriteTripIds(storedFavorites ? JSON.parse(storedFavorites) : []);
+  };
+  
   useEffect(() => {
-    const loadFavorites = () => {
-        const storedFavorites = localStorage.getItem('favoriteTrips');
-        setFavoriteTrips(storedFavorites ? JSON.parse(storedFavorites) : []);
-    };
     loadFavorites();
     window.addEventListener('favoritesChanged', loadFavorites);
     return () => window.removeEventListener('favoritesChanged', loadFavorites);
   }, []);
 
+  const toggleFavorite = (tripId: string) => {
+    const newFavorites = favoriteTripIds.includes(tripId)
+      ? favoriteTripIds.filter(id => id !== tripId)
+      : [...favoriteTripIds, tripId];
+    
+    setFavoriteTripIds(newFavorites);
+    localStorage.setItem('favoriteTrips', JSON.stringify(newFavorites));
+    // Dispatch a custom event so other components on the same page can react in real-time
+    window.dispatchEvent(new CustomEvent('favoritesChanged'));
+  };
+
+  const handleFilterToggle = (filterList, setFilterList, value) => {
+    if (filterList.includes(value)) {
+      setFilterList(filterList.filter(item => item !== value));
+    } else {
+      setFilterList([...filterList, value]);
+    }
+  };
+
   const filteredAndSortedResults = useMemo(() => {
     let processedResults = results
-      .map(trip => {
-          return {
-              id: trip._id,
-              company: trip.route.company.name,
-              departureTime: new Date(trip.departureTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-              arrivalTime: new Date(trip.arrivalTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-              durationMinutes: trip.route.estimatedDurationMinutes,
-              basePrice: trip.route.basePrice,
-              dynamicPrice: trip.route.basePrice, // Can add dynamic logic here later
-              availableSeats: Object.values(trip.seatMap).filter(s => s === 'available').length,
-              amenities: trip.bus.amenities,
-          };
-      })
+      .map(trip => ({
+          id: trip._id,
+          company: trip.route.company.name,
+          departureTime: new Date(trip.departureTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+          arrivalTime: new Date(trip.arrivalTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+          durationMinutes: trip.route.estimatedDurationMinutes,
+          basePrice: trip.route.basePrice,
+          dynamicPrice: trip.route.basePrice, // Can add dynamic logic here later
+          availableSeats: Object.values(trip.seatMap).filter(s => s === 'available').length,
+          amenities: trip.bus.amenities,
+          driver: trip.driver ? {
+            name: trip.driver.name,
+            avatarUrl: trip.driver.avatarUrl,
+          } : null,
+      }))
       .filter(trip => {
-        if (showFavoritesOnly && !favoriteTrips.includes(trip.id)) return false;
+        if (showFavoritesOnly && !favoriteTripIds.includes(trip.id)) return false;
+        if (amenityFilters.length > 0 && !amenityFilters.every(amenity => trip.amenities.includes(amenity))) return false;
+        if (companyFilters.length > 0 && !companyFilters.includes(trip.company)) return false;
+        if (timeFilters.length > 0) {
+            const hour = parseInt(trip.departureTime.split(':')[0]);
+            const morning = hour >= 5 && hour < 12;
+            const afternoon = hour >= 12 && hour < 18;
+            const evening = hour >= 18;
+            if (timeFilters.includes('Morning') && !morning) return false;
+            if (timeFilters.includes('Afternoon') && !afternoon) return false;
+            if (timeFilters.includes('Evening') && !evening) return false;
+        }
         return true;
       });
 
@@ -81,7 +130,7 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
     });
 
     return processedResults;
-  }, [results, sortOrder, showFavoritesOnly, favoriteTrips]);
+  }, [results, sortOrder, showFavoritesOnly, favoriteTripIds, amenityFilters, companyFilters, timeFilters]);
 
 
   return (
@@ -111,6 +160,33 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
                             <option value="earliest">Earliest Departure</option>
                         </select>
                     </div>
+                    
+                    <div className="border-b dark:border-gray-700 py-4">
+                        <h4 className="font-semibold mb-2 dark:text-gray-200">Amenities</h4>
+                        <div className="space-y-2">
+                            {allAmenities.map(amenity => (
+                                <label key={amenity} className="flex items-center space-x-2 cursor-pointer"><input type="checkbox" onChange={() => handleFilterToggle(amenityFilters, setAmenityFilters, amenity)} className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500"/><span>{amenity}</span></label>
+                            ))}
+                        </div>
+                    </div>
+
+                     <div className="border-b dark:border-gray-700 py-4">
+                        <h4 className="font-semibold mb-2 dark:text-gray-200">Departure Time</h4>
+                        <div className="space-y-2">
+                            {['Morning (5am-12pm)', 'Afternoon (12pm-6pm)', 'Evening (6pm-onwards)'].map(time => (
+                                <label key={time} className="flex items-center space-x-2 cursor-pointer"><input type="checkbox" onChange={() => handleFilterToggle(timeFilters, setTimeFilters, time.split(' ')[0])} className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500"/><span>{time}</span></label>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <div className="border-b dark:border-gray-700 py-4">
+                        <h4 className="font-semibold mb-2 dark:text-gray-200">Bus Companies</h4>
+                        <div className="space-y-2">
+                            {companies.map(company => (
+                                <label key={company._id} className="flex items-center space-x-2 cursor-pointer"><input type="checkbox" onChange={() => handleFilterToggle(companyFilters, setCompanyFilters, company.name)} className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500"/><span>{company.name}</span></label>
+                            ))}
+                        </div>
+                    </div>
 
                     <div className="py-4">
                         <label className="flex items-center justify-between cursor-pointer">
@@ -128,7 +204,12 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
            <div className="lg:col-span-3">
                {isLoading && <SearchResultSkeleton />}
                {error && <p className="text-red-500">{error}</p>}
-               {!isLoading && !error && <SearchResultsPage results={filteredAndSortedResults} onTripSelect={(trip) => onNavigate('seatSelection', { tripId: trip.id })} />}
+               {!isLoading && !error && <SearchResultsPage 
+                  results={filteredAndSortedResults} 
+                  onTripSelect={(trip) => onNavigate('seatSelection', { tripId: trip.id })}
+                  favoriteTripIds={favoriteTripIds}
+                  onToggleFavorite={toggleFavorite}
+                />}
            </div>
          </div>
        </main>

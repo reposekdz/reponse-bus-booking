@@ -1,9 +1,11 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { ChartBarIcon, UsersIcon, BuildingOfficeIcon, BriefcaseIcon, CheckCircleIcon, CurrencyDollarIcon } from '../components/icons';
 import ActivityFeed from '../components/ActivityFeed';
 import LiveSalesTicker from '../components/LiveSalesTicker';
-import { api } from '../lib/api';
+import * as api from '../services/apiService';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const StatCard = ({ title, value, icon, change, changeType }) => (
     <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
@@ -16,13 +18,21 @@ const StatCard = ({ title, value, icon, change, changeType }) => (
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
             </div>
         </div>
-        <div className={`text-xs mt-2 font-semibold ${changeType === 'increase' ? 'text-green-500' : 'text-red-500'}`}>
+        {change && <div className={`text-xs mt-2 font-semibold ${changeType === 'increase' ? 'text-green-500' : 'text-red-500'}`}>
             {change} vs last month
-        </div>
+        </div>}
     </div>
 );
 
 const BarChart = ({ data, dataKey, labelKey, title, colorClass }) => {
+    if (!data || data.length === 0) {
+        return (
+            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg h-full flex flex-col">
+                <h3 className="font-bold mb-4 dark:text-white">{title}</h3>
+                <div className="flex-grow flex items-center justify-center text-gray-400">No data available</div>
+            </div>
+        );
+    }
     const maxValue = Math.max(...data.map(d => d[dataKey]));
     return (
         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg h-full flex flex-col">
@@ -63,18 +73,18 @@ const highValueTransactions = [
 ];
 
 const AdminDashboard: React.FC = () => {
-    const [dashboardData, setDashboardData] = useState(null);
+    const [dashboardData, setDashboardData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string|null>(null);
     
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await api.getAdminDashboardAnalytics();
+                const data = await api.adminGetDashboardAnalytics();
                 setDashboardData(data);
             } catch (err) {
-                setError(err.message);
+                setError((err as Error).message);
             } finally {
                 setLoading(false);
             }
@@ -83,7 +93,7 @@ const AdminDashboard: React.FC = () => {
     }, []);
 
     if (loading) {
-        return <div className="dark:text-white">Loading dashboard data...</div>;
+        return <LoadingSpinner />;
     }
     
     if (error) {
@@ -98,14 +108,14 @@ const AdminDashboard: React.FC = () => {
             <LiveSalesTicker />
             <SystemHealth />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Revenue" value="25.8M RWF" icon={<ChartBarIcon className="w-6 h-6 text-blue-600"/>} change="+5.2%" changeType="increase" />
-                <StatCard title="Total Passengers" value="8.6M" icon={<UsersIcon className="w-6 h-6 text-blue-600"/>} change="+2.1%" changeType="increase" />
-                <StatCard title="Active Companies" value={stats.companies} icon={<BuildingOfficeIcon className="w-6 h-6 text-blue-600"/>} change="+1" changeType="increase" />
-                <StatCard title="Registered Agents" value="2" icon={<BriefcaseIcon className="w-6 h-6 text-blue-600"/>} change="+0%" changeType="increase" />
+                <StatCard title="Total Revenue" value="0 RWF" icon={<ChartBarIcon className="w-6 h-6 text-blue-600"/>} change="+0%" changeType="increase" />
+                <StatCard title="Total Passengers" value="0" icon={<UsersIcon className="w-6 h-6 text-blue-600"/>} change="+0%" changeType="increase" />
+                <StatCard title="Active Companies" value={stats.companies} icon={<BuildingOfficeIcon className="w-6 h-6 text-blue-600"/>} change="+0" changeType="increase" />
+                <StatCard title="Registered Agents" value="0" icon={<BriefcaseIcon className="w-6 h-6 text-blue-600"/>} change="+0" changeType="increase" />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                  <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6" style={{ minHeight: '300px' }}>
-                    <BarChart data={revenueData} dataKey="revenue" labelKey="day" title="Weekly Revenue (Millions RWF)" colorClass="bg-green-400 dark:bg-green-800" />
+                    <BarChart data={revenueData} dataKey="revenue" labelKey="day" title="Weekly Revenue (RWF)" colorClass="bg-green-400 dark:bg-green-800" />
                     <BarChart data={passengerData} dataKey="passengers" labelKey="day" title="Weekly Passengers" colorClass="bg-blue-400 dark:bg-blue-800"/>
                 </div>
                  <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
@@ -131,7 +141,7 @@ const AdminDashboard: React.FC = () => {
             </div>
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                    <BarChart data={companyRevenue} dataKey="revenue" labelKey="name" title="Revenue by Company (Billions RWF)" colorClass="bg-indigo-400 dark:bg-indigo-800"/>
+                    <BarChart data={companyRevenue} dataKey="revenue" labelKey="name" title="Revenue by Company" colorClass="bg-indigo-400 dark:bg-indigo-800"/>
                 </div>
                 <ActivityFeed />
             </div>
@@ -140,4 +150,3 @@ const AdminDashboard: React.FC = () => {
 };
 
 export default AdminDashboard;
-      

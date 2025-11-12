@@ -1,21 +1,35 @@
 import React, { useState } from 'react';
-import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, MegaphoneIcon, CalendarIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, StarIcon, ShieldCheckIcon } from './components/icons';
+import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, MegaphoneIcon, CalendarIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, StarIcon, ShieldCheckIcon, MenuIcon, XIcon } from './components/icons';
 import { Page } from './App';
 import DriverSettingsPage from './DriverSettingsPage';
-import { mockCompaniesData } from './lib/api';
+// FIX: The mockCompaniesData is no longer available from a central file.
+// A temporary mock is provided here to ensure component functionality.
+const mockCompaniesData = [
+    { id: 'volcano', name: 'Volcano Express', logoUrl: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg', description: 'Volcano Express is a popular choice for many travelers in Rwanda.' },
+    { id: 'ritco', name: 'RITCO', logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/04/ritco-logo.jpg', description: 'RITCO is a government-owned company providing public transport services.' },
+];
 import DriverPerformance from './components/DriverPerformance';
 import DriverTripHistory from './components/DriverTripHistory';
 import VehicleReportModal from './components/VehicleReportModal';
+import * as api from './services/apiService';
+
 
 interface DriverDashboardProps {
     onLogout: () => void;
     theme: 'light' | 'dark';
     setTheme: (theme: 'light' | 'dark') => void;
     driverData: any;
-    allCompanies: any[];
-    onPassengerBoarding: (ticketId: string) => void;
     navigate: (page: Page, data?: any) => void;
 }
+
+const navItems = [
+    { view: 'dashboard', label: 'Dashboard', icon: ChartBarIcon },
+    { view: 'boarding', label: 'Passenger Boarding', icon: QrCodeIcon },
+    { view: 'performance', label: 'My Performance', icon: ChartPieIcon },
+    { view: 'history', label: 'Trip History', icon: ClipboardDocumentListIcon },
+    { view: 'profile', label: 'My Profile', icon: UsersIcon },
+    { view: 'settings', label: 'Settings', icon: CogIcon },
+];
 
 const mockCurrentTrip = {
     id: 'VK-TRIP-123',
@@ -83,13 +97,34 @@ const PreTripChecklist = ({ onComplete }) => {
     );
 };
 
+const MobileNav: React.FC<{isOpen: boolean, onClose: () => void, setView: (view: string) => void, navigate: (page: Page) => void, currentView: string}> = ({isOpen, onClose, setView, navigate, currentView}) => (
+    <div className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onClose}>
+        <div className="absolute inset-0 bg-black/60"></div>
+        <div className={`absolute top-0 left-0 h-full w-64 bg-gray-900 text-white p-6 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-8">
+                <span className="font-bold text-xl">Driver Menu</span>
+                <button onClick={onClose}><XIcon className="w-6 h-6"/></button>
+            </div>
+            <nav className="space-y-2">
+                {navItems.map(item => (
+                    <button key={item.view} onClick={() => { item.view === 'profile' ? navigate('driverProfile') : setView(item.view); onClose(); }} className={`w-full flex items-center p-3 rounded-lg ${currentView === item.view ? 'bg-white/20' : 'hover:bg-white/10'}`}>
+                        <item.icon className="w-5 h-5 mr-3"/>
+                        <span>{item.label}</span>
+                    </button>
+                ))}
+            </nav>
+        </div>
+    </div>
+);
 
-const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setTheme, driverData, allCompanies, onPassengerBoarding, navigate }) => {
+
+const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setTheme, driverData, navigate }) => {
     const [view, setView] = useState('dashboard');
     const [scannedTicket, setScannedTicket] = useState('');
     const [scanResult, setScanResult] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const [passengers, setPassengers] = useState(mockCurrentTrip.passengers);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
     
@@ -97,25 +132,28 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
     const upcomingTrips = driverData.tripHistory.filter(t => t.status === 'Upcoming');
 
 
-    const handleScan = () => {
+    const handleScan = async () => {
         setScanResult(null);
         if (!scannedTicket) {
             setScanResult({ type: 'error', message: 'Ticket ID cannot be empty.' });
             return;
         }
-        const passenger = passengers.find(p => p.ticketId === scannedTicket);
-        if (passenger) {
-            if (passenger.status === 'boarded') {
-                setScanResult({ type: 'error', message: `${passenger.name} has already boarded.` });
-            } else {
-                onPassengerBoarding(passenger.ticketId);
-                setScanResult({ type: 'success', message: `Welcome, ${passenger.name}! Seat: ${passenger.seat}.` });
-                setPassengers(passengers.map(p => p.ticketId === scannedTicket ? {...p, status: 'boarded'} : p));
-            }
-        } else {
-            setScanResult({ type: 'error', message: 'Invalid ticket ID. Please try again.' });
+
+        // The mockCurrentTrip.id would be dynamic in a real app
+        const currentTripId = "60c72b2f9b1d8c001f8e4b1a"; // A mock ObjectId for an existing trip
+
+        try {
+            // Call the new backend service
+            const result = await api.confirmBoarding(currentTripId, scannedTicket);
+            
+            // On success, update UI
+            setScanResult({ type: 'success', message: `Welcome, ${result.passengerName}! Seat: ${result.seat}.` });
+            setPassengers(passengers.map(p => p.ticketId === scannedTicket ? {...p, status: 'boarded'} : p));
+        } catch (err) {
+            setScanResult({ type: 'error', message: (err as Error).message || 'Verification failed.' });
+        } finally {
+            setScannedTicket('');
         }
-        setScannedTicket('');
     };
     
     const simulateScan = (type: 'success' | 'failure' | 'duplicate') => {
@@ -140,7 +178,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
     };
 
     const NavLink = ({ viewName, label, icon: Icon }) => (
-      <button onClick={() => setView(viewName)} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative ${view === viewName ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+      <button onClick={() => viewName === 'profile' ? navigate('driverProfile') : setView(viewName)} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative ${view === viewName ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
           <div className={`absolute left-0 top-0 h-full w-1 rounded-r-full bg-yellow-400 transition-all duration-300 ${view === viewName ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-50'}`}></div>
           <Icon className="w-6 h-6 mr-4 transition-transform duration-300 group-hover:scale-110" />
           <span className="font-semibold">{label}</span>
@@ -295,21 +333,17 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
             <aside className="w-64 bg-gradient-to-b from-gray-800 via-gray-900 to-black text-gray-300 flex-col hidden lg:flex border-r border-gray-700/50">
                 <div className="h-20 flex items-center justify-center text-white font-bold text-xl border-b border-white/10">DRIVER PORTAL</div>
                 <nav className="flex-1 px-4 py-6 space-y-2">
-                    <NavLink viewName="dashboard" label="Dashboard" icon={ChartBarIcon} />
-                    <NavLink viewName="boarding" label="Passenger Boarding" icon={QrCodeIcon} />
-                    <NavLink viewName="performance" label="My Performance" icon={ChartPieIcon} />
-                    <NavLink viewName="history" label="Trip History" icon={ClipboardDocumentListIcon} />
-                    <button onClick={() => navigate('driverProfile')} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative text-gray-400 hover:text-white hover:bg-white/5`}>
-                        <div className={`absolute left-0 top-0 h-full w-1 rounded-r-full bg-yellow-400 transition-all duration-300 scale-y-0 group-hover:scale-y-50`}></div>
-                        <UsersIcon className="w-6 h-6 mr-4 transition-transform duration-300 group-hover:scale-110" />
-                        <span className="font-semibold">My Profile</span>
-                    </button>
-                    <NavLink viewName="settings" label="Settings" icon={CogIcon} />
+                    {navItems.map(item => <NavLink key={item.view} viewName={item.view} label={item.label} icon={item.icon}/>)}
                 </nav>
             </aside>
             <div className="flex-1 flex flex-col bg-gray-100 dark:bg-gray-900">
                 <header className="h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm flex items-center justify-between px-6 border-b dark:border-gray-700/50">
-                    <div className="font-bold text-gray-800 dark:text-white">Welcome, {driverData.name.split(' ')[0]}</div>
+                    <div className="flex items-center">
+                        <button className="lg:hidden mr-4" onClick={() => setIsMobileMenuOpen(true)}>
+                            <MenuIcon className="w-6 h-6 text-gray-700 dark:text-gray-200"/>
+                        </button>
+                        <div className="font-bold text-gray-800 dark:text-white">Welcome, {driverData.name.split(' ')[0]}</div>
+                    </div>
                     <div className="flex items-center space-x-4">
                         <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-400">{theme === 'light' ? <MoonIcon className="w-6 h-6"/> : <SunIcon className="w-6 h-6"/>}</button>
                         <button onClick={onLogout} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Logout</button>
@@ -320,6 +354,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                 </main>
             </div>
             {isReportModalOpen && <VehicleReportModal busId={driverData.assignedBusId} onClose={() => setIsReportModalOpen(false)} />}
+            <MobileNav isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} setView={setView} navigate={navigate} currentView={view} />
         </div>
     );
 };

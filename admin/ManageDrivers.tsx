@@ -11,12 +11,14 @@ import LoadingSpinner from '../components/LoadingSpinner';
 // Form component
 const DriverForm = ({ driver, companies, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        companyId: companies[0]?._id || '',
-        ...driver
+        name: driver?.name || '',
+        email: driver?.email || '',
+        phone: driver?.phone || '',
+        companyId: driver?.company?._id || companies[0]?._id || '',
+        password: '',
     });
+
+    const isEditing = !!driver;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -25,9 +27,7 @@ const DriverForm = ({ driver, companies, onSave, onCancel }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // For new drivers, we add a default password. Backend should handle this better.
-        const payload = driver ? formData : { ...formData, password: 'password' };
-        onSave(payload);
+        onSave(formData);
     };
 
     return (
@@ -38,8 +38,14 @@ const DriverForm = ({ driver, companies, onSave, onCancel }) => {
             </div>
              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                <input type="email" name="email" value={formData.email} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required disabled={isEditing} />
             </div>
+            {!isEditing && (
+                 <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Password</label>
+                    <input type="password" name="password" value={formData.password} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
+                </div>
+            )}
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
                 <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600" required />
@@ -103,7 +109,7 @@ const ManageDrivers: React.FC<{ navigate: (page: Page, data?: any) => void; }> =
             }
             await fetchAllData();
         } catch (err) {
-            setError(`Failed to save driver: ${err.message}`);
+            setError(`Failed to save driver: ${(err as Error).message}`);
         } finally {
             setIsLoading(false);
         }
@@ -116,7 +122,7 @@ const ManageDrivers: React.FC<{ navigate: (page: Page, data?: any) => void; }> =
                 await api.adminDeleteDriver(id);
                 await fetchAllData();
             } catch (err) {
-                setError(`Failed to delete driver: ${err.message}`);
+                setError(`Failed to delete driver: ${(err as Error).message}`);
             } finally {
                 setIsLoading(false);
             }
@@ -187,7 +193,11 @@ const ManageDrivers: React.FC<{ navigate: (page: Page, data?: any) => void; }> =
                 </div>
             </div>
              <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentDriver ? "Edit Driver" : "Add New Driver"}>
-                <DriverForm driver={currentDriver} companies={companies} onSave={handleSave} onCancel={() => setIsModalOpen(false)} />
+                {companies.length > 0 ? (
+                    <DriverForm driver={currentDriver} companies={companies} onSave={handleSave} onCancel={() => setIsModalOpen(false)} />
+                ) : (
+                    <p>Please add a company before adding a driver.</p>
+                )}
             </Modal>
         </div>
     );

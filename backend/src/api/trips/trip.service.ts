@@ -1,6 +1,9 @@
 import Trip from './trip.model';
 import Route from '../routes/route.model';
 import { AppError } from '../../utils/AppError';
+import Boarding from '../boarding/boarding.model';
+import Booking from '../bookings/booking.model';
+import { io } from '../../server';
 
 interface TripQuery {
     from: string;
@@ -45,7 +48,7 @@ export const findTrips = async (query: TripQuery) => {
         }
     })
     .populate('bus', 'model amenities')
-    .populate('driver', 'name');
+    .populate('driver', 'name avatarUrl');
 
     return trips;
 };
@@ -66,4 +69,55 @@ export const findTripById = async (id: string) => {
         throw new AppError('Trip not found', 404);
     }
     return trip;
+};
+
+
+interface BoardingData {
+    driverId: string;
+    tripId: string;
+    ticketId: string;
+}
+
+export const confirmPassengerBoarding = async (data: BoardingData) => {
+    const { driverId, tripId, ticketId } = data;
+
+    const booking = await Booking.findOne({ bookingId: ticketId, trip: tripId }).populate('passenger', 'name');
+    if (!booking) {
+        throw new AppError('Invalid ticket ID for this trip.', 404);
+    }
+    
+    const passenger = booking.passenger as any;
+
+    const existingBoarding = await Boarding.findOne({ booking: booking._id });
+    if (existingBoarding) {
+        throw new AppError(`${passenger.name} has already boarded.`, 409);
+    }
+    
+    const trip = await Trip.findById(tripId).populate('route', 'from to');
+    if (!trip || trip.driver.toString() !== driverId.toString()) {
+        throw new AppError('You are not authorized to manage this trip.', 403);
+    }
+
+    await Boarding.create({
+        booking: booking._id,
+        passenger: passenger._id,
+        driver: driverId,
+        trip: tripId,
+    });
+    
+    booking.status = 'Completed';
+    await booking.save();
+    
+    const routeInfo = trip.route as any;
+    const message = `Welcome, ${passenger.name}! You have successfully boarded the bus for ${routeInfo.from} to ${routeInfo.to}.`;
+
+    io.to(passenger._id.toString()).emit('passengerBoarded', {
+        message: message,
+        route: `${routeInfo.from} to ${routeInfo.to}`
+    });
+
+    return {
+        passengerName: passenger.name,
+        seat: booking.seats.join(', '),
+    };
 };
