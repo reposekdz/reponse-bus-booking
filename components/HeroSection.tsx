@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import BookingForm from './BookingForm';
 import AITripPlanner from './AITripPlanner';
 import { SparklesIcon, ArrowRightIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
+import * as api from '../services/apiService';
 
 interface HeroSectionProps {
   onSearch: (from?: string, to?: string) => void;
@@ -11,11 +12,26 @@ interface HeroSectionProps {
 const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
   const [showAiPlanner, setShowAiPlanner] = useState(false);
   const { t } = useLanguage();
+  const [heroImage, setHeroImage] = useState("url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop')");
+
+  useEffect(() => {
+    const fetchHeroImage = async () => {
+        try {
+            const res = await api.getSetting('hero_image');
+            if (res.data && res.data.setting_value) {
+                setHeroImage(`url('${res.data.setting_value}')`);
+            }
+        } catch (e) {
+            console.error("Failed to load hero image", e);
+        }
+    };
+    fetchHeroImage();
+  }, []);
 
   return (
     <>
       <section className="relative h-[70vh] min-h-[600px] flex items-center justify-center text-white">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2048&auto=format&fit=crop')" }}></div>
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: heroImage }}></div>
         <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-green-900/40 z-10"></div>
         <div className="relative z-20 container mx-auto px-6 text-center">
             <div className="bg-gradient-to-br from-white/20 to-white/0 backdrop-blur-xl rounded-2xl shadow-2xl p-6 md:p-8 max-w-4xl mx-auto border border-white/20">

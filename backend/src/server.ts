@@ -2,7 +2,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import app from './app';
 import dotenv from 'dotenv';
-import connectDB from './config/db';
+import { connectDB } from './config/db';
 import config from './config';
 import logger from './utils/logger';
 import { initSocket } from './socket';

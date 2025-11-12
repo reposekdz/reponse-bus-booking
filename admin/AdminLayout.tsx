@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Page } from '../App';
-import { ChartBarIcon, BuildingOfficeIcon, UsersIcon, BriefcaseIcon, SunIcon, MoonIcon, MegaphoneIcon, TagIcon, CurrencyDollarIcon, MenuIcon, XIcon, ChatBubbleLeftRightIcon } from '../components/icons';
+import { ChartBarIcon, BuildingOfficeIcon, UsersIcon, BriefcaseIcon, SunIcon, MoonIcon, MegaphoneIcon, TagIcon, CurrencyDollarIcon, MenuIcon, XIcon, ChatBubbleLeftRightIcon, CogIcon, MapIcon } from '../components/icons';
 import AdminDashboard from './AdminDashboard';
 import ManageCompanies from './ManageCompanies';
 import ManageDrivers from './ManageDrivers';
@@ -11,6 +11,9 @@ import ManageAds from './ManageAds';
 import ManagePromotions from './ManagePromotions';
 import PlatformAnnouncements from './PlatformAnnouncements';
 import ManageMessages from './ManageMessages';
+import ManageSite from './ManageSite';
+import ManageDestinations from './ManageDestinations';
+
 
 interface AdminLayoutProps {
     currentPage: Page;
@@ -31,6 +34,8 @@ const navItems: { page: Page; label: string; icon: React.FC<any> }[] = [
     { page: 'adminPromotions', label: 'Promotions', icon: TagIcon },
     { page: 'adminAds', label: 'Adverts', icon: MegaphoneIcon },
     { page: 'adminAnnouncements', label: 'Announcements', icon: MegaphoneIcon },
+    { page: 'adminDestinations', label: 'Destinations', icon: MapIcon },
+    { page: 'adminSettings', label: 'Site Settings', icon: CogIcon },
 ];
 
 const MobileNav: React.FC<{isOpen: boolean, onClose: () => void, navigate: (page: Page) => void, currentPage: Page}> = ({isOpen, onClose, navigate, currentPage}) => (
@@ -68,6 +73,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPage, navigate, theme,
             case 'adminPromotions': return <ManagePromotions />;
             case 'adminAnnouncements': return <PlatformAnnouncements />;
             case 'adminMessages': return <ManageMessages />;
+            case 'adminSettings': return <ManageSite />;
+            case 'adminDestinations': return <ManageDestinations />;
             default: return <AdminDashboard />;
         }
     };

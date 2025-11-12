@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+
 import * as tripService from './trip.service';
 import asyncHandler from '../../utils/asyncHandler';
 
 // FIX: Removed explicit types to allow for correct type inference.
-export const searchTrips = asyncHandler(async (req, res: any) => {
+export const searchTrips = asyncHandler(async (req, res) => {
     const { from, to, date } = req.query;
 
     const query = {
@@ -21,7 +21,7 @@ export const searchTrips = asyncHandler(async (req, res: any) => {
     });
 });
 
-export const getTripById = asyncHandler(async (req, res: any) => {
+export const getTripById = asyncHandler(async (req, res) => {
     const trip = await tripService.findTripById(req.params.id);
     res.status(200).json({
         success: true,
@@ -29,7 +29,7 @@ export const getTripById = asyncHandler(async (req, res: any) => {
     });
 });
 
-export const confirmBoarding = asyncHandler(async (req: any, res: any) => {
+export const confirmBoarding = asyncHandler(async (req, res) => {
     const { tripId } = req.params;
     const { ticketId } = req.body;
     const driverId = req.user._id;

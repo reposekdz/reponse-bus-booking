@@ -41,7 +41,7 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
                 </div>
                 {result.driver && (
                     <div className="flex items-center space-x-2 mt-3 pt-2 border-t dark:border-gray-700 justify-center sm:justify-start">
-                        <img src={result.driver.avatarUrl} alt={result.driver.name} className="w-7 h-7 rounded-full"/>
+                        <img src={result.driver.avatarUrl} alt={result.driver.name} className="w-7 h-7 rounded-full object-cover"/>
                         <p className="text-xs text-gray-500 dark:text-gray-400">Driver: <span className="font-semibold text-gray-700 dark:text-gray-200">{result.driver.name}</span></p>
                     </div>
                 )}

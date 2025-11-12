@@ -1,11 +1,14 @@
+
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config';
-import User from '../api/users/user.model';
+import { pool } from '../config/db';
 import { AppError } from '../utils/AppError';
 import asyncHandler from '../utils/asyncHandler';
+import { User } from '../types';
+// FIX: Add missing import for mysql types
+import * as mysql from 'mysql2/promise';
 
-// FIX: Use `req: any` to allow access to custom `user` property and resolve header errors.
 export const protect = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -19,11 +22,15 @@ export const protect = asyncHandler(async (req: any, res: Response, next: NextFu
     try {
         const decoded = jwt.verify(token, config.jwt.secret!) as { id: string };
         
-        req.user = await User.findById(decoded.id).select('-password');
-
-        if (!req.user) {
+        const [rows] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [decoded.id]);
+        const user = rows[0];
+        
+        if (!user) {
             return next(new AppError('No user found with this id', 401));
         }
+
+        delete user.password_hash;
+        req.user = user;
 
         next();
     } catch (error) {
@@ -32,7 +39,6 @@ export const protect = asyncHandler(async (req: any, res: Response, next: NextFu
 });
 
 export const authorize = (...roles: string[]) => {
-    // FIX: Removed explicit types from middleware function parameters to allow for correct type inference.
     return (req: any, res: Response, next: NextFunction) => {
         if (!req.user || !roles.includes(req.user.role)) {
             return next(new AppError(`User role '${req.user?.role}' is not authorized to access this route`, 403));

@@ -75,7 +75,7 @@ export const getMyBookings = async () => {
     return data;
 };
 
-// --- COMPANIES (Public) ---
+// --- PUBLIC CONTENT ---
 export const getCompanies = async () => {
     const { data } = await apiFetch('/companies');
     return data;
@@ -84,6 +84,12 @@ export const getCompanyById = async (id: string) => {
     const { data } = await apiFetch(`/companies/${id}`);
     return data;
 };
+export const getSetting = (key: string) => apiFetch(`/settings/${key}`);
+export const getAllDestinations = async () => {
+    const { data } = await apiFetch('/destinations');
+    return data;
+};
+
 
 // --- WALLET ---
 export const getWalletHistory = async () => {
@@ -121,14 +127,13 @@ export const adminCreateDriver = (driverData: any) => apiFetch('/admin/drivers',
 export const adminUpdateDriver = (id: string, driverData: any) => apiFetch(`/admin/drivers/${id}`, { method: 'PUT', body: JSON.stringify(driverData) });
 export const adminDeleteDriver = (id: string) => apiFetch(`/admin/drivers/${id}`, { method: 'DELETE' });
 
-// FIX: Added missing admin functions for agent management.
 export const adminGetAllAgents = async () => {
     const { data } = await apiFetch('/admin/agents');
     return data;
 };
+export const adminCreateAgent = (agentData: any) => apiFetch('/admin/agents', { method: 'POST', body: JSON.stringify(agentData) });
 export const adminUpdateAgent = (id: string, agentData: any) => apiFetch(`/admin/agents/${id}`, { method: 'PUT', body: JSON.stringify(agentData) });
 export const adminDeleteAgent = (id: string) => apiFetch(`/admin/agents/${id}`, { method: 'DELETE' });
-
 
 export const adminGetAllUsers = async () => {
     const { data } = await apiFetch('/admin/users');
@@ -136,19 +141,16 @@ export const adminGetAllUsers = async () => {
 };
 
 export const adminGetDashboardAnalytics = async () => {
-    // This endpoint doesn't exist on the backend, so we return a structured empty state.
-    await simulateLatency();
-    return {
-        stats: { companies: 0, drivers: 0 },
-        revenueData: [],
-        passengerData: [],
-        companyRevenue: [],
-    };
-};
-export const adminCreateAgent = async (agentData: any) => {
-    const { data } = await apiFetch('/admin/agents', { method: 'POST', body: JSON.stringify(agentData) });
+    const { data } = await apiFetch('/admin/analytics');
     return data;
-}
+};
+
+export const adminUpdateSetting = (key: string, value: string) => apiFetch(`/admin/settings/${key}`, { method: 'PUT', body: JSON.stringify({ value }) });
+
+export const adminCreateDestination = (data: any) => apiFetch('/admin/destinations', { method: 'POST', body: JSON.stringify(data) });
+export const adminUpdateDestination = (id: number, data: any) => apiFetch(`/admin/destinations/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const adminDeleteDestination = (id: number) => apiFetch(`/admin/destinations/${id}`, { method: 'DELETE' });
+
 
 // --- COMPANY ---
 export const companyGetMyDrivers = async () => {

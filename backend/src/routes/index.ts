@@ -7,6 +7,8 @@ import companyRoutes from '../api/companies/company.routes';
 import debugRoutes from '../api/debug/debug.routes';
 import walletRoutes from '../api/wallet/wallet.routes';
 import messageRoutes from '../api/messages/message.routes';
+import settingsRoutes from '../api/settings/settings.routes';
+import destinationRoutes from '../api/destinations/destinations.routes';
 
 const router = Router();
 
@@ -19,6 +21,8 @@ router.use('/companies', companyRoutes);
 router.use('/debug', debugRoutes);
 router.use('/wallet', walletRoutes);
 router.use('/messages', messageRoutes);
+router.use('/settings', settingsRoutes);
+router.use('/destinations', destinationRoutes);
 
 
 export default router;

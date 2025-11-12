@@ -1,19 +1,26 @@
-import mongoose from 'mongoose';
+import mysql from 'mysql2/promise';
 import config from './index';
 import logger from '../utils/logger';
 
+const pool = mysql.createPool({
+    host: config.mysql.host,
+    user: config.mysql.user,
+    password: config.mysql.password,
+    database: config.mysql.database,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
 const connectDB = async () => {
     try {
-        if (!config.mongoUri) {
-            throw new Error('MONGO_URI is not defined in environment variables.');
-        }
-        await mongoose.connect(config.mongoUri);
-        logger.info('MongoDB connected successfully.');
+        const connection = await pool.getConnection();
+        logger.info('MySQL connected successfully.');
+        connection.release();
     } catch (error) {
-        logger.error('MongoDB connection failed:', error.message);
-        // FIX: Removed 'as any' to resolve type definition error for 'exit'.
+        logger.error('MySQL connection failed:', (error as Error).message);
         process.exit(1);
     }
 };
 
-export default connectDB;
+export { pool, connectDB };

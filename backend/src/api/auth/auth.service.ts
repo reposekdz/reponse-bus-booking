@@ -1,24 +1,40 @@
-import User from '../users/user.model';
+import bcrypt from 'bcryptjs';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import config from '../../config';
+import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
+import { User } from '../../types';
+import * as mysql from 'mysql2/promise';
+
+const generateToken = (userId: number) => {
+    return jwt.sign({ id: userId }, config.jwt.secret, {
+        expiresIn: config.jwt.expiresIn,
+    } as SignOptions);
+};
 
 export const registerUser = async (userData: any) => {
     const { name, email, password, phone } = userData;
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
+    const [existingUsers] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT id FROM users WHERE email = ?', [email]);
+    if (existingUsers.length > 0) {
         throw new AppError('User already exists', 400);
     }
     
-    // Force role to passenger for public registration
-    const user = await User.create({ name, email, password, phone, role: 'passenger' });
-
-    const token = user.getSignedJwtToken();
+    const password_hash = await bcrypt.hash(password, 10);
     
-    // Omit password from the returned user object
-    const userResponse = user.toObject();
-    delete userResponse.password;
+    const [result] = await pool.query<mysql.ResultSetHeader>(
+        'INSERT INTO users (name, email, password_hash, phone_number, role) VALUES (?, ?, ?, ?, ?)',
+        [name, email, password_hash, phone, 'passenger']
+    );
 
-    return { user: userResponse, token };
+    const userId = result.insertId;
+    const [rows] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [userId]);
+    const user = rows[0];
+    delete user.password_hash;
+    
+    const token = generateToken(userId);
+
+    return { user, token };
 };
 
 export const loginUser = async (loginData: any) => {
@@ -28,37 +44,36 @@ export const loginUser = async (loginData: any) => {
         throw new AppError('Please provide an email and password', 400);
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const [rows] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email]);
+    const user = rows[0];
 
-    if (!user || !(await user.matchPassword(password))) {
+    if (!user || !(await bcrypt.compare(password, user.password_hash!))) {
         throw new AppError('Invalid credentials', 401);
     }
 
-    const token = user.getSignedJwtToken();
+    const token = generateToken(user.id);
+    delete user.password_hash;
     
-    const userResponse = user.toObject();
-    delete userResponse.password;
-
-    return { user: userResponse, token };
+    return { user, token };
 };
 
-export const updatePassword = async (userId: string, currentPassword, newPassword) => {
+export const updatePassword = async (userId: number, currentPassword, newPassword) => {
     if (!currentPassword || !newPassword) {
         throw new AppError('Please provide current and new passwords', 400);
     }
 
-    const user = await User.findById(userId).select('+password');
+    const [rows] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT password_hash FROM users WHERE id = ?', [userId]);
+    const user = rows[0];
 
     if (!user) {
         throw new AppError('User not found', 404);
     }
 
-    const isMatch = await user.matchPassword(currentPassword);
-
+    const isMatch = await bcrypt.compare(currentPassword, user.password_hash!);
     if (!isMatch) {
         throw new AppError('Incorrect current password', 401);
     }
 
-    user.password = newPassword;
-    await user.save();
+    const new_password_hash = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [new_password_hash, userId]);
 };

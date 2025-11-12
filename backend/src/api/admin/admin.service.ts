@@ -1,154 +1,185 @@
-import Company from '../companies/company.model';
-import User from '../users/user.model';
+
+import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
+import * as mysql from 'mysql2/promise';
+import bcrypt from 'bcryptjs';
 
 // --- Company Services ---
 export const createCompany = async (companyData: any) => {
     const { name, ownerName, ownerEmail, password, ...contactDetails } = companyData;
 
-    // Check if a user with this email already exists
-    const userExists = await User.findOne({ email: ownerEmail });
-    if (userExists) {
-        throw new AppError('A user with this email already exists and cannot be assigned as a company owner.', 400);
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        const [existingUsers] = await connection.query('SELECT id FROM users WHERE email = ?', [ownerEmail]);
+        if ((existingUsers as any[]).length > 0) {
+            throw new AppError('A user with this email already exists.', 400);
+        }
+
+        const password_hash = await bcrypt.hash(password, 10);
+        const [userResult] = await connection.query<mysql.ResultSetHeader>(
+            'INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)',
+            [ownerName, ownerEmail, password_hash, 'company']
+        );
+        const ownerId = userResult.insertId;
+
+        const [companyResult] = await connection.query<mysql.ResultSetHeader>(
+            'INSERT INTO companies (name, owner_id, contact_email, contact_phone, address, status) VALUES (?, ?, ?, ?, ?, ?)',
+            [name, ownerId, contactDetails.contactEmail, contactDetails.contactPhone, contactDetails.address, 'Active']
+        );
+        const companyId = companyResult.insertId;
+
+        await connection.query('UPDATE users SET company_id = ? WHERE id = ?', [companyId, ownerId]);
+
+        await connection.commit();
+        const [companyRows] = await pool.query('SELECT * FROM companies WHERE id = ?', [companyId]);
+        return (companyRows as any)[0];
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
     }
-    
-    // Create the company manager user
-    const owner = await User.create({
-        name: ownerName,
-        email: ownerEmail,
-        password: password,
-        role: 'company',
-    });
-
-    const company = await Company.create({
-        name,
-        contact: contactDetails,
-        owner: owner._id,
-        status: 'Active'
-    });
-    
-    // Link company back to user
-    // FIX: Cast company._id to 'any' to resolve ObjectId type mismatch error.
-    owner.company = company._id as any;
-    await owner.save();
-
-    return company;
 };
 
 export const getAllCompanies = async () => {
-    return Company.find().populate('owner', 'name email');
+    const [rows] = await pool.query(`
+        SELECT c.*, u.name as owner_name, u.email as owner_email 
+        FROM companies c 
+        JOIN users u ON c.owner_id = u.id
+    `);
+    return rows;
 };
 
 export const updateCompanyById = async (id: string, updateData: any) => {
-    const company = await Company.findByIdAndUpdate(id, updateData, {
-        new: true,
-        runValidators: true
-    });
-    if (!company) {
+    const { name, status } = updateData;
+    const [result] = await pool.query('UPDATE companies SET name = ?, status = ? WHERE id = ?', [name, status, id]);
+    if ((result as mysql.OkPacket).affectedRows === 0) {
         throw new AppError('Company not found', 404);
     }
-    return company;
+    const [rows] = await pool.query('SELECT * FROM companies WHERE id = ?', [id]);
+    return (rows as any)[0];
 };
 
 export const deleteCompanyById = async (id: string) => {
-    const company = await Company.findById(id);
-    if (!company) {
+    // In a real app with cascading deletes handled by DB, this would be simpler.
+    // For now, we assume related data might be orphaned or handled by DB constraints.
+    const [result] = await pool.query('DELETE FROM companies WHERE id = ?', [id]);
+     if ((result as mysql.OkPacket).affectedRows === 0) {
         throw new AppError('Company not found', 404);
     }
-    // In a real app, you'd handle cascading deletes (buses, routes, etc.)
-    await company.deleteOne();
     return;
 };
-
 
 // --- Driver Services ---
 export const createDriver = async (driverData: any) => {
     const { name, email, password, phone, companyId } = driverData;
-    const company = await Company.findById(companyId);
-    if (!company) {
-        throw new AppError('Company not found', 404);
-    }
-    const driver = await User.create({ name, email, password, phone, role: 'driver', company: companyId });
-    const driverResponse = driver.toObject();
-    delete driverResponse.password;
-    return driverResponse;
+    const password_hash = await bcrypt.hash(password, 10);
+    const [result] = await pool.query<mysql.ResultSetHeader>(
+        'INSERT INTO users (name, email, password_hash, phone_number, role, company_id) VALUES (?, ?, ?, ?, ?, ?)',
+        [name, email, password_hash, phone, 'driver', companyId]
+    );
+    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [result.insertId]);
+    return (rows as any)[0];
 };
 
 export const getAllDrivers = async () => {
-    return User.find({ role: 'driver' }).populate('company', 'name');
+    const [rows] = await pool.query(`
+        SELECT u.*, c.name as company_name 
+        FROM users u 
+        LEFT JOIN companies c ON u.company_id = c.id 
+        WHERE u.role = 'driver'
+    `);
+    return rows;
 };
 
 export const updateDriverById = async (id: string, updateData: any) => {
-    // Admins shouldn't change passwords here
-    delete updateData.password;
-    
-    const driver = await User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
-    if (!driver || driver.role !== 'driver') {
+    const { name, phone, companyId } = updateData;
+    const [result] = await pool.query('UPDATE users SET name = ?, phone_number = ?, company_id = ? WHERE id = ? AND role = "driver"', [name, phone, companyId, id]);
+    if ((result as mysql.OkPacket).affectedRows === 0) {
         throw new AppError('Driver not found', 404);
     }
-    return driver;
+    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+    return (rows as any)[0];
 };
 
 export const deleteDriverById = async (id: string) => {
-    const driver = await User.findById(id);
-    if (!driver || driver.role !== 'driver') {
+    const [result] = await pool.query('DELETE FROM users WHERE id = ? AND role = "driver"', [id]);
+    if ((result as mysql.OkPacket).affectedRows === 0) {
         throw new AppError('Driver not found', 404);
     }
-    await driver.deleteOne();
     return;
 };
 
-
 // --- Agent Services ---
 export const createAgent = async (agentData: any) => {
-    const { name, email, password, phone, location, commissionRate, avatarUrl } = agentData;
-    
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-        throw new AppError('User with this email already exists.', 400);
-    }
-    
-    const agent = await User.create({
-        name,
-        email,
-        password,
-        phone,
-        role: 'agent',
-        location,
-        commissionRate,
-        avatarUrl,
-    });
-
-    const agentResponse = agent.toObject();
-    delete agentResponse.password;
-
-    return agentResponse;
+    const { name, email, password, phone, location } = agentData;
+    const password_hash = await bcrypt.hash(password, 10);
+    const [result] = await pool.query<mysql.ResultSetHeader>(
+        'INSERT INTO users (name, email, password_hash, phone_number, role, location) VALUES (?, ?, ?, ?, ?, ?)',
+        [name, email, password_hash, phone, 'agent', location]
+    );
+     const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [result.insertId]);
+    return (rows as any)[0];
 };
 
 export const getAllAgents = async () => {
-    return User.find({ role: 'agent' });
+    const [rows] = await pool.query("SELECT * FROM users WHERE role = 'agent'");
+    return rows;
 };
 
 export const updateAgentById = async (id: string, updateData: any) => {
-    delete updateData.password; // Password should be changed through a separate process
-    const agent = await User.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
-    if (!agent || agent.role !== 'agent') {
+    const { name, phone, location } = updateData;
+    const [result] = await pool.query('UPDATE users SET name = ?, phone_number = ?, location = ? WHERE id = ? AND role = "agent"', [name, phone, location, id]);
+    if ((result as mysql.OkPacket).affectedRows === 0) {
         throw new AppError('Agent not found', 404);
     }
-    return agent;
+     const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+    return (rows as any)[0];
 };
 
 export const deleteAgentById = async (id: string) => {
-    const agent = await User.findById(id);
-    if (!agent || agent.role !== 'agent') {
+    const [result] = await pool.query('DELETE FROM users WHERE id = ? AND role = "agent"', [id]);
+    if ((result as mysql.OkPacket).affectedRows === 0) {
         throw new AppError('Agent not found', 404);
     }
-    await agent.deleteOne();
     return;
 };
 
 
 // --- User Services ---
 export const getAllUsers = async () => {
-    return User.find().populate('company', 'name');
+    const [rows] = await pool.query(`
+        SELECT u.id, u.name, u.email, u.role, u.created_at, u.status, u.avatar_url, c.name as company_name 
+        FROM users u 
+        LEFT JOIN companies c ON u.company_id = c.id
+    `);
+    return rows;
+};
+
+// --- Dashboard Analytics ---
+export const getDashboardAnalytics = async () => {
+    const [[{ count: companies }]] = await pool.query<any[] & mysql.RowDataPacket[]>("SELECT COUNT(*) as count FROM companies WHERE status = 'Active'");
+    
+    // Mock data for now as queries would be complex
+    const revenueData = [
+        { day: 'Mon', revenue: 1200000 }, { day: 'Tue', revenue: 1500000 }, { day: 'Wed', revenue: 1350000 },
+        { day: 'Thu', revenue: 1800000 }, { day: 'Fri', revenue: 2500000 }, { day: 'Sat', revenue: 3200000 }, { day: 'Sun', revenue: 2800000 }
+    ];
+    const passengerData = [
+        { day: 'Mon', passengers: 1200 }, { day: 'Tue', passengers: 1500 }, { day: 'Wed', passengers: 1350 },
+        { day: 'Thu', passengers: 1800 }, { day: 'Fri', passengers: 2500 }, { day: 'Sat', passengers: 3200 }, { day: 'Sun', passengers: 2800 }
+    ];
+    const companyRevenue = [
+        { name: 'Volcano Express', revenue: 12500000 },
+        { name: 'RITCO', revenue: 9800000 },
+    ];
+
+    return {
+        stats: { companies },
+        revenueData,
+        passengerData,
+        companyRevenue
+    };
 };

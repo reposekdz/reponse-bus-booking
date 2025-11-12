@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -66,7 +67,7 @@ export type Page =
   | 'corporateTravel' | 'tourPackages' | 'travelInsurance' | 'giftCards' | 'adminAnnouncements'
   | 'hotelBooking' | 'eventTickets' | 'vehicleRentals' | 'vipLounge' | 'companyRouteAnalytics'
   | 'bookingConfirmation' | 'favorites' | 'priceAlerts' | 'loyalty' | 'wallet' | 'companyDriverProfile'
-  | 'adminMessages';
+  | 'adminMessages' | 'adminSettings' | 'adminDestinations';
 
 
 const AppContent: React.FC = () => {
@@ -145,7 +146,6 @@ const AppContent: React.FC = () => {
     switch (currentPage) {
       case 'login': return <LoginPage onNavigate={navigate} />;
       case 'register': return <RegisterPage onNavigate={navigate} />;
-      {/* FIX: Add missing favoriteTripIds and onToggleFavorite props */}
       case 'search': return <SearchResultsPage results={pageData} onTripSelect={(tripId) => navigate('seatSelection', { tripId })} favoriteTripIds={favoriteTripIds} onToggleFavorite={handleToggleFavorite} />;
       case 'seatSelection': return <SeatSelectionPage tripId={pageData.tripId} onConfirm={(bookingDetails) => navigate('payment', bookingDetails)} onBack={() => navigate('bookingSearch')} />;
       case 'payment': return <PaymentPage bookingDetails={pageData} onNavigate={navigate} />;
@@ -175,7 +175,7 @@ const AppContent: React.FC = () => {
       case 'loyalty': return <LoyaltyPage user={user} onNavigate={navigate} />;
       case 'wallet': return <WalletPage onNavigate={navigate} />;
       
-      case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions': case 'adminAnnouncements': case 'adminMessages':
+      case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions': case 'adminAnnouncements': case 'adminMessages': case 'adminSettings': case 'adminDestinations':
         return user?.role === 'admin' ? <AdminLayout currentPage={currentPage} navigate={navigate} theme={theme} setTheme={setTheme} onLogout={handleLogout}/> : <p>Access Denied</p>;
         
       case 'companyDashboard': case 'companyBuses': case 'companyDrivers': case 'companyRoutes': case 'companyPassengers': case 'companyFinancials': case 'companySettings': case 'fleetMonitoring': case 'companyRouteAnalytics': case 'companyDriverProfile':
@@ -210,7 +210,7 @@ const AppContent: React.FC = () => {
     }
   };
   
-  const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'adminAnnouncements', 'adminMessages', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile', 'passengerProfile', 'companyRouteAnalytics', 'companyDriverProfile'].includes(currentPage);
+  const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'adminAnnouncements', 'adminMessages', 'adminSettings', 'adminDestinations', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile', 'passengerProfile', 'companyRouteAnalytics', 'companyDriverProfile'].includes(currentPage);
   const isFullScreenPage = ['bookingConfirmation'].includes(currentPage);
   const showHeader = !isDashboard && !isFullScreenPage;
   const showFooter = !isDashboard && !isFullScreenPage;
