@@ -38,7 +38,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
     try {
         await register(formData);
         // Auth context will handle navigation or App.tsx will re-render
-    } catch(err) {
+    } catch(err: any) {
         setError(err.message || "Registration failed.");
     }
   };

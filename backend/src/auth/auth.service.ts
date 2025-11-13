@@ -1,4 +1,5 @@
-import User from '../api/users/user.model';
+
+import User from '../api/models/user.model';
 import { AppError } from '../utils/AppError';
 
 export const registerUser = async (userData: any) => {

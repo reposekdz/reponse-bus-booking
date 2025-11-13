@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, FormEvent } from 'react';
 import { 
     SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, ArrowDownLeftIcon,
@@ -440,7 +441,14 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ onLogout, theme, setThe
         }
     };
 
-    const NavLink = ({ viewName, label, icon: Icon }) => (
+    // FIX: Added interface for NavLink props to resolve type error.
+    interface NavLinkProps {
+        viewName: string;
+        label: string;
+        icon: React.FC<React.SVGProps<SVGSVGElement>>;
+    }
+
+    const NavLink: React.FC<NavLinkProps> = ({ viewName, label, icon: Icon }) => (
       <button onClick={() => viewName === 'profile' ? navigate('agentProfile') : setView(viewName)} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative ${view === viewName ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
           <div className={`absolute left-0 top-0 h-full w-1 rounded-r-full bg-yellow-400 transition-all duration-300 ${view === viewName ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-50'}`}></div>
           <Icon className="w-6 h-6 mr-4 transition-transform duration-300 group-hover:scale-110" />

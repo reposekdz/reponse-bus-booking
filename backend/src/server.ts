@@ -30,7 +30,8 @@ const startServer = async () => {
         });
     } catch (error) {
         logger.error('Failed to start server:', error);
-        process.exit(1);
+        // FIX: Cast process to any to avoid type error when node types are missing.
+        (process as any).exit(1);
     }
 };
 

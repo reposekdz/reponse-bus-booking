@@ -1,4 +1,3 @@
-
 -- GoBus Platform Database Schema
 -- SQL Dialect: PostgreSQL
 
@@ -9,9 +8,9 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     phone_number VARCHAR(20),
-    role VARCHAR(50) NOT NULL CHECK (role IN ('passenger', 'driver', 'agent', 'company_admin', 'platform_admin')),
+    role VARCHAR(50) NOT NULL CHECK (role IN ('passenger', 'driver', 'agent', 'company', 'admin')),
     avatar_url TEXT,
-    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'pending')),
+    status VARCHAR(50) DEFAULT 'Active' CHECK (status IN ('Active', 'Suspended', 'Pending')),
     company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -23,11 +22,12 @@ CREATE TABLE companies (
     name VARCHAR(255) UNIQUE NOT NULL,
     description TEXT,
     logo_url TEXT,
+    cover_url TEXT,
     contact_email VARCHAR(255),
     contact_phone VARCHAR(20),
     address TEXT,
     owner_id INTEGER REFERENCES users(id) ON DELETE RESTRICT,
-    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('active', 'pending', 'suspended')),
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('Active', 'Pending', 'Suspended')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -40,7 +40,8 @@ CREATE TABLE buses (
     model VARCHAR(100),
     capacity INTEGER NOT NULL,
     amenities TEXT[], -- Array of strings like {'WiFi', 'AC', 'Charging'}
-    status VARCHAR(50) DEFAULT 'operational' CHECK (status IN ('operational', 'maintenance', 'on_route')),
+    status VARCHAR(50) DEFAULT 'operational' CHECK (status IN ('Operational', 'Maintenance', 'On Route')),
+    image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -53,7 +54,7 @@ CREATE TABLE routes (
     destination VARCHAR(255) NOT NULL,
     base_price NUMERIC(10, 2) NOT NULL,
     estimated_duration_minutes INTEGER NOT NULL,
-    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('Active', 'Inactive')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (company_id, origin, destination)
@@ -67,7 +68,7 @@ CREATE TABLE trips (
     driver_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
     departure_time TIMESTAMP WITH TIME ZONE NOT NULL,
     arrival_time TIMESTAMP WITH TIME ZONE NOT NULL,
-    status VARCHAR(50) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'departed', 'arrived', 'cancelled', 'delayed')),
+    status VARCHAR(50) DEFAULT 'scheduled' CHECK (status IN ('Scheduled', 'Departed', 'Arrived', 'Cancelled', 'Delayed')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -79,7 +80,7 @@ CREATE TABLE bookings (
     trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
     booking_id VARCHAR(20) UNIQUE NOT NULL, -- User-facing ID, e.g., GB-XYZ123
     total_price NUMERIC(10, 2) NOT NULL,
-    status VARCHAR(50) DEFAULT 'confirmed' CHECK (status IN ('confirmed', 'cancelled', 'completed', 'pending_payment')),
+    status VARCHAR(50) DEFAULT 'confirmed' CHECK (status IN ('Confirmed', 'Cancelled', 'Completed', 'Pending')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -93,18 +94,15 @@ CREATE TABLE seats (
     UNIQUE (trip_id, seat_number) -- A seat can only be booked once per trip
 );
 
--- Payments Table: Tracks payment information for each booking
-CREATE TABLE payments (
+-- Boardings Table: Log when a passenger's ticket is scanned
+CREATE TABLE boardings (
     id SERIAL PRIMARY KEY,
-    booking_id INTEGER NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
-    amount NUMERIC(10, 2) NOT NULL,
-    method VARCHAR(50) CHECK (method IN ('wallet', 'momo', 'card')),
-    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'successful', 'failed')),
-    transaction_id VARCHAR(255) UNIQUE,
-    gateway_response JSONB,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    booking_id INTEGER NOT NULL REFERENCES bookings(id),
+    trip_id INTEGER NOT NULL REFERENCES trips(id),
+    driver_id INTEGER NOT NULL REFERENCES users(id),
+    boarded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- Passenger Wallet Table
 CREATE TABLE wallets (
@@ -119,31 +117,80 @@ CREATE TABLE wallet_transactions (
     id SERIAL PRIMARY KEY,
     wallet_id INTEGER NOT NULL REFERENCES wallets(id) ON DELETE CASCADE,
     amount NUMERIC(10, 2) NOT NULL, -- Positive for deposits, negative for withdrawals/payments
-    type VARCHAR(50) CHECK (type IN ('deposit', 'purchase', 'refund', 'bonus')),
+    type VARCHAR(50) CHECK (type IN ('deposit', 'purchase', 'refund', 'bonus', 'commission')),
     description TEXT,
     related_booking_id INTEGER REFERENCES bookings(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Notifications Table
-CREATE TABLE notifications (
+-- Contact Messages Table
+CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    subject TEXT,
     message TEXT NOT NULL,
-    type VARCHAR(50) CHECK (type IN ('trip_reminder', 'delay', 'promotion', 'announcement')),
-    is_read BOOLEAN DEFAULT FALSE,
+    status VARCHAR(50) DEFAULT 'New' CHECK (status IN ('New', 'Read', 'Archived')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Analytics Table: Stores aggregated daily data for performance tracking
-CREATE TABLE daily_analytics (
+-- Site Settings Table
+CREATE TABLE site_settings (
     id SERIAL PRIMARY KEY,
-    date DATE UNIQUE NOT NULL,
-    total_revenue NUMERIC(15, 2),
-    total_passengers INTEGER,
-    total_bookings INTEGER,
-    company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE, -- Can be NULL for platform-wide analytics
-    route_id INTEGER REFERENCES routes(id) ON DELETE CASCADE, -- Can be NULL for company-wide analytics
+    setting_key VARCHAR(100) UNIQUE NOT NULL,
+    setting_value TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Featured Destinations Table
+CREATE TABLE featured_destinations (
+    id SERIAL PRIMARY KEY,
+    from_location VARCHAR(255) NOT NULL,
+    to_location VARCHAR(255) NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    image_data_uri TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Reviews Table
+CREATE TABLE reviews (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Services Table (for company-specific offerings)
+CREATE TABLE services (
+    id SERIAL PRIMARY KEY,
+    company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Promotions Table
+CREATE TABLE promotions (
+    id SERIAL PRIMARY KEY,
+    company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE, -- NULL for platform-wide promotions
+    code VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    discount_type VARCHAR(20) CHECK (discount_type IN ('percentage', 'fixed')),
+    discount_value NUMERIC(10, 2),
+    start_date DATE,
+    end_date DATE,
+    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'expired')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Gallery Table (for company profiles)
+CREATE TABLE gallery (
+    id SERIAL PRIMARY KEY,
+    company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    category VARCHAR(100),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -151,8 +198,5 @@ CREATE TABLE daily_analytics (
 CREATE INDEX idx_trips_departure_time ON trips(departure_time);
 CREATE INDEX idx_bookings_user_id ON bookings(user_id);
 CREATE INDEX idx_seats_trip_id ON seats(trip_id);
-CREATE INDEX idx_notifications_user_id ON notifications(user_id);
-CREATE INDEX idx_analytics_date ON daily_analytics(date);
 
 -- END OF SCHEMA
-      

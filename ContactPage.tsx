@@ -21,7 +21,7 @@ const ContactPage: React.FC = () => {
       await api.submitContactMessage(formData);
       setSuccess(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'Failed to send message. Please try again.');
     } finally {
       setIsLoading(false);

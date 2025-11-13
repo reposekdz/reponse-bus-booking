@@ -1,7 +1,5 @@
+
 import { pool } from '../../config/db';
-import Booking from './booking.model';
-import Trip from '../trips/trip.model';
-import User from '../users/user.model';
 import { AppError } from '../../utils/AppError';
 import * as mysql from 'mysql2/promise';
 

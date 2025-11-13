@@ -9,8 +9,8 @@ interface LoginPageProps {
 
 const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('reponse@gmail.com');
-  const [password, setPassword] = useState('2025');
+  const [email, setEmail] = useState('passenger@gobus.rw');
+  const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
 
   const { login, isLoading } = useAuth();
@@ -21,7 +21,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
       try {
           await login({ email, password });
           // The App component will handle navigation based on the user's role
-      } catch (err) {
+      } catch (err: any) {
           setError(err.message || 'Login failed. Please check your credentials.');
       }
   };
