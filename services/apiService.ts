@@ -283,6 +283,9 @@ export const trackPackage = async (trackingId: string) => {
 
 export const createCharterRequest = (charterData: any) => apiFetch('/charters', { method: 'POST', body: JSON.stringify(charterData) });
 
+// --- NOTIFICATIONS ---
+export const subscribePush = (subscription: any) => apiFetch('/notifications/subscribe', { method: 'POST', body: JSON.stringify(subscription) });
+
 
 // --- DEBUG ---
 export const seedDatabase = () => apiFetch('/debug/seed', { method: 'POST' });

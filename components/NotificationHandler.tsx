@@ -1,0 +1,71 @@
+import React, { useEffect } from 'react';
+import * as api from '../services/apiService';
+import { useAuth } from '../contexts/AuthContext';
+
+// This is a public key for the VAPID protocol, used to identify the application server.
+// In a real production app, this would be stored securely as an environment variable.
+const VAPID_PUBLIC_KEY = 'BElA_xXf2-k-y-9-uG59iG-rKzJ7-p0L3B_yS7_zC3-n8F5uT5wN_qC-sA_bO-jD8fK_lP-tO_iR_s';
+
+// Helper function to convert the VAPID key to the format required by the Push API.
+function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+
+const NotificationHandler: React.FC = () => {
+    const { user } = useAuth();
+
+    useEffect(() => {
+        if (!user || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+            return;
+        }
+
+        const subscribeUser = async () => {
+            try {
+                const swRegistration = await navigator.serviceWorker.register('/sw.js');
+                let subscription = await swRegistration.pushManager.getSubscription();
+
+                if (subscription === null) {
+                    subscription = await swRegistration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                    });
+                }
+                
+                await api.subscribePush({
+                    endpoint: subscription.endpoint,
+                    keys: {
+                        p256dh: subscription.toJSON().keys!.p256dh,
+                        auth: subscription.toJSON().keys!.auth
+                    },
+                    platform: 'web'
+                });
+
+            } catch (error) {
+                console.error('Failed to subscribe to push notifications:', error);
+            }
+        };
+        
+        if (Notification.permission === 'granted') {
+            subscribeUser();
+        } else if (Notification.permission === 'default') {
+            // In a real app, you would show a UI element before this prompt.
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    subscribeUser();
+                }
+            });
+        }
+    }, [user]);
+
+    return null; // This component does not render anything.
+};
+
+export default NotificationHandler;

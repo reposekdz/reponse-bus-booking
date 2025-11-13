@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import QRCode from 'qrcode';
 import { Page } from './App';
-import { CheckCircleIcon, ArrowUpTrayIcon, TicketIcon, ArrowRightIcon } from './components/icons';
+import { CheckCircleIcon, ArrowUpTrayIcon, TicketIcon, ArrowRightIcon, ShareIcon } from './components/icons';
 
 const RealQRCode: React.FC<{ ticketData: any; size: number }> = ({ ticketData, size }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -50,6 +50,18 @@ const BookingConfirmationPage: React.FC<{ bookingDetails: any, onNavigate: (page
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             });
+        }
+    };
+
+    const handleShare = () => {
+        if (navigator.share) {
+            navigator.share({
+                title: 'My GoBus Ticket',
+                text: `I just booked a trip from ${bookingDetails.from} to ${bookingDetails.to} on GoBus! #GoBus #RwandaTravel`,
+                url: window.location.href
+            }).catch((error) => console.log('Error sharing', error));
+        } else {
+            alert('Web Share API is not supported in your browser.');
         }
     };
     
@@ -111,6 +123,10 @@ const BookingConfirmationPage: React.FC<{ bookingDetails: any, onNavigate: (page
                          <button onClick={handleDownload} className="w-full flex items-center justify-center p-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-colors">
                             <ArrowUpTrayIcon className="w-6 h-6 mr-3"/>
                             Download Ticket
+                        </button>
+                         <button onClick={handleShare} className="w-full flex items-center justify-center p-4 bg-green-500 text-white font-bold rounded-xl shadow-lg hover:bg-green-600 transition-colors">
+                            <ShareIcon className="w-6 h-6 mr-3"/>
+                            Share My Trip
                         </button>
                         <button onClick={() => onNavigate('bookings')} className="w-full flex items-center justify-center p-4 bg-white dark:bg-gray-700 text-gray-800 dark:text-white font-bold rounded-xl shadow-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                             <TicketIcon className="w-6 h-6 mr-3"/>

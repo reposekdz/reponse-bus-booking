@@ -54,6 +54,7 @@ import PaymentPage from './PaymentPage';
 import WalletPage from './WalletPage';
 import { useAuth } from './contexts/AuthContext';
 import LoadingSpinner from './components/LoadingSpinner';
+import NotificationHandler from './components/NotificationHandler';
 
 
 export type Page = 
@@ -231,6 +232,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className={`font-sans bg-white dark:bg-gray-900`}>
+        <NotificationHandler />
         {showHeader && (
              <Header 
                 currentPage={currentPage} 

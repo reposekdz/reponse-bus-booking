@@ -1,7 +1,7 @@
 // New screen to confirm a successful booking.
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CheckIcon = () => <Text style={styles.checkIcon}>✓</Text>;
@@ -9,6 +9,16 @@ const CheckIcon = () => <Text style={styles.checkIcon}>✓</Text>;
 export default function BookingConfirmationScreen({ route, navigation }) {
     const { bookingDetails } = route.params;
     const pointsEarned = Math.floor(bookingDetails.totalPrice / 100); // Mock points
+
+    const onShare = async () => {
+        try {
+          await Share.share({
+            message: `I just booked a trip from ${bookingDetails.from} to ${bookingDetails.to} with GoBus! #GoBus #RwandaTravel`,
+          });
+        } catch (error: any) {
+          Alert.alert(error.message);
+        }
+    };
 
     if (!bookingDetails) {
         return (
@@ -43,6 +53,13 @@ export default function BookingConfirmationScreen({ route, navigation }) {
                     onPress={() => navigation.navigate('MainApp', { screen: 'My Tickets'})}
                 >
                     <Text style={styles.buttonText}>View My Tickets</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                    style={[styles.button, styles.shareButton]}
+                    onPress={onShare}
+                >
+                    <Text style={[styles.buttonText, styles.shareButtonText]}>Share My Trip</Text>
                 </TouchableOpacity>
 
                  <TouchableOpacity onPress={() => navigation.popToTop()}>
@@ -118,6 +135,13 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    shareButton: {
+        backgroundColor: '#10B981',
+        marginTop: 12,
+    },
+    shareButtonText: {
+        color: 'white',
     },
     homeLink: {
         marginTop: 20,

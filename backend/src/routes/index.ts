@@ -18,6 +18,7 @@ import lostAndFoundRoutes from '../api/lost-and-found/lost-and-found.routes';
 import packageRoutes from '../api/packages/packages.routes';
 import charterRoutes from '../api/charters/charters.routes';
 import userRoutes from '../api/users/user.routes';
+import notificationRoutes from '../api/notifications/notifications.routes';
 
 const router = Router();
 
@@ -41,6 +42,7 @@ router.use('/lost-and-found', lostAndFoundRoutes);
 router.use('/packages', packageRoutes);
 router.use('/charters', charterRoutes);
 router.use('/users', userRoutes);
+router.use('/notifications', notificationRoutes);
 
 
 export default router;

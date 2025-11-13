@@ -2,6 +2,8 @@ import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
 import * as mysql from 'mysql2/promise';
 import { verifyPin } from '../wallet/wallet.service';
+import * as notificationService from '../notifications/notifications.service';
+import logger from '../../utils/logger';
 
 interface BookingDetails {
     tripId: string;
@@ -81,8 +83,19 @@ export const createBooking = async (userId: number, details: BookingDetails) => 
             );
         }
 
-
         await connection.commit();
+
+        // Send push notification after successful booking
+        try {
+            await notificationService.sendNotification(userId, {
+                title: 'Booking Confirmed!',
+                body: `Your ticket for trip #${tripId} has been booked successfully.`,
+                data: { bookingId: newBookingId, screen: 'TicketDetails' } // For deep linking on mobile
+            });
+        } catch (notificationError) {
+            // Don't fail the booking if notification fails. Just log it.
+            logger.error(`Failed to send booking confirmation notification for user ${userId}:`, notificationError);
+        }
         
         return {
             bookingId: bookingId,
