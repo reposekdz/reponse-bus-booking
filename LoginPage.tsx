@@ -10,7 +10,7 @@ interface LoginPageProps {
 
 const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('passenger@gobus.rw');
+  const [emailOrPhone, setEmailOrPhone] = useState('passenger@gobus.rw');
   const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
 
@@ -21,7 +21,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
       e.preventDefault();
       setError('');
       try {
-          await login({ email, password });
+          await login({ email: emailOrPhone, password });
           // The App component will handle navigation based on the user's role
       } catch (err: any) {
           setError(err.message || t('login_error_credentials'));
@@ -40,11 +40,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
           <form className="space-y-6" onSubmit={handleLogin}>
             <div className="relative">
               <label htmlFor="email-address" className="sr-only">{t('login_email_label')}</label>
-              <input id="email-address" name="email" type="email" autoComplete="email" required 
+              <input id="email-address" name="email" type="text" autoComplete="email" required 
                 className="w-full pl-4 pr-3 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition" 
-                placeholder={t('login_email_placeholder')}
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                placeholder={t('login_email_or_phone_placeholder')}
+                value={emailOrPhone}
+                onChange={e => setEmailOrPhone(e.target.value)}
               />
             </div>
             <div className="relative">

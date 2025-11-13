@@ -14,10 +14,23 @@ const generateToken = (userId: number) => {
 
 export const registerUser = async (userData: any) => {
     const { name, email, password, phone } = userData;
+    
+    if(!email && !phone){
+        throw new AppError('Email or Phone number is required', 400);
+    }
 
-    const [existingUsers] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT id FROM users WHERE email = ?', [email]);
-    if (existingUsers.length > 0) {
-        throw new AppError('User already exists', 400);
+    if(email){
+        const [existingUsers] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT id FROM users WHERE email = ?', [email]);
+        if (existingUsers.length > 0) {
+            throw new AppError('User with this email already exists', 400);
+        }
+    }
+
+    if(phone){
+        const [existingUsers] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT id FROM users WHERE phone_number = ?', [phone]);
+        if (existingUsers.length > 0) {
+            throw new AppError('User with this phone number already exists', 400);
+        }
     }
     
     const password_hash = await bcrypt.hash(password, 10);
@@ -45,13 +58,16 @@ export const registerUser = async (userData: any) => {
 };
 
 export const loginUser = async (loginData: any) => {
-    const { email, password } = loginData;
+    const { email: emailOrPhone, password } = loginData;
 
-    if (!email || !password) {
-        throw new AppError('Please provide an email and password', 400);
+    if (!emailOrPhone || !password) {
+        throw new AppError('Please provide login credentials', 400);
     }
+    
+    const isEmail = emailOrPhone.includes('@');
+    const queryField = isEmail ? 'email' : 'phone_number';
 
-    const [rows] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await pool.query<User[] & mysql.RowDataPacket[]>(`SELECT * FROM users WHERE ${queryField} = ?`, [emailOrPhone]);
     const user = rows[0];
 
     if (!user || !(await bcrypt.compare(password, user.password_hash!))) {

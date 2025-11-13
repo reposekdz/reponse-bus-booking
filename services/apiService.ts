@@ -111,6 +111,8 @@ export const topUpWallet = async (amount: number) => {
     return data;
 };
 export const setWalletPin = (pin: string) => apiFetch('/wallet/set-pin', { method: 'PUT', body: JSON.stringify({ pin }) });
+// FIX: Added walletTransfer function to handle peer-to-peer fund transfers.
+export const walletTransfer = (data: any) => apiFetch('/wallet/transfer', { method: 'POST', body: JSON.stringify(data) });
 
 // --- MESSAGES ---
 export const submitContactMessage = (messageData: any) => apiFetch('/messages', { method: 'POST', body: JSON.stringify(messageData) });

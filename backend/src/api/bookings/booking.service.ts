@@ -3,16 +3,18 @@
 import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
 import * as mysql from 'mysql2/promise';
+import { verifyPin } from '../wallet/wallet.service';
 
 interface BookingDetails {
     tripId: string;
     seats: string[];
     paymentMethod: string;
     totalPrice: number;
+    pin?: string;
 }
 
 export const createBooking = async (userId: number, details: BookingDetails) => {
-    const { tripId, seats, paymentMethod, totalPrice } = details;
+    const { tripId, seats, paymentMethod, totalPrice, pin } = details;
     
     const connection = await pool.getConnection();
     await connection.beginTransaction();
@@ -39,13 +41,25 @@ export const createBooking = async (userId: number, details: BookingDetails) => 
             }
         }
         
-        // --- Payment Processing Simulation ---
-        if (paymentMethod === 'Wallet') {
+        // --- Payment Processing ---
+        if (paymentMethod === 'wallet') {
+            await verifyPin(userId, pin!);
+            
             const [walletResult] = await connection.query<mysql.OkPacket>('UPDATE wallets SET balance = balance - ? WHERE user_id = ? AND balance >= ?', [totalPrice, userId, totalPrice]);
             if (walletResult.affectedRows === 0) {
                 throw new AppError('Insufficient wallet balance', 400);
             }
+            
+            // Log wallet transaction
+            const [walletRows] = await connection.query<any[] & mysql.RowDataPacket[]>('SELECT id FROM wallets WHERE user_id = ?', [userId]);
+            const walletId = walletRows[0].id;
+            await connection.query(
+                'INSERT INTO wallet_transactions (wallet_id, amount, type, description) VALUES (?, ?, ?, ?)',
+                [walletId, -totalPrice, 'purchase', `Ticket purchase for trip #${tripId}`]
+            );
+
         }
+        // Other payment methods like 'momo' are handled client-side first, then confirmed here.
 
         const bookingId = `GB-${Date.now().toString().slice(-6)}`;
         const [bookingResult] = await connection.query<mysql.ResultSetHeader>(
@@ -79,9 +93,9 @@ export const createBooking = async (userId: number, details: BookingDetails) => 
 export const getBookingsForUser = async (userId: number) => {
     const [rows] = await pool.query(`
         SELECT 
-            b.id as _id, b.booking_id, b.total_price, b.created_at,
+            b.id as _id, b.booking_id as bookingId, b.total_price as totalPrice, b.created_at as createdAt,
             GROUP_CONCAT(s.seat_number) as seats,
-            t.departure_time, t.arrival_time,
+            t.departure_time as departureTime, t.arrival_time as arrivalTime,
             r.origin, r.destination,
             c.name as company_name
         FROM bookings b
@@ -97,12 +111,12 @@ export const getBookingsForUser = async (userId: number) => {
     // Re-structure to match frontend expectations
     return (rows as any[]).map(row => ({
         _id: row._id,
-        bookingId: row.booking_id,
-        totalPrice: row.total_price,
+        bookingId: row.bookingId,
+        totalPrice: row.totalPrice,
         seats: row.seats.split(','),
         trip: {
-            departureTime: row.departure_time,
-            arrivalTime: row.arrival_time,
+            departureTime: row.departureTime,
+            arrivalTime: row.arrivalTime,
             route: {
                 from: row.origin,
                 to: row.destination,

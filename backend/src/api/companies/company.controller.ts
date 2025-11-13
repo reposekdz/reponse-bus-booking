@@ -47,3 +47,15 @@ export const getDriverHistoryForCompany = asyncHandler(async (req: any, res: any
     const history = await driverService.getTripHistoryForDriver(parseInt(req.params.id));
     res.status(200).json({ success: true, data: history });
 });
+
+// --- Gallery Management ---
+export const addGalleryImage = asyncHandler(async (req: any, res: any) => {
+    const { imageUrl, category } = req.body;
+    const newImage = await companyService.addGalleryImage(req.user.company_id, imageUrl, category);
+    res.status(201).json({ success: true, data: newImage });
+});
+
+export const deleteGalleryImage = asyncHandler(async (req: any, res: any) => {
+    await companyService.deleteGalleryImage(req.user.company_id, parseInt(req.params.id));
+    res.status(200).json({ success: true, data: {} });
+});

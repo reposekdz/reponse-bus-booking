@@ -6,6 +6,8 @@ import * as api from './services/apiService';
 import { useLanguage } from './contexts/LanguageContext';
 import { useSocket } from './contexts/SocketContext';
 import Modal from './components/Modal';
+import { useAuth } from './contexts/AuthContext';
+import PinModal from './components/PinModal';
 
 
 const MomoAwaitingConfirmationModal: React.FC<{amount: number, phone: string, onCancel: () => void}> = ({ amount, phone, onCancel }) => {
@@ -27,9 +29,11 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
     const [momoPhone, setMomoPhone] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isAwaitingMomo, setIsAwaitingMomo] = useState(false);
+    const [isPinModalOpen, setIsPinModalOpen] = useState(false);
     const [error, setError] = useState('');
     const { t } = useLanguage();
     const socket = useSocket();
+    const { user, setUser } = useAuth();
 
     useEffect(() => {
         if (socket && isAwaitingMomo) {
@@ -38,7 +42,7 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
                 // Ensure the signal is for THIS booking
                 if (data.bookingDetails.tripId === bookingDetails.tripId) {
                     setIsAwaitingMomo(false);
-                    finalizeBooking();
+                    finalizeBooking('momo');
                 }
             };
             const handlePaymentFailure = (data) => {
@@ -67,17 +71,25 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
         )
     };
     
-    const finalizeBooking = async () => {
+    // FIX: Add pin parameter to pass to API
+    const finalizeBooking = async (finalPaymentMethod: string, pin?: string) => {
         setIsProcessing(true);
         setError('');
         try {
              const bookingPayload = {
                 tripId: bookingDetails.tripId,
                 seats: bookingDetails.seats,
-                paymentMethod,
-                totalPrice: bookingDetails.totalPrice
+                paymentMethod: finalPaymentMethod,
+                totalPrice: bookingDetails.totalPrice,
+                pin: pin, // Pass the pin for wallet transactions
             };
             const confirmedBooking = await api.createBooking(bookingPayload);
+            
+            // If wallet was used, update user context
+            if(finalPaymentMethod === 'wallet') {
+                setUser(prev => ({...prev, walletBalance: prev.walletBalance - bookingDetails.totalPrice}))
+            }
+            
             onNavigate('bookingConfirmation', { ...bookingDetails, ...confirmedBooking });
         } catch (err: any) {
              setError(err.message || t('payment_error_finalizing'));
@@ -89,9 +101,9 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        setIsProcessing(true);
-
+        
         if (paymentMethod === 'momo') {
+            setIsProcessing(true);
             try {
                 await api.initiateMomoPayment({ ...bookingDetails, phone: momoPhone });
                 setIsAwaitingMomo(true);
@@ -99,16 +111,37 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
                 setError(err.message || t('payment_error_momo_start'));
                 setIsProcessing(false);
             }
+        } else if (paymentMethod === 'wallet') {
+            if ((user?.walletBalance || 0) < bookingDetails.totalPrice) {
+                setError('Insufficient wallet balance.');
+                return;
+            }
+            setIsPinModalOpen(true);
         } else {
-            // For Card or Wallet, we finalize immediately
-            await finalizeBooking();
+            // For Card, we would integrate a payment gateway like Stripe here
+            alert('Card payments are not yet implemented.');
         }
+    };
+    
+    // FIX: Accept pin from modal and pass it to finalizeBooking
+    const handlePinSuccess = (pin: string) => {
+        setIsPinModalOpen(false);
+        finalizeBooking('wallet', pin);
     };
 
     return (
         <>
         {isProcessing && !isAwaitingMomo && <LoadingSpinner />}
         {isAwaitingMomo && <MomoAwaitingConfirmationModal amount={bookingDetails.totalPrice} phone={momoPhone} onCancel={() => { setIsAwaitingMomo(false); setIsProcessing(false); }} />}
+        {isPinModalOpen && user?.pin && 
+            <PinModal 
+                onClose={() => setIsPinModalOpen(false)}
+                onSuccess={handlePinSuccess}
+                pinToMatch={user.pin}
+                title="Confirm Wallet Payment"
+                description={`Enter your PIN to authorize payment of ${new Intl.NumberFormat('fr-RW').format(bookingDetails.totalPrice)} RWF`}
+            />
+        }
         
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12 px-4">
             <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -132,9 +165,9 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
                     <h2 className="text-2xl font-bold mb-6 dark:text-white">{t('payment_secure_title')}</h2>
                     <div className="flex border border-gray-200 dark:border-gray-700 rounded-lg p-1 mb-6">
-                        <button onClick={() => setPaymentMethod('momo')} className={`flex-1 py-2 rounded-md font-semibold text-sm transition ${paymentMethod === 'momo' ? 'bg-blue-600 text-white shadow' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>{t('payment_method_momo')}</button>
-                        <button onClick={() => setPaymentMethod('card')} className={`flex-1 py-2 rounded-md font-semibold text-sm transition ${paymentMethod === 'card' ? 'bg-blue-600 text-white shadow' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>{t('payment_method_card')}</button>
-                        <button onClick={() => setPaymentMethod('wallet')} className={`flex-1 py-2 rounded-md font-semibold text-sm transition ${paymentMethod === 'wallet' ? 'bg-blue-600 text-white shadow' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>{t('payment_method_wallet')}</button>
+                        <button onClick={() => setPaymentMethod('wallet')} className={`flex-1 py-2 rounded-md font-semibold text-sm transition flex items-center justify-center ${paymentMethod === 'wallet' ? 'bg-blue-600 text-white shadow' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}><WalletIcon className="w-4 h-4 mr-2"/> {t('payment_method_wallet')}</button>
+                        <button onClick={() => setPaymentMethod('momo')} className={`flex-1 py-2 rounded-md font-semibold text-sm transition flex items-center justify-center ${paymentMethod === 'momo' ? 'bg-blue-600 text-white shadow' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}><PhoneIcon className="w-4 h-4 mr-2"/> {t('payment_method_momo')}</button>
+                        <button onClick={() => setPaymentMethod('card')} className={`flex-1 py-2 rounded-md font-semibold text-sm transition flex items-center justify-center ${paymentMethod === 'card' ? 'bg-blue-600 text-white shadow' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300'}`}><CreditCardIcon className="w-4 h-4 mr-2"/> {t('payment_method_card')}</button>
                     </div>
 
                     <form onSubmit={handlePayment} className="space-y-4">
@@ -151,7 +184,10 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
                             <p className="text-center text-sm text-gray-500">{t('payment_card_info')}</p>
                         )}
                          {paymentMethod === 'wallet' && (
-                            <p className="text-center text-sm text-gray-500">{t('payment_wallet_info')}</p>
+                            <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                <p className="text-sm text-gray-600 dark:text-gray-300">Your current balance is</p>
+                                <p className="font-bold text-lg text-green-600">{new Intl.NumberFormat('fr-RW').format(user?.walletBalance || 0)} RWF</p>
+                            </div>
                         )}
                         
                         {error && <p className="text-sm text-red-500 text-center font-semibold mt-4">{error}</p>}

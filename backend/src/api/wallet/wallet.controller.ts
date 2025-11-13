@@ -18,3 +18,9 @@ export const setPin = asyncHandler(async (req: any, res: any) => {
     await walletService.setUserPin(req.user!.id, pin);
     res.status(200).json({ success: true, message: 'PIN set successfully.' });
 });
+
+export const transferFunds = asyncHandler(async (req: any, res: any) => {
+    const { toSerial, amount, pin } = req.body;
+    const { newBalance } = await walletService.transferFunds(req.user, toSerial, amount, pin);
+    res.status(200).json({ success: true, message: 'Transfer successful', data: { newBalance } });
+});

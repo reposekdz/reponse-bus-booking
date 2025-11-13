@@ -1,10 +1,12 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { LockClosedIcon, XIcon } from './icons';
 
 interface PinModalProps {
   onClose: () => void;
-  onSuccess: () => void;
+  // FIX: Update onSuccess signature to pass the entered pin string
+  onSuccess: (pin: string) => void;
   pinToMatch: string;
   title: string;
   description: string;
@@ -49,7 +51,8 @@ const PinModal: React.FC<PinModalProps> = ({ onClose, onSuccess, pinToMatch, tit
     setIsLoading(true);
     setTimeout(() => {
       if (currentPin.join('') === pinToMatch) {
-        onSuccess();
+        // FIX: Pass the pin string to the onSuccess callback
+        onSuccess(currentPin.join(''));
       } else {
         setError('PIN itariyo. Ongera ugerageze.');
         setPin(Array(4).fill(''));

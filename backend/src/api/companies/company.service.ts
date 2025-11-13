@@ -34,7 +34,7 @@ export const getCompanyDetailsById = async (id: string) => {
     const [routes] = await pool.query('SELECT *, origin as `from`, destination as `to` FROM routes WHERE company_id = ?', [companyId]);
     const [services] = await pool.query('SELECT * FROM services WHERE company_id = ?', [companyId]);
     const [promotions] = await pool.query('SELECT * FROM promotions WHERE company_id = ?', [companyId]);
-    const [gallery] = await pool.query("SELECT image_url as src, category FROM gallery WHERE company_id = ?", [companyId]);
+    const [gallery] = await pool.query("SELECT id, image_url as src, category FROM gallery WHERE company_id = ?", [companyId]);
     const [reviews] = await pool.query(`
         SELECT r.rating, r.comment, u.name as author 
         FROM reviews r 
@@ -132,4 +132,27 @@ export const checkDriverOwnership = async (driverId: string, companyId: number) 
     if ((rows as any[]).length === 0) {
         throw new AppError('Driver not found or not part of your company.', 404);
     }
+};
+
+// --- Gallery Management ---
+export const addGalleryImage = async (companyId: number, imageUrl: string, category: string) => {
+    if (!imageUrl || !category) {
+        throw new AppError('Image URL and category are required.', 400);
+    }
+    const [result] = await pool.query<mysql.ResultSetHeader>(
+        'INSERT INTO gallery (company_id, image_url, category) VALUES (?, ?, ?)',
+        [companyId, imageUrl, category]
+    );
+    return { id: result.insertId, src: imageUrl, category };
+};
+
+export const deleteGalleryImage = async (companyId: number, imageId: number) => {
+    const [result] = await pool.query<mysql.OkPacket>(
+        'DELETE FROM gallery WHERE id = ? AND company_id = ?',
+        [imageId, companyId]
+    );
+    if (result.affectedRows === 0) {
+        throw new AppError('Image not found or you do not have permission to delete it.', 404);
+    }
+    return;
 };

@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon, TagIcon, ArchiveBoxIcon, PhoneIcon } from './components/icons';
 import FleetDetailModal from './components/FleetDetailModal';
@@ -68,19 +69,33 @@ const PhotoViewerModal: React.FC<{ images: string[], startIndex: number, onClose
     const nextImage = () => setCurrentIndex(prev => (prev + 1) % images.length);
     const prevImage = () => setCurrentIndex(prev => (prev - 1 + images.length) % images.length);
 
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowRight') nextImage();
+            if (e.key === 'ArrowLeft') prevImage();
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [images]);
+
     return (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
             <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/30 transition-colors z-20">
                 <XIcon className="w-6 h-6" />
             </button>
-            <div className="relative w-full max-w-4xl" onClick={e => e.stopPropagation()}>
-                <img src={images[currentIndex]} alt="Company gallery" className="max-h-[85vh] w-auto mx-auto rounded-lg shadow-2xl" />
-                <button onClick={prevImage} className="absolute left-0 top-1/2 -translate-y-1/2 p-3 bg-white/10 text-white rounded-full hover:bg-white/30 transition-colors ml-2">
-                    <ChevronRightIcon className="w-6 h-6 transform rotate-180" />
-                </button>
-                <button onClick={nextImage} className="absolute right-0 top-1/2 -translate-y-1/2 p-3 bg-white/10 text-white rounded-full hover:bg-white/30 transition-colors mr-2">
-                    <ChevronRightIcon className="w-6 h-6" />
-                </button>
+            <div className="relative w-full max-w-4xl h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+                <img src={images[currentIndex]} alt="Company gallery" className="max-h-[90vh] max-w-[90vw] w-auto h-auto rounded-lg shadow-2xl" />
+                {images.length > 1 && (
+                    <>
+                        <button onClick={prevImage} className="absolute left-0 top-1/2 -translate-y-1/2 p-3 bg-white/10 text-white rounded-full hover:bg-white/30 transition-colors ml-2 md:ml-[-50px]">
+                            <ChevronRightIcon className="w-6 h-6 transform rotate-180" />
+                        </button>
+                        <button onClick={nextImage} className="absolute right-0 top-1/2 -translate-y-1/2 p-3 bg-white/10 text-white rounded-full hover:bg-white/30 transition-colors mr-2 md:mr-[-50px]">
+                            <ChevronRightIcon className="w-6 h-6" />
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );
@@ -106,6 +121,7 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company: initia
         }
         try {
             setIsLoading(true);
+            // FIX: Corrected the API call to 'getCompanyProfileDetails' as 'getCompanyDetailsById' does not exist.
             const companyDetails = await api.getCompanyProfileDetails(initialCompanyData.id);
             setData(companyDetails);
         } catch (err: any) {
@@ -129,9 +145,16 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company: initia
   const scheduleForRoute = company.schedule?.[`${fromLocation}-${toLocation}`] || [];
 
   const filteredGallery = useMemo(() => {
-    if (galleryFilter === 'all' || !company.gallery) return company.gallery || [];
+    if (!company.gallery) return [];
+    if (galleryFilter === 'all') return company.gallery;
     return company.gallery.filter((img: any) => img.category === galleryFilter);
   }, [galleryFilter, company.gallery]);
+
+  const galleryCategories = useMemo(() => {
+    if (!company.gallery) return [];
+    const categories = new Set(company.gallery.map(img => img.category));
+    return ['all', ...Array.from(categories)];
+  }, [company.gallery]);
 
   const TabButton: React.FC<{tabName: string; label: string}> = ({ tabName, label }) => (
     <button
@@ -272,6 +295,32 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company: initia
                   ) : <p className="text-gray-500 dark:text-gray-400">Fleet information is not available.</p>}
                 </div>
               )}
+              {activeTab === 'gallery' && (
+                  <div>
+                      <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Gallery</h3>
+                      {company.gallery?.length > 0 ? (
+                          <>
+                              <div className="flex space-x-2 mb-6 border-b dark:border-gray-700">
+                                  {/* FIX: Added explicit type 'string' to 'cat' to resolve type errors */}
+                                  {galleryCategories.map((cat: string) => (
+                                      <button key={cat} onClick={() => setGalleryFilter(cat)} className={`px-4 py-2 text-sm font-semibold capitalize transition-colors ${galleryFilter === cat ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'}`}>
+                                          {cat}
+                                      </button>
+                                  ))}
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                  {filteredGallery.map((img, index) => (
+                                      <button key={img.id || index} onClick={() => setViewingPhotoIndex(index)} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden group">
+                                          <img src={img.src} alt={`${company.name} gallery image`} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"/>
+                                      </button>
+                                  ))}
+                              </div>
+                          </>
+                      ) : (
+                          <p className="text-gray-500 dark:text-gray-400">This company has not uploaded any photos yet.</p>
+                      )}
+                  </div>
+              )}
             </div>
           </div>
 
@@ -292,7 +341,7 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company: initia
         </div>
       </div>
       {selectedBus && <FleetDetailModal bus={selectedBus} onClose={() => setSelectedBus(null)} />}
-      {viewingPhotoIndex !== null && <PhotoViewerModal images={company.gallery.map(g => g.src)} startIndex={viewingPhotoIndex} onClose={() => setViewingPhotoIndex(null)} />}
+      {viewingPhotoIndex !== null && <PhotoViewerModal images={filteredGallery.map(g => g.src)} startIndex={viewingPhotoIndex} onClose={() => setViewingPhotoIndex(null)} />}
     </div>
   );
 };

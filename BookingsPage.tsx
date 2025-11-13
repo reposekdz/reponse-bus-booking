@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { TicketIcon, QrCodeIcon, ArrowPathIcon, ShareIcon, StarIcon, CheckCircleIcon } from './components/icons';
 import Modal from './components/Modal';
@@ -43,9 +44,10 @@ interface BookingCardProps {
     onActivate: (ticketId: string) => void;
     isPast: boolean;
     isActivatable: boolean;
+    isTicketActive: boolean;
 }
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRateTrip, onActivate, isPast, isActivatable }) => {
+const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRateTrip, onActivate, isPast, isActivatable, isTicketActive }) => {
     const { trip } = booking;
     const { route } = trip;
     const { user } = useAuth();
@@ -64,7 +66,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRate
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden my-4 transform hover:shadow-xl transition-shadow duration-300">
+        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden my-4 transform hover:shadow-xl transition-shadow duration-300 ${isTicketActive ? 'shadow-green-500/30 border-2 border-green-400' : ''}`}>
             <div className="flex flex-col sm:flex-row">
                 <div className="p-5 flex-grow">
                     <div className="flex justify-between items-start">
@@ -84,7 +86,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRate
                     </div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-5 flex items-center justify-center sm:w-40">
-                    <button onClick={() => onViewTicket(ticketDetails, false)} className="flex flex-col items-center text-blue-600 dark:text-blue-400 font-semibold text-sm hover:opacity-80">
+                    <button onClick={() => onViewTicket(ticketDetails, isTicketActive)} className="flex flex-col items-center text-blue-600 dark:text-blue-400 font-semibold text-sm hover:opacity-80">
                         <QrCodeIcon className="w-8 h-8 mb-1" />
                         <span>View Ticket</span>
                     </button>
@@ -92,13 +94,19 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onViewTicket, onRate
             </div>
             <div className="bg-gray-100 dark:bg-gray-700/50 px-5 py-2 flex items-center justify-between">
                 <div>
-                     {isActivatable && (
+                     {isActivatable && !isTicketActive && (
                         <button 
-                            onClick={() => { onActivate(booking.bookingId); onViewTicket(ticketDetails, true); }}
+                            onClick={() => onActivate(booking.bookingId)}
                             className="bg-green-500 text-white font-bold py-1 px-3 rounded-full text-xs hover:bg-green-600 interactive-button"
                         >
-                            Activate Ticket
+                            Activate Ticket for Boarding
                         </button>
+                    )}
+                     {isTicketActive && (
+                        <div className="flex items-center text-green-600 font-bold text-xs animate-pulse">
+                            <CheckCircleIcon className="w-4 h-4 mr-1.5"/>
+                            Ticket is Active for Boarding
+                        </div>
                     )}
                 </div>
                 <div className="flex items-center justify-end space-x-4">
@@ -181,6 +189,8 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket }) => {
                  const departureTime = new Date(booking.trip.departureTime);
                  const hoursUntilDeparture = (departureTime.getTime() - now.getTime()) / (1000 * 60 * 60);
                  const isActivatable = activeTab === 'upcoming' && hoursUntilDeparture > 0 && hoursUntilDeparture <= 24;
+                 const isTicketActive = activeTicketId === booking.bookingId;
+
                  return (
                     <BookingCard 
                         key={booking._id} 
@@ -190,6 +200,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onViewTicket }) => {
                         onActivate={setActiveTicketId}
                         isPast={activeTab === 'past'}
                         isActivatable={isActivatable}
+                        isTicketActive={isTicketActive}
                     />
                 );
             })}

@@ -1,7 +1,7 @@
 
 
 import { Router } from 'express';
-import { getCompanies, getCompanyById, getMyDrivers, createDriverForMyCompany, updateDriverForMyCompany, deleteDriverForMyCompany, getCompanyDetails, getDriverHistoryForCompany } from './company.controller';
+import { getCompanies, getCompanyById, getMyDrivers, createDriverForMyCompany, updateDriverForMyCompany, deleteDriverForMyCompany, getCompanyDetails, getDriverHistoryForCompany, addGalleryImage, deleteGalleryImage } from './company.controller';
 import { protect, authorize } from '../../middleware/auth.middleware';
 
 const router = Router();
@@ -12,15 +12,23 @@ router.route('/:id').get(getCompanyById);
 router.route('/:id/details').get(getCompanyDetails); // New detailed endpoint
 
 // Protected routes for company managers
+router.use(protect, authorize('company'));
+
 router.route('/mydrivers')
-    .get(protect, authorize('company'), getMyDrivers)
-    .post(protect, authorize('company'), createDriverForMyCompany);
+    .get(getMyDrivers)
+    .post(createDriverForMyCompany);
     
 router.route('/mydrivers/:id')
-    .put(protect, authorize('company'), updateDriverForMyCompany)
-    .delete(protect, authorize('company'), deleteDriverForMyCompany);
+    .put(updateDriverForMyCompany)
+    .delete(deleteDriverForMyCompany);
 
-router.get('/mydrivers/:id/history', protect, authorize('company'), getDriverHistoryForCompany);
+router.get('/mydrivers/:id/history', getDriverHistoryForCompany);
+
+router.route('/my-gallery')
+    .post(addGalleryImage);
+
+router.route('/my-gallery/:id')
+    .delete(deleteGalleryImage);
 
 
 export default router;

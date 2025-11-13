@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import Modal from './Modal';
 import PinModal from './PinModal';
@@ -30,7 +31,8 @@ const WalletTopUpModal: React.FC<WalletTopUpModalProps> = ({ onClose, onSuccess,
         setIsPinModalOpen(true);
     };
 
-    const handlePinSuccess = () => {
+    // FIX: Update signature to accept pin string from PinModal's onSuccess callback
+    const handlePinSuccess = (pin: string) => {
         setIsPinModalOpen(false);
         onSuccess(Number(finalAmount));
     };
