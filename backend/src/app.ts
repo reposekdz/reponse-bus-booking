@@ -7,10 +7,8 @@ const app = express();
 
 // Core Middleware
 app.use(cors());
-// FIX: Resolve "No overload matches this call" error by casting middleware to express.RequestHandler, which seems to be caused by a type conflict.
-app.use('/', express.json() as express.RequestHandler);
-// FIX: Resolve "No overload matches this call" error by casting middleware to express.RequestHandler, which seems to be caused by a type conflict.
-app.use('/', express.urlencoded({ extended: true }) as express.RequestHandler);
+app.use(express.json() as express.RequestHandler);
+app.use(express.urlencoded({ extended: true }) as express.RequestHandler);
 
 // API Routes
 app.use('/api/v1', apiRouter);

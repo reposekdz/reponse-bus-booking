@@ -51,6 +51,7 @@ const DriverForm = ({ driver, onSave, onCancel }) => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
                 <select name="status" value={formData.status} onChange={handleChange} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
                     <option>Active</option>
+                    <option>Unavailable</option>
                     <option>On Leave</option>
                     <option>Suspended</option>
                 </select>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -25,7 +26,8 @@ import PackageDeliveryPage from './PackageDeliveryPage';
 import BusCharterPage from './BusCharterPage';
 import BookingSearchPage from './BookingSearchPage';
 import BottomNavigation from './components/BottomNavigation';
-import TicketModal from './components/TicketModal';
+// FIX: Changed import to be a named import to resolve module loading issue.
+import { TicketModal } from './components/TicketModal';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import DriverProfilePage from './DriverProfilePage';
 import AgentProfilePage from './AgentProfilePage';

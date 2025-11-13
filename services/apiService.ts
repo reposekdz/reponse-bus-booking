@@ -196,6 +196,14 @@ export const driverGetMyHistory = async () => {
     const { data } = await apiFetch('/drivers/my-history');
     return data;
 };
+export const driverUpdateMyStatus = async (status: 'Active' | 'Unavailable') => {
+    const { data } = await apiFetch('/drivers/my-status', {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+    });
+    return data;
+};
+
 
 // --- AGENT ---
 export const agentLookupPassenger = async (serialCode: string) => {

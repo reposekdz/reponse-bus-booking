@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, TagIcon } from './icons';
 
@@ -13,18 +11,14 @@ const AmenityIcon: React.FC<{ amenity: string }> = ({ amenity }) => {
 
 const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite: boolean, onToggleFavorite: () => void, style?: React.CSSProperties, className?: string }> = ({ result, onSelect, isFavorite, onToggleFavorite, style, className }) => {
     const isSurge = result.dynamicPrice > result.basePrice;
+    const isSellingFast = result.availableSeats < 10;
 
     return (
         <div style={style} className={`${className} bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 relative group`}>
             {/* Animated Glow Border */}
             <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-yellow-400/50 transition-all duration-300 pointer-events-none"></div>
 
-            {result.tag && (
-                <div className="absolute top-0 left-0 transform -translate-x-3 -translate-y-3 -rotate-12 bg-yellow-400 text-blue-900 text-xs font-bold px-3 py-1 rounded-full shadow-md z-10">
-                    {result.tag}
-                </div>
-            )}
-            {result.availableSeats < 10 && (
+            {isSellingFast && (
                 <div className="absolute top-0 right-6 transform translate-y-[-50%] bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-10">
                     Selling Fast!
                 </div>
@@ -60,7 +54,7 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
                 <div className="text-center text-gray-400">
                     <p className="text-xs">{Math.floor(result.durationMinutes / 60)}h {result.durationMinutes % 60}m</p>
                     <div className="w-20 h-0.5 bg-gray-300 dark:bg-gray-600 my-1"></div>
-                    <p className="text-xs">Ntaho uhagaze</p>
+                    <p className="text-xs">Direct</p>
                 </div>
                 <div className="text-center">
                     <p className="font-bold text-xl text-gray-800 dark:text-white">{result.arrivalTime}</p>
@@ -70,7 +64,7 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
             <div className="text-center flex-shrink-0">
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">{new Intl.NumberFormat('fr-RW').format(result.dynamicPrice)} RWF</p>
                 {isSurge && <p className="text-xs text-gray-400 line-through">{new Intl.NumberFormat('fr-RW').format(result.basePrice)} RWF</p>}
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">hasigaye imyanya {result.availableSeats}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{result.availableSeats} seats left</p>
             </div>
             <div className="flex items-center space-x-2">
                 <button 
@@ -81,7 +75,7 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
                     <StarIcon className={`w-6 h-6 transition-all duration-200 ${isFavorite ? 'text-yellow-400 scale-110' : 'text-gray-300 dark:text-gray-600'}`} />
                 </button>
                 <button onClick={onSelect} className="w-full sm:w-auto flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-[#0033A0] font-bold hover:saturate-150 transition-all duration-300 shadow-md transform hover:-translate-y-0.5 interactive-button">
-                    Hitamo Imyanya <ArrowRightIcon className="w-5 h-5 ml-2" />
+                    Select Seats <ArrowRightIcon className="w-5 h-5 ml-2" />
                 </button>
             </div>
         </div>

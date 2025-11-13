@@ -6,10 +6,12 @@ import { pool } from '../config/db';
 import { AppError } from '../utils/AppError';
 import asyncHandler from '../utils/asyncHandler';
 import { User } from '../types';
-// FIX: Add missing import for mysql types
 import * as mysql from 'mysql2/promise';
 
-export const protect = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
+// FIX: Removed custom AuthRequest interface. The `user` property is added to Express.Request via module augmentation in `src/types/express/index.d.ts`.
+// This ensures that the `Request` type has all the default properties like `headers`.
+
+export const protect = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
@@ -39,7 +41,7 @@ export const protect = asyncHandler(async (req: any, res: Response, next: NextFu
 });
 
 export const authorize = (...roles: string[]) => {
-    return (req: any, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
         if (!req.user || !roles.includes(req.user.role)) {
             return next(new AppError(`User role '${req.user?.role}' is not authorized to access this route`, 403));
         }

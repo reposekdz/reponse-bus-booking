@@ -49,7 +49,7 @@ CREATE TABLE `users` (
     `role` VARCHAR(50) NOT NULL CHECK (`role` IN ('passenger', 'driver', 'agent', 'company', 'admin')),
     `avatar_url` LONGTEXT,
     `cover_url` LONGTEXT,
-    `status` VARCHAR(50) DEFAULT 'Active' CHECK (`status` IN ('Active', 'Suspended', 'Pending')),
+    `status` VARCHAR(50) DEFAULT 'Active' CHECK (`status` IN ('Active', 'Unavailable', 'On Leave', 'Suspended', 'Pending')),
     `company_id` INT,
     `pin` VARCHAR(255),
     `serial_code` VARCHAR(20) UNIQUE,

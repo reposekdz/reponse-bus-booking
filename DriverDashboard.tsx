@@ -12,6 +12,24 @@ interface DriverDashboardProps {
     navigate: (page: Page, data?: any) => void;
 }
 
+const AvailabilityToggle: React.FC<{ isAvailable: boolean; onToggle: () => void; isLoading: boolean }> = ({ isAvailable, onToggle, isLoading }) => {
+    return (
+        <div className="flex items-center space-x-2">
+            <span className={`text-sm font-semibold ${isAvailable ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
+                {isAvailable ? 'Available' : 'Unavailable'}
+            </span>
+            <button
+                onClick={onToggle}
+                disabled={isLoading}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${isAvailable ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+            >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isAvailable ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
+        </div>
+    );
+};
+
+
 // FIX: Added React.FC type to TripCard to fix type error with 'key' prop
 const TripCard: React.FC<{ trip: any, onSelect: (trip: any) => void }> = ({ trip, onSelect }) => (
     <button onClick={() => onSelect(trip)} className="w-full text-left bg-white dark:bg-gray-800/50 p-4 rounded-xl shadow-md hover:shadow-lg hover:border-blue-500 border-2 border-transparent transition-all">
@@ -134,6 +152,23 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
     const [selectedTrip, setSelectedTrip] = useState<any | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isAvailable, setIsAvailable] = useState(driverData.status === 'Active');
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+    const handleToggleAvailability = async () => {
+        setIsUpdatingStatus(true);
+        const newStatus = !isAvailable ? 'Active' : 'Unavailable';
+        try {
+            await api.driverUpdateMyStatus(newStatus as 'Active' | 'Unavailable');
+            setIsAvailable(!isAvailable);
+        } catch (error) {
+            console.error("Failed to update status", error);
+            alert("Could not update availability status. Please try again.");
+        } finally {
+            setIsUpdatingStatus(false);
+        }
+    };
+
 
     useEffect(() => {
         const fetchTrips = async () => {
@@ -181,6 +216,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                 <header className="h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm flex items-center justify-between px-6 border-b dark:border-gray-700/50">
                     <div className="font-bold text-gray-800 dark:text-white">Welcome, {driverData.name.split(' ')[0]}</div>
                     <div className="flex items-center space-x-4">
+                        <AvailabilityToggle isAvailable={isAvailable} onToggle={handleToggleAvailability} isLoading={isUpdatingStatus} />
                         <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-400">{theme === 'light' ? <MoonIcon className="w-6 h-6"/> : <SunIcon className="w-6 h-6"/>}</button>
                         <button onClick={onLogout} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Logout</button>
                     </div>

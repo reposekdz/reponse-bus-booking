@@ -1,5 +1,3 @@
-
-
 import mysql from 'mysql2/promise';
 import config from './index';
 import logger from '../utils/logger';
@@ -21,7 +19,6 @@ const connectDB = async () => {
         connection.release();
     } catch (error) {
         logger.error('MySQL connection failed:', (error as Error).message);
-        // FIX: Cast process to any to avoid type error when node types are missing.
         (process as any).exit(1);
     }
 };

@@ -1,5 +1,6 @@
 import { pool } from '../../config/db';
 import * as mysql from 'mysql2/promise';
+import { AppError } from '../../utils/AppError';
 
 export const getTripHistoryForDriver = async (driverId: number) => {
     const [rows] = await pool.query<any[] & mysql.RowDataPacket[]>(`
@@ -37,4 +38,18 @@ export const getTripsForDriver = async (driverId: number) => {
         ORDER BY t.departure_time ASC;
     `, [driverId, today]);
     return rows;
+};
+
+export const updateDriverStatus = async (driverId: number, status: 'Active' | 'Unavailable') => {
+    if (!['Active', 'Unavailable'].includes(status)) {
+        throw new AppError('Invalid status provided.', 400);
+    }
+    const [result] = await pool.query<mysql.OkPacket>(
+        'UPDATE users SET status = ? WHERE id = ? AND role = "driver"',
+        [status, driverId]
+    );
+    if (result.affectedRows === 0) {
+        throw new AppError('Driver not found or status could not be updated.', 404);
+    }
+    return { status };
 };

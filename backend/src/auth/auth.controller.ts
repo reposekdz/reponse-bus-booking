@@ -1,10 +1,16 @@
+
 import { Request, Response, NextFunction } from 'express';
 import * as authService from './auth.service';
 
 // A simple utility for handling async controller functions
 // FIX: Removed explicit types to allow for correct type inference.
-const asyncHandler = (fn: Function) => (req: any, res: any, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
+// FIX: Refactored to use async/await and try/catch to resolve type error with .catch(next)
+const asyncHandler = (fn: Function) => async (req: any, res: any, next: NextFunction) => {
+    try {
+        await fn(req, res, next);
+    } catch (error) {
+        next(error);
+    }
 };
 
 // FIX: Removed explicit types to allow for correct type inference.

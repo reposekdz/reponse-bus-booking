@@ -13,16 +13,20 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const { token, user } = useAuth();
 
     useEffect(() => {
+        // Only establish connection if we have a token and user
         if (token && user) {
-            // In development, the server is on a different port, so specify the URL.
-            // In production, this would likely be the same origin.
+            // In a production environment with a proxy, the path is relative.
+            // For development with vite proxy, this will be directed to the backend.
             const newSocket = io({
-                // This will be handled by the proxy in vite.config.js for dev
-                // In production, it connects to the same host.
+                // The path option ensures it connects to your backend's socket.io endpoint
+                // especially if it's not at the root.
+                path: '/socket.io',
+                // transports: ['websocket'], // You can force websocket if needed
             });
 
             newSocket.on('connect', () => {
                 console.log('Socket connected:', newSocket.id);
+                // After connecting, send the token for authentication on the backend
                 newSocket.emit('authenticate', token);
             });
             
@@ -32,14 +36,16 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
             setSocket(newSocket);
 
+            // Cleanup on component unmount or when token changes
             return () => {
                 newSocket.disconnect();
             };
         } else if (socket) {
+            // If the user logs out, disconnect the existing socket
             socket.disconnect();
             setSocket(null);
         }
-    }, [token, user]);
+    }, [token, user]); // Rerun effect if token or user changes
 
     return (
         <SocketContext.Provider value={socket}>

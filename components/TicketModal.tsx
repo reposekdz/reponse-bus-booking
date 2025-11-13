@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { XIcon, BusIcon } from './icons';
@@ -8,14 +9,16 @@ const RealQRCode: React.FC<{ ticketData: any; size: number }> = ({ ticketData, s
 
   useEffect(() => {
     if (canvasRef.current && ticketData) {
-      const qrDataString = JSON.stringify({
+      // Create a structured object for the QR code payload for better scanner compatibility
+      const qrDataPayload = {
         bookingId: ticketData.id,
         passenger: ticketData.passenger,
-        route: `${ticketData.from} to ${ticketData.to}`,
-        datetime: `${ticketData.date} at ${ticketData.time}`,
+        route: `${ticketData.from}-${ticketData.to}`,
+        datetime: `${ticketData.date}T${ticketData.time}`,
         seats: ticketData.seats,
         busPlate: ticketData.busPlate,
-      });
+      };
+      const qrDataString = JSON.stringify(qrDataPayload);
 
       QRCode.toCanvas(canvasRef.current, qrDataString, {
         width: size,
@@ -24,7 +27,7 @@ const RealQRCode: React.FC<{ ticketData: any; size: number }> = ({ ticketData, s
           dark: '#002B7F', // GoBus dark blue
           light: '#FFFFFFFF',
         },
-        errorCorrectionLevel: 'H', // High error correction
+        errorCorrectionLevel: 'H',
       }, (error) => {
         if (error) console.error('QR Code generation failed:', error);
       });
@@ -42,7 +45,7 @@ const InfoRow: React.FC<{ label: string; value: string }> = ({ label, value }) =
     </div>
 );
 
-const TicketModal: React.FC<{ ticket: any; onClose: () => void, isActive?: boolean }> = ({ ticket, onClose, isActive = false }) => {
+export const TicketModal: React.FC<{ ticket: any; onClose: () => void, isActive?: boolean }> = ({ ticket, onClose, isActive = false }) => {
   const { t } = useLanguage();
   if (!ticket) return null;
 
@@ -81,7 +84,7 @@ const TicketModal: React.FC<{ ticket: any; onClose: () => void, isActive?: boole
                 </div>
             </div>
              {isActive ? (
-                <p className="text-center font-bold text-lg text-green-500 animate-pulse mb-4">{t('ticket_modal_activated')}</p>
+                <p className="text-center font-bold text-lg text-green-500 animate-pulse">{t('ticket_modal_activated')}</p>
             ) : (
                 <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">{t('ticket_modal_scan_prompt')}</p>
             )}
@@ -119,5 +122,3 @@ const TicketModal: React.FC<{ ticket: any; onClose: () => void, isActive?: boole
     </div>
   );
 };
-
-export default TicketModal;

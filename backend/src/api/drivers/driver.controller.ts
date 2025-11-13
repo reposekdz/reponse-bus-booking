@@ -10,3 +10,9 @@ export const getMyTrips = asyncHandler(async (req, res) => {
     const trips = await driverService.getTripsForDriver(req.user!.id);
     res.status(200).json({ success: true, data: trips });
 });
+
+export const updateMyStatus = asyncHandler(async (req, res) => {
+    const { status } = req.body; // Expecting 'Active' or 'Unavailable'
+    const updatedStatus = await driverService.updateDriverStatus(req.user!.id, status);
+    res.status(200).json({ success: true, data: updatedStatus });
+});
