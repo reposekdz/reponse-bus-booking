@@ -10,15 +10,17 @@ const StatCard = ({ label, value, icon }) => (
     </View>
 );
 
-export default function DriverDashboardScreen({ navigation }) {
-    const currentTrip = {
-        route: 'Kigali - Rubavu',
-        departure: '07:00 AM',
-        arrival: '10:30 AM',
-        busPlate: 'RAD 123 B',
-        passengerCount: 38,
-    };
+const mockTrip = {
+    id: 'trip123',
+    route: 'Kigali - Rubavu',
+    departure: '07:00 AM',
+    arrival: '10:30 AM',
+    busPlate: 'RAD 123 B',
+    passengerCount: 38,
+};
 
+
+export default function DriverDashboardScreen({ navigation }) {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.content}>
@@ -34,20 +36,20 @@ export default function DriverDashboardScreen({ navigation }) {
 
                 <Text style={styles.sectionTitle}>Current Trip</Text>
                 <View style={styles.card}>
-                    <Text style={styles.route}>{currentTrip.route}</Text>
+                    <Text style={styles.route}>{mockTrip.route}</Text>
                     <View style={styles.timeContainer}>
-                        <Text style={styles.time}>{currentTrip.departure}</Text>
+                        <Text style={styles.time}>{mockTrip.departure}</Text>
                         <Text style={styles.arrow}>→</Text>
-                        <Text style={styles.time}>{currentTrip.arrival}</Text>
+                        <Text style={styles.time}>{mockTrip.arrival}</Text>
                     </View>
                     <View style={styles.divider} />
                     <View style={styles.tripDetailsRow}>
-                        <Text style={styles.detailText}>Plate: {currentTrip.busPlate}</Text>
-                        <Text style={styles.detailText}>Passengers: {currentTrip.passengerCount}</Text>
+                        <Text style={styles.detailText}>Plate: {mockTrip.busPlate}</Text>
+                        <Text style={styles.detailText}>Passengers: {mockTrip.passengerCount}</Text>
                     </View>
                 </View>
 
-                 <TouchableOpacity style={styles.boardingButton} onPress={() => navigation.navigate('DriverBoarding')}>
+                 <TouchableOpacity style={styles.boardingButton} onPress={() => navigation.navigate('DriverBoarding', { trip: mockTrip })}>
                     <Text style={styles.boardingButtonText}>Start Boarding</Text>
                 </TouchableOpacity>
 

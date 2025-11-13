@@ -1,4 +1,5 @@
 
+
 import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
 import { io } from '../../server';
@@ -171,7 +172,12 @@ export const confirmPassengerBoarding = async (data: BoardingData) => {
         throw new AppError(`${booking.passenger_name} has already boarded.`, 409);
     }
     
-    const [tripRows] = await pool.query<any[] & mysql.RowDataPacket[]>('SELECT driver_id, origin, destination FROM trips JOIN routes ON trips.route_id = routes.id WHERE trips.id = ?', [tripId]);
+    const [tripRows] = await pool.query<any[] & mysql.RowDataPacket[]>(`
+        SELECT t.driver_id, r.origin, r.destination 
+        FROM trips t
+        JOIN routes r ON t.route_id = r.id
+        WHERE t.id = ?
+    `, [tripId]);
     if (tripRows.length === 0 || tripRows[0].driver_id !== driverId) {
         throw new AppError('You are not authorized to manage this trip.', 403);
     }
@@ -185,7 +191,13 @@ export const confirmPassengerBoarding = async (data: BoardingData) => {
         [booking.id, tripId, driverId]
     );
 
-    // Emit a real-time notification to the specific passenger
+    // Emit a real-time notification to the driver's room for this trip
+    io.to(`trip:${tripId}`).emit('passengerBoarded', {
+        bookingId: booking.id, // Use the internal booking ID for updates
+        newStatus: 'Completed',
+    });
+
+    // Also emit a notification to the specific passenger
     const notificationMessage = `Welcome, ${booking.passenger_name}! You have successfully boarded the bus for ${trip.origin} to ${trip.destination}.`;
     io.to(booking.passenger_id.toString()).emit('passengerBoarded', {
         message: notificationMessage,
@@ -208,7 +220,7 @@ const checkTripAuthorization = async (tripId: string, driverId: number) => {
 export const getManifestForTrip = async (tripId: string, driverId: number) => {
     await checkTripAuthorization(tripId, driverId);
     const [rows] = await pool.query<any[] & mysql.RowDataPacket[]>(`
-        SELECT u.name as passenger_name, b.status, b.booking_id, GROUP_CONCAT(s.seat_number) as seats
+        SELECT u.name as passenger_name, b.status, b.id as booking_id, GROUP_CONCAT(s.seat_number) as seats
         FROM bookings b
         JOIN users u ON b.user_id = u.id
         JOIN seats s ON b.id = s.booking_id

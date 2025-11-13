@@ -41,6 +41,13 @@ export const initSocket = (io: Server) => {
             }
         });
 
+        socket.on('joinTripRoom', (tripId: string) => {
+            if (tripId) {
+                socket.join(`trip:${tripId}`);
+                logger.info(`Socket ${socket.id} joined room for trip ${tripId}`);
+            }
+        });
+
         socket.on('disconnect', () => {
             logger.info(`Socket disconnected: ${socket.id}`);
         });

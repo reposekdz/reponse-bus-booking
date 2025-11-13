@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { useAuth, User } from '../hooks/useAuth';
 
-// FIX: Changed property names to snake_case (avatar_url, wallet_balance) to match the User type.
+// FIX: Added 'id' property to each mock user to satisfy the User type definition.
 const mockUsers: { [key: string]: User } = {
-  passenger: { name: 'Kalisa Jean', email: 'passenger@rwandabus.rw', role: 'passenger', avatar_url: 'https://randomuser.me/api/portraits/men/32.jpg', wallet_balance: 15000 },
-  company: { name: 'Volcano Express', email: 'manager@volcano.rw', role: 'company', avatar_url: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg' },
-  admin: { name: 'Admin User', email: 'admin@rwandabus.rw', role: 'admin', avatar_url: 'https://randomuser.me/api/portraits/women/44.jpg' },
-  driver: { name: 'John Doe', email: 'driver@volcano.rw', role: 'driver', avatar_url: 'https://randomuser.me/api/portraits/men/4.jpg' },
-  agent: { name: 'Jane Smith', email: 'jane.s@agent.rw', role: 'agent', avatar_url: 'https://randomuser.me/api/portraits/women/5.jpg' }
+  passenger: { id: 1, name: 'Kalisa Jean', email: 'passenger@rwandabus.rw', role: 'passenger', avatar_url: 'https://randomuser.me/api/portraits/men/32.jpg', wallet_balance: 15000 },
+  company: { id: 2, name: 'Volcano Express', email: 'manager@volcano.rw', role: 'company', avatar_url: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg' },
+  admin: { id: 3, name: 'Admin User', email: 'admin@rwandabus.rw', role: 'admin', avatar_url: 'https://randomuser.me/api/portraits/women/44.jpg' },
+  driver: { id: 4, name: 'John Doe', email: 'driver@volcano.rw', role: 'driver', avatar_url: 'https://randomuser.me/api/portraits/men/4.jpg' },
+  agent: { id: 5, name: 'Jane Smith', email: 'jane.s@agent.rw', role: 'agent', avatar_url: 'https://randomuser.me/api/portraits/women/5.jpg' }
 };
 
 export default function LoginScreen({ navigation }) {

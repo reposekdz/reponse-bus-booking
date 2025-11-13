@@ -83,10 +83,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         api.setAuthToken(null);
     };
 
-    return (
-        <AuthContext.Provider value={{ user, token, login, register, logout, isLoading, setUser }}>
-            {children}
-        </AuthContext.Provider>
+    // FIX: Replaced JSX with React.createElement to resolve parsing errors in a .ts file.
+    return React.createElement(
+        AuthContext.Provider,
+        { value: { user, token, login, register, logout, isLoading, setUser } },
+        children
     );
 };
 

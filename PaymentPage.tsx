@@ -89,7 +89,9 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
                 setUser(prev => ({...prev, walletBalance: prev.walletBalance - bookingDetails.totalPrice}))
             }
             
-            onNavigate('bookingConfirmation', { ...bookingDetails, ...confirmedBooking });
+            const fullBookingDetails = { ...bookingDetails, ...confirmedBooking };
+            onNavigate('bookingConfirmation', fullBookingDetails);
+
         } catch (err: any) {
              setError(err.message || t('payment_error_finalizing'));
         } finally {

@@ -1,4 +1,5 @@
 
+
 import React, { useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { XIcon, BusIcon } from './icons';

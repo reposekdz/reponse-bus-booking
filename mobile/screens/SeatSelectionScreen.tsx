@@ -125,7 +125,7 @@ export default function SeatSelectionScreen({ route, navigation }) {
                 <TouchableOpacity 
                     style={[styles.confirmButton, selectedSeats.length === 0 && styles.disabledButton]}
                     disabled={selectedSeats.length === 0}
-                    onPress={() => navigation.navigate('BookingConfirmation')}
+                    onPress={() => navigation.navigate('Payment', { tripDetails, selectedSeats })}
                 >
                     <Text style={styles.confirmButtonText}>Confirm</Text>
                 </TouchableOpacity>

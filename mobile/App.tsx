@@ -7,6 +7,7 @@ import AppNavigator from './navigation/AppNavigator';
 import { AuthProvider } from './hooks/useAuth';
 import useCachedResources from './hooks/useCachedResources';
 import { LanguageProvider } from '../contexts/LanguageContext';
+import { SocketProvider } from '../contexts/SocketContext';
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -17,12 +18,14 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <LanguageProvider>
-        <NavigationContainer>
-          <AppNavigator />
-          <StatusBar style="auto" />
-        </NavigationContainer>
-      </LanguageProvider>
+      <SocketProvider>
+        <LanguageProvider>
+          <NavigationContainer>
+            <AppNavigator />
+            <StatusBar style="auto" />
+          </NavigationContainer>
+        </LanguageProvider>
+      </SocketProvider>
     </AuthProvider>
   );
 }

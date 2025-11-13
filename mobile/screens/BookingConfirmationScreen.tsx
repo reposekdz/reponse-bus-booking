@@ -6,9 +6,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CheckIcon = () => <Text style={styles.checkIcon}>✓</Text>;
 
-export default function BookingConfirmationScreen({ navigation }) {
-    const pointsEarned = Math.floor((Math.random() * 50) + 50); // Mock points
+export default function BookingConfirmationScreen({ route, navigation }) {
+    const { bookingDetails } = route.params;
+    const pointsEarned = Math.floor(bookingDetails.totalPrice / 100); // Mock points
 
+    if (!bookingDetails) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <Text>Something went wrong.</Text>
+            </SafeAreaView>
+        );
+    }
+    
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
@@ -18,19 +27,20 @@ export default function BookingConfirmationScreen({ navigation }) {
                 <Text style={styles.title}>Booking Confirmed!</Text>
                 <Text style={styles.subtitle}>Your ticket has been sent to your email. You can also find it in the "My Tickets" section.</Text>
                 
-                <Text style={styles.pointsText}>✨ You've earned {pointsEarned} GoPoints! ✨</Text>
+                {pointsEarned > 0 && <Text style={styles.pointsText}>✨ You've earned {pointsEarned} GoPoints! ✨</Text>}
 
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Kigali to Rubavu</Text>
-                    <Text style={styles.cardCompany}>Volcano Express</Text>
+                    <Text style={styles.cardTitle}>{bookingDetails.from} to {bookingDetails.to}</Text>
+                    <Text style={styles.cardCompany}>{bookingDetails.company}</Text>
                     <View style={styles.divider} />
-                    <Text style={styles.cardDetails}>Date: Oct 28, 2024</Text>
-                    <Text style={styles.cardDetails}>Seats: A5, B2</Text>
+                    <Text style={styles.cardDetails}>Date: {new Date(bookingDetails.createdAt).toLocaleDateString()}</Text>
+                    <Text style={styles.cardDetails}>Seats: {Array.isArray(bookingDetails.seats) ? bookingDetails.seats.join(', ') : bookingDetails.seats}</Text>
+                    <Text style={styles.cardDetails}>Booking ID: {bookingDetails.bookingId}</Text>
                 </View>
 
                 <TouchableOpacity 
                     style={styles.button}
-                    onPress={() => navigation.navigate('MyTickets')}
+                    onPress={() => navigation.navigate('MainApp', { screen: 'My Tickets'})}
                 >
                     <Text style={styles.buttonText}>View My Tickets</Text>
                 </TouchableOpacity>

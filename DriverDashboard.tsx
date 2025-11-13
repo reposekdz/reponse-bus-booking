@@ -49,12 +49,13 @@ const TripCard: React.FC<{ trip: any, onSelect: (trip: any) => void }> = ({ trip
 
 
 const TripManagementView = ({ trip, onBack }) => {
-    const [manifest, setManifest] = useState([]);
+    const [manifest, setManifest] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [ticketId, setTicketId] = useState('');
     const [scanResult, setScanResult] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const [tripStatus, setTripStatus] = useState(trip.status);
+    const socket = useSocket();
 
     const fetchManifest = async () => {
         setIsLoading(true);
@@ -72,13 +73,34 @@ const TripManagementView = ({ trip, onBack }) => {
         fetchManifest();
     }, [trip.id]);
 
+    useEffect(() => {
+        if (socket) {
+            socket.emit('joinTripRoom', trip.id);
+
+            const handlePassengerBoarded = ({ bookingId, newStatus }) => {
+                setManifest(prevManifest =>
+                    prevManifest.map(p =>
+                        p.booking_id === bookingId ? { ...p, status: newStatus } : p
+                    )
+                );
+            };
+
+            socket.on('passengerBoarded', handlePassengerBoarded);
+
+            return () => {
+                socket.off('passengerBoarded', handlePassengerBoarded);
+                // Optionally leave the room, though not strictly necessary
+            };
+        }
+    }, [socket, trip.id]);
+
     const handleVerify = async () => {
         setScanResult(null);
         if (!ticketId) return;
         try {
             const result = await api.confirmBoarding(trip.id, ticketId);
             setScanResult({ type: 'success', message: `Welcome ${result.passengerName} (Seat: ${result.seat})` });
-            fetchManifest(); // Re-fetch to update status
+            // The state update will now come from the socket event, so no need to refetch manifest here.
         } catch (e: any) {
             setScanResult({ type: 'error', message: e.message || 'Verification failed.' });
         } finally {
@@ -136,7 +158,7 @@ const TripManagementView = ({ trip, onBack }) => {
                                         <p className="font-semibold text-sm dark:text-white">{p.passenger_name}</p>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">Seat: {p.seats}</p>
                                     </div>
-                                    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${p.status === 'Completed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>{p.status}</span>
+                                    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${p.status === 'Completed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>{p.status === 'Completed' ? 'Boarded' : 'Booked'}</span>
                                 </div>
                             ))}
                         </div>

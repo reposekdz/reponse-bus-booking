@@ -6,11 +6,12 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 // Define params for each screen that receives them
 type SearchResultsParams = { from: string; to: string; date: string; };
 type SeatSelectionParams = { tripId: string };
-type PaymentParams = { bookingDetails: any };
+type PaymentParams = { tripDetails: any, selectedSeats: string[] };
 type BookingConfirmationParams = { bookingDetails: any };
 type TicketDetailsParams = { ticket: any };
 type AddEditBusParams = { bus?: any };
 type AddEditDriverParams = { driver?: any };
+type BoardingParams = { trip: any };
 
 // The root stack contains everything, including modals and nested navigators
 export type RootStackParamList = {
@@ -23,7 +24,7 @@ export type RootStackParamList = {
   Payment: PaymentParams;
   BookingConfirmation: BookingConfirmationParams;
   TicketDetails: TicketDetailsParams;
-  DriverBoarding: undefined;
+  DriverBoarding: BoardingParams;
   DriverTripHistory: undefined;
   BusCharter: undefined;
   LostAndFound: undefined;
