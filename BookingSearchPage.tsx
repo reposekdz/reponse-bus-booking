@@ -1,15 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowRightIcon, FilterIcon, StarIcon, WifiIcon, AcIcon, PowerIcon, BuildingOfficeIcon, XIcon } from './components/icons';
+import { ArrowRightIcon, FilterIcon, StarIcon, WifiIcon, AcIcon, PowerIcon, BuildingOfficeIcon, XIcon, CalendarIcon } from './components/icons';
 import SearchResultsPage from './SearchResultsPage';
 import { Page } from './App';
 import * as api from './services/apiService';
 import SearchResultSkeleton from './components/SearchResultSkeleton';
 import Modal from './components/Modal';
+import SearchableSelect from './components/SearchableSelect';
+import PassengerSelector from './components/PassengerSelector';
 
 const allAmenities = ['WiFi', 'AC', 'Charging'];
+const allLocations = ['Kigali', 'Rubavu', 'Musanze', 'Huye', 'Rusizi', 'Nyagatare', 'Muhanga'];
 
 interface BookingSearchPageProps {
-  searchParams: { from?: string; to?: string; date?: string; };
+  searchParams: { from?: string; to?: string; date?: string; passengers?: { adults: number; children: number; } };
   onNavigate: (page: Page, data?: any) => void;
 }
 
@@ -69,6 +72,7 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
   const [fromLocation, setFromLocation] = useState(searchParams?.from || 'Kigali');
   const [toLocation, setToLocation] = useState(searchParams?.to || 'Rubavu');
   const [journeyDate, setJourneyDate] = useState(searchParams?.date || new Date().toISOString().split('T')[0]);
+  const [passengers, setPassengers] = useState(searchParams?.passengers || { adults: 1, children: 0 });
 
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,6 +86,8 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
   const [companyFilters, setCompanyFilters] = useState<string[]>([]);
   const [timeFilters, setTimeFilters] = useState<string[]>([]);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  
+  const totalPassengers = useMemo(() => passengers.adults + passengers.children, [passengers]);
 
   const fetchTrips = async () => {
       if (!fromLocation || !toLocation || !journeyDate) return;
@@ -155,6 +161,7 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
           driver: trip.driver,
       }))
       .filter(trip => {
+        if (trip.availableSeats < totalPassengers) return false;
         if (showFavoritesOnly && !favoriteTripIds.includes(trip.id)) return false;
         if (amenityFilters.length > 0 && !amenityFilters.every(amenity => trip.amenities.includes(amenity))) return false;
         if (companyFilters.length > 0 && !companyFilters.includes(trip.company)) return false;
@@ -184,22 +191,33 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
     });
 
     return processedResults;
-  }, [results, sortOrder, showFavoritesOnly, favoriteTripIds, amenityFilters, companyFilters, timeFilters]);
+  }, [results, sortOrder, showFavoritesOnly, favoriteTripIds, amenityFilters, companyFilters, timeFilters, totalPassengers]);
 
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <header className="bg-white dark:bg-gray-800/50 shadow-sm pt-12 pb-24">
+      <header className="bg-white dark:bg-gray-800/50 shadow-sm pt-12 pb-8">
             <div className="container mx-auto px-6">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-6">
                     <div>
                         <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">{fromLocation} <ArrowRightIcon className="inline w-6 sm:w-8 h-6 sm:h-8 mx-2"/> {toLocation}</h1>
-                        <p className="mt-2 text-md sm:text-lg text-gray-600 dark:text-gray-400">{new Date(journeyDate).toDateString()}, {isLoading ? '...' : `${filteredAndSortedResults.length} trips found`}</p>
+                        <p className="mt-2 text-md sm:text-lg text-gray-600 dark:text-gray-400">{new Date(journeyDate).toDateString()}, {totalPassengers} passenger(s) - {isLoading ? '...' : `${filteredAndSortedResults.length} trips found`}</p>
                     </div>
                 </div>
+                 <div className="bg-white/10 dark:bg-black/20 p-4 rounded-xl grid grid-cols-1 md:grid-cols-[1fr_1fr_auto_auto] gap-4 items-center">
+                    <SearchableSelect options={allLocations} value={fromLocation} onChange={setFromLocation} placeholder="From" />
+                    <SearchableSelect options={allLocations} value={toLocation} onChange={setToLocation} placeholder="To" />
+                    <div className="relative">
+                        <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                        <input type="date" value={journeyDate} onChange={e => setJourneyDate(e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700"/>
+                    </div>
+                    <div className="min-w-[180px]">
+                      <PassengerSelector passengers={passengers} onPassengersChange={setPassengers} className="bg-gray-50 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-black dark:text-white" />
+                    </div>
+                 </div>
             </div>
       </header>
-       <main className="container mx-auto px-6 py-8 -mt-20">
+       <main className="container mx-auto px-6 py-8">
          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
            <aside className="hidden lg:block lg:col-span-1">
              <div className="sticky top-24 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">

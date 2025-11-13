@@ -127,8 +127,8 @@ const AppContent: React.FC = () => {
       window.dispatchEvent(new CustomEvent('favoritesChanged'));
   };
 
-  const handleSearch = (from?: string, to?: string, date?: string) => {
-      navigate('bookingSearch', { from, to, date });
+  const handleSearch = (from?: string, to?: string, date?: string, passengers?: { adults: number; children: number; }) => {
+      navigate('bookingSearch', { from, to, date, passengers });
   }
 
   if (isLoading) {

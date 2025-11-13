@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { CalendarIcon, UserCircleIcon, ArrowRightIcon, ArrowsUpDownIcon } from './icons';
+import { CalendarIcon, ArrowRightIcon, ArrowsUpDownIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
 import SearchableSelect from './SearchableSelect';
+import PassengerSelector from './PassengerSelector';
 
 interface BookingFormProps {
-  onSearch: (from: string, to: string, date: string) => void;
+  onSearch: (from: string, to: string, date: string, passengers: { adults: number; children: number; }) => void;
 }
 
 const locations = ['Kigali', 'Rubavu', 'Musanze', 'Huye', 'Rusizi', 'Nyagatare', 'Muhanga'];
@@ -16,25 +17,17 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
   const [journeyDate, setJourneyDate] = useState(new Date().toISOString().split('T')[0]);
   const [returnDate, setReturnDate] = useState('');
   const [passengers, setPassengers] = useState({ adults: 1, children: 0 });
-  const [isPassengerDropdownOpen, setIsPassengerDropdownOpen] = useState(false);
   const [tripType, setTripType] = useState('one-way');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(fromLocation, toLocation, journeyDate);
+    onSearch(fromLocation, toLocation, journeyDate, passengers);
   };
 
   const swapLocations = () => {
     const temp = fromLocation;
     setFromLocation(toLocation);
     setToLocation(temp);
-  };
-  
-  const handlePassengerChange = (type: 'adults' | 'children', operation: 'inc' | 'dec') => {
-      setPassengers(prev => ({
-          ...prev,
-          [type]: operation === 'inc' ? prev[type] + 1 : Math.max(type === 'adults' ? 1 : 0, prev[type] - 1)
-      }));
   };
   
   const formInputBaseClass = "w-full pl-10 pr-4 py-3 rounded-lg border-2 border-white/10 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-black/30 backdrop-blur-sm text-white transition appearance-none";
@@ -78,32 +71,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
           </div>
       </div>
       <div className="grid grid-cols-1">
-          <div className="relative">
-            <button type="button" onClick={() => setIsPassengerDropdownOpen(!isPassengerDropdownOpen)} className={`${formInputBaseClass} text-left`}>
-                 <UserCircleIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                 {passengers.adults} {t('form_adults')}, {passengers.children} {t('form_children')}
-            </button>
-             {isPassengerDropdownOpen && (
-                <div className="absolute top-full mt-2 w-full bg-gray-900/80 backdrop-blur-md border border-gray-700 rounded-lg shadow-xl p-4 z-20 text-white">
-                    <div className="flex justify-between items-center">
-                        <p>{t('form_adults_label')}</p>
-                        <div className="flex items-center space-x-3">
-                            <button type="button" onClick={() => handlePassengerChange('adults', 'dec')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">-</button>
-                            <span className="w-4 text-center">{passengers.adults}</span>
-                            <button type="button" onClick={() => handlePassengerChange('adults', 'inc')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">+</button>
-                        </div>
-                    </div>
-                     <div className="flex justify-between items-center mt-2">
-                        <p>{t('form_children_label')}</p>
-                        <div className="flex items-center space-x-3">
-                            <button type="button" onClick={() => handlePassengerChange('children', 'dec')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">-</button>
-                            <span className="w-4 text-center">{passengers.children}</span>
-                            <button type="button" onClick={() => handlePassengerChange('children', 'inc')} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30">+</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-          </div>
+          <PassengerSelector 
+            passengers={passengers} 
+            onPassengersChange={setPassengers}
+            className="border-2 border-white/10 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 bg-black/30 backdrop-blur-sm text-white"
+          />
        </div>
 
       <button

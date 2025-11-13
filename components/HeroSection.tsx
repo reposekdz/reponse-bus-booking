@@ -6,7 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import * as api from '../services/apiService';
 
 interface HeroSectionProps {
-  onSearch: (from?: string, to?: string, date?: string) => void;
+  onSearch: (from?: string, to?: string, date?: string, passengers?: { adults: number; children: number; }) => void;
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
@@ -45,7 +45,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
                 <p className="text-md md:text-lg font-light mb-8 max-w-2xl mx-auto">
                   {t('hero_subtitle')}
                 </p>
-                <BookingForm onSearch={onSearch} />
+                <BookingForm onSearch={(from, to, date, passengers) => onSearch(from, to, date, passengers)} />
           </div>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
              <button 

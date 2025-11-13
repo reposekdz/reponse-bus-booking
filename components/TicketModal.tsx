@@ -1,39 +1,37 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import QRCode from 'qrcode';
 import { XIcon, BusIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
 
-// Simple hash function to generate a "unique" pattern from a string
-const simpleHash = (str: string) => {
-  let hash = 0;
-  if (!str) return hash;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};
+const RealQRCode: React.FC<{ ticketData: any; size: number }> = ({ ticketData, size }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-const QRCode: React.FC<{ value: string; size: number, isActive: boolean }> = ({ value, size, isActive }) => {
-  const hash = simpleHash(value);
-  const gridSize = 15; // QR codes are grids
+  useEffect(() => {
+    if (canvasRef.current && ticketData) {
+      const qrDataString = JSON.stringify({
+        bookingId: ticketData.id,
+        passenger: ticketData.passenger,
+        route: `${ticketData.from} to ${ticketData.to}`,
+        datetime: `${ticketData.date} at ${ticketData.time}`,
+        seats: ticketData.seats,
+        busPlate: ticketData.busPlate,
+      });
 
-  return (
-    <div className={`p-2 bg-white rounded-lg ${isActive ? 'activated-ticket-glow' : ''}`} style={{ width: size, height: size }}>
-      <div className="grid grid-cols-15 w-full h-full">
-        {Array.from({ length: gridSize * gridSize }).map((_, i) => {
-          const bit = (hash >> (i % 31)) & 1;
-          return (
-            <div
-              key={i}
-              className={`w-full h-full ${bit === 1 ? 'bg-black' : 'bg-white'}`}
-            ></div>
-          );
-        })}
-      </div>
-       <style>{`.grid-cols-15 { grid-template-columns: repeat(15, minmax(0, 1fr)); }`}</style>
-    </div>
-  );
+      QRCode.toCanvas(canvasRef.current, qrDataString, {
+        width: size,
+        margin: 1,
+        color: {
+          dark: '#002B7F', // GoBus dark blue
+          light: '#FFFFFFFF',
+        },
+        errorCorrectionLevel: 'H', // High error correction
+      }, (error) => {
+        if (error) console.error('QR Code generation failed:', error);
+      });
+    }
+  }, [ticketData, size]);
+
+  return <canvas ref={canvasRef} style={{ width: size, height: size }} />;
 };
 
 
@@ -57,20 +55,28 @@ const TicketModal: React.FC<{ ticket: any; onClose: () => void, isActive?: boole
         className="bg-gray-50 dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm transform transition-transform duration-300 scale-95 animate-scale-in"
         onClick={e => e.stopPropagation()}
       >
-        <header className="bg-gradient-to-r from-blue-600 to-green-500 p-6 rounded-t-2xl text-white relative">
+        <header className="bg-gradient-to-r from-blue-600 to-green-500 p-6 rounded-t-2xl text-white relative animated-gradient-bg">
             <button onClick={onClose} className="absolute top-3 right-3 p-1 rounded-full bg-white/20 hover:bg-white/40 transition-colors">
                 <XIcon className="w-5 h-5"/>
             </button>
-            <div className="flex items-center space-x-3">
-                 <BusIcon className="w-8 h-8"/>
-                 <h2 className="text-2xl font-bold">{t('ticket_modal_title')}</h2>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                     <BusIcon className="w-8 h-8"/>
+                     <h2 className="text-2xl font-bold">{t('ticket_modal_title')}</h2>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+                    <span className="text-xs font-bold tracking-wider">LIVE</span>
+                </div>
             </div>
             <p className="text-sm opacity-80 mt-1">{ticket.company}</p>
         </header>
 
         <main className="p-6">
             <div className="flex items-center justify-center mb-4">
-                <QRCode value={ticket.id} size={180} isActive={isActive} />
+                <div className={`p-2 bg-white rounded-lg transition-shadow duration-300 ${isActive ? 'activated-ticket-glow' : 'shadow-md'}`}>
+                    <RealQRCode ticketData={ticket} size={164} />
+                </div>
             </div>
              {isActive ? (
                 <p className="text-center font-bold text-lg text-green-500 animate-pulse mb-4">{t('ticket_modal_activated')}</p>

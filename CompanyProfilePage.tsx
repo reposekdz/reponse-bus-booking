@@ -1,11 +1,8 @@
-
-
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon, TagIcon, ArchiveBoxIcon, PhoneIcon } from './components/icons';
 import FleetDetailModal from './components/FleetDetailModal';
 import StarRating from './components/StarRating';
-import * as api from './services/apiService';
+import * as api from '../services/apiService';
 import LoadingSpinner from './components/LoadingSpinner';
 
 const AmenityIcon: React.FC<{ amenity: string; withText?: boolean }> = ({ amenity, withText = false }) => {
@@ -84,8 +81,19 @@ const PhotoViewerModal: React.FC<{ images: string[], startIndex: number, onClose
             <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/30 transition-colors z-20">
                 <XIcon className="w-6 h-6" />
             </button>
-            <div className="relative w-full max-w-4xl h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
-                <img src={images[currentIndex]} alt="Company gallery" className="max-h-[90vh] max-w-[90vw] w-auto h-auto rounded-lg shadow-2xl" />
+            <div className="relative w-full max-w-4xl h-full flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
+                <img src={images[currentIndex]} alt="Company gallery" className="max-h-[80vh] max-w-[90vw] w-auto h-auto rounded-lg shadow-2xl mb-4" />
+                {images.length > 1 && (
+                    <div className="w-full max-w-xl overflow-x-auto custom-scrollbar">
+                        <div className="flex space-x-2 p-2 justify-center">
+                            {images.map((img, index) => (
+                                <button key={index} onClick={() => setCurrentIndex(index)} className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-colors ${currentIndex === index ? 'border-white' : 'border-transparent hover:border-white/50'}`}>
+                                    <img src={img} alt={`thumbnail ${index + 1}`} className="w-full h-full object-cover"/>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 {images.length > 1 && (
                     <>
                         <button onClick={prevImage} className="absolute left-0 top-1/2 -translate-y-1/2 p-3 bg-white/10 text-white rounded-full hover:bg-white/30 transition-colors ml-2 md:ml-[-50px]">
@@ -300,10 +308,9 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company: initia
                       <h3 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Gallery</h3>
                       {company.gallery?.length > 0 ? (
                           <>
-                              <div className="flex space-x-2 mb-6 border-b dark:border-gray-700">
-                                  {/* FIX: Added explicit type 'string' to 'cat' to resolve type errors */}
+                              <div className="flex flex-wrap gap-2 mb-6">
                                   {galleryCategories.map((cat: string) => (
-                                      <button key={cat} onClick={() => setGalleryFilter(cat)} className={`px-4 py-2 text-sm font-semibold capitalize transition-colors ${galleryFilter === cat ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'}`}>
+                                      <button key={cat} onClick={() => setGalleryFilter(cat)} className={`px-4 py-2 text-sm font-semibold capitalize transition-all rounded-full ${galleryFilter === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
                                           {cat}
                                       </button>
                                   ))}
