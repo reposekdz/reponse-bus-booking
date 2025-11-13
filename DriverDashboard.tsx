@@ -1,20 +1,8 @@
-
-
-import React, { useState } from 'react';
-import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, MegaphoneIcon, CalendarIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, StarIcon, ShieldCheckIcon, MenuIcon, XIcon } from './components/icons';
+import React, { useState, useEffect } from 'react';
+import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, MegaphoneIcon, CalendarIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, StarIcon, ShieldCheckIcon, MenuIcon, XIcon, ArrowRightIcon, BusIcon } from './components/icons';
 import { Page } from './App';
-import DriverSettingsPage from './DriverSettingsPage';
-// FIX: The mockCompaniesData is no longer available from a central file.
-// A temporary mock is provided here to ensure component functionality.
-const mockCompaniesData = [
-    { id: 'volcano', name: 'Volcano Express', logoUrl: 'https://pbs.twimg.com/profile_images/1237839357116452865/p-28c8o-_400x400.jpg', description: 'Volcano Express is a popular choice for many travelers in Rwanda.' },
-    { id: 'ritco', name: 'RITCO', logoUrl: 'https://www.ritco.rw/wp-content/uploads/2021/04/ritco-logo.jpg', description: 'RITCO is a government-owned company providing public transport services.' },
-];
-import DriverPerformance from './components/DriverPerformance';
-import DriverTripHistory from './components/DriverTripHistory';
-import VehicleReportModal from './components/VehicleReportModal';
 import * as api from './services/apiService';
-
+import LoadingSpinner from './components/LoadingSpinner';
 
 interface DriverDashboardProps {
     onLogout: () => void;
@@ -24,335 +12,173 @@ interface DriverDashboardProps {
     navigate: (page: Page, data?: any) => void;
 }
 
-const navItems = [
-    { view: 'dashboard', label: 'Dashboard', icon: ChartBarIcon },
-    { view: 'boarding', label: 'Passenger Boarding', icon: QrCodeIcon },
-    { view: 'performance', label: 'My Performance', icon: ChartPieIcon },
-    { view: 'history', label: 'Trip History', icon: ClipboardDocumentListIcon },
-    { view: 'profile', label: 'My Profile', icon: UsersIcon },
-    { view: 'settings', label: 'Settings', icon: CogIcon },
-];
-
-const mockCurrentTrip = {
-    id: 'VK-TRIP-123',
-    route: 'Kigali - Rubavu',
-    departureTime: '07:00 AM',
-    arrivalTime: '10:30 AM',
-    passengers: [
-        { id: 1, name: 'Kalisa Jean', seat: 'A5', ticketId: 'VK-83AD1', status: 'booked' },
-        { id: 2, name: 'Mutesi Aline', seat: 'A6', ticketId: 'VK-83AD2', status: 'booked' },
-        { id: 3, name: 'Gatete David', seat: 'B1', ticketId: 'VK-83AD3', status: 'boarded' },
-        { id: 4, name: 'Uwineza Grace', seat: 'C3', ticketId: 'VK-83AD4', status: 'booked' },
-        { id: 5, name: 'Mugisha Frank', seat: 'C4', ticketId: 'VK-83AD5', status: 'booked' },
-    ],
-};
-
-const mockAnnouncements = [
-    { id: 1, text: "Reminder: All drivers must complete the new safety training module by Friday.", date: "2024-10-28" },
-    { id: 2, text: "Heavy rain is expected on the Kigali-Huye route this afternoon. Please drive with extra caution.", date: "2024-10-27" }
-];
-
-const checklistItems = [
-    { id: 'tires', label: 'Check Tire Pressure' },
-    { id: 'fuel', label: 'Verify Fuel Level' },
-    { id: 'lights', label: 'Test Headlights & Signals' },
-    { id: 'clean', label: 'Interior is Clean' },
-];
-
-const StatCard = ({ title, value, icon: Icon }) => (
-    <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg flex items-center space-x-4">
-        <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-full">
-            <Icon className="w-7 h-7 text-blue-500" />
+const TripCard = ({ trip, onSelect }) => (
+    <button onClick={() => onSelect(trip)} className="w-full text-left bg-white dark:bg-gray-800/50 p-4 rounded-xl shadow-md hover:shadow-lg hover:border-blue-500 border-2 border-transparent transition-all">
+        <div className="flex justify-between items-center">
+            <p className="font-bold text-lg dark:text-white">{trip.route}</p>
+            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${trip.status === 'Scheduled' ? 'bg-yellow-200 text-yellow-800' : 'bg-blue-200 text-blue-800'}`}>
+                {trip.status}
+            </span>
         </div>
-        <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+        <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <p>Departure: {new Date(trip.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+            <p>Bus: {trip.bus_plate}</p>
         </div>
-    </div>
+    </button>
 );
 
-const PreTripChecklist = ({ onComplete }) => {
-    const [checkedItems, setCheckedItems] = useState<string[]>([]);
-    
-    const handleToggle = (id: string) => {
-        setCheckedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+
+const TripManagementView = ({ trip, onBack }) => {
+    const [manifest, setManifest] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [ticketId, setTicketId] = useState('');
+    const [scanResult, setScanResult] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+    const [tripStatus, setTripStatus] = useState(trip.status);
+
+    const fetchManifest = async () => {
+        setIsLoading(true);
+        try {
+            const data = await api.getTripManifest(trip.id);
+            setManifest(data);
+        } catch (e) {
+            setError(e.message || 'Failed to load manifest.');
+        } finally {
+            setIsLoading(false);
+        }
     };
     
-    const allChecked = checkedItems.length === checklistItems.length;
+    useEffect(() => {
+        fetchManifest();
+    }, [trip.id]);
+
+    const handleVerify = async () => {
+        setScanResult(null);
+        if (!ticketId) return;
+        try {
+            const result = await api.confirmBoarding(trip.id, ticketId);
+            setScanResult({ type: 'success', message: `Welcome ${result.passengerName} (Seat: ${result.seat})` });
+            fetchManifest(); // Re-fetch to update status
+        } catch (e) {
+            setScanResult({ type: 'error', message: e.message || 'Verification failed.' });
+        } finally {
+            setTicketId('');
+        }
+    };
+
+    const handleUpdateTripStatus = async (newStatus: 'Departed' | 'Arrived') => {
+        try {
+            if (newStatus === 'Departed') {
+                await api.departTrip(trip.id);
+                setTripStatus('Departed');
+            } else if (newStatus === 'Arrived') {
+                await api.arriveTrip(trip.id);
+                setTripStatus('Arrived');
+            }
+        } catch (e) {
+            alert(`Failed to update trip status: ${e.message}`);
+        }
+    };
+
+    const boardedCount = manifest.filter(p => p.status === 'Completed').length;
 
     return (
-         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-            <h2 className="text-xl font-bold dark:text-white mb-4">Pre-Trip Checklist</h2>
-            <div className="space-y-3">
-                {checklistItems.map(item => (
-                    <label key={item.id} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer">
-                        <input type="checkbox" checked={checkedItems.includes(item.id)} onChange={() => handleToggle(item.id)} className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500"/>
-                        <span className={`flex-1 ${checkedItems.includes(item.id) ? 'line-through text-gray-400' : 'dark:text-gray-200'}`}>{item.label}</span>
-                         {checkedItems.includes(item.id) && <CheckCircleIcon className="w-6 h-6 text-green-500" />}
-                    </label>
-                ))}
+        <div className="animate-fade-in">
+            <button onClick={onBack} className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-4">&larr; Back to Trip List</button>
+            <h1 className="text-3xl font-bold dark:text-white">{trip.route}</h1>
+            <p className="text-gray-500 dark:text-gray-400">Departure: {new Date(trip.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+            
+            <div className="mt-4 flex space-x-4">
+                <button onClick={() => handleUpdateTripStatus('Departed')} disabled={tripStatus !== 'Scheduled'} className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-400">Depart Trip</button>
+                <button onClick={() => handleUpdateTripStatus('Arrived')} disabled={tripStatus !== 'Departed'} className="px-4 py-2 bg-green-600 text-white rounded-lg disabled:bg-gray-400">Arrive Trip</button>
             </div>
-            <button onClick={onComplete} disabled={!allChecked} className="w-full mt-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                Confirm & Start Trip
-            </button>
-        </div>
-    );
-};
 
-const MobileNav: React.FC<{isOpen: boolean, onClose: () => void, setView: (view: string) => void, navigate: (page: Page) => void, currentView: string}> = ({isOpen, onClose, setView, navigate, currentView}) => (
-    <div className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onClose}>
-        <div className="absolute inset-0 bg-black/60"></div>
-        <div className={`absolute top-0 left-0 h-full w-64 bg-gray-900 text-white p-6 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`} onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-8">
-                <span className="font-bold text-xl">Driver Menu</span>
-                <button onClick={onClose}><XIcon className="w-6 h-6"/></button>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+                <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl shadow-md">
+                    <h2 className="text-xl font-bold mb-4 dark:text-white">Boarding Verification</h2>
+                    <div className="flex space-x-2">
+                        <input type="text" value={ticketId} onChange={e => setTicketId(e.target.value.toUpperCase())} placeholder="Enter Ticket ID" className="flex-grow p-2 border rounded-md dark:bg-gray-700"/>
+                        <button onClick={handleVerify} className="px-4 py-2 bg-blue-600 text-white rounded-md font-semibold">Verify</button>
+                    </div>
+                    {scanResult && (
+                         <div className={`mt-4 p-3 rounded-md text-sm font-semibold ${scanResult.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'}`}>
+                             {scanResult.message}
+                         </div>
+                     )}
+                </div>
+                <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl shadow-md">
+                    <h2 className="text-xl font-bold mb-4 dark:text-white">Passenger Manifest ({boardedCount}/{manifest.length})</h2>
+                    {isLoading ? <p>Loading...</p> : error ? <p className="text-red-500">{error}</p> : (
+                        <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+                            {manifest.map(p => (
+                                <div key={p.booking_id} className="flex justify-between p-2 bg-gray-100 dark:bg-gray-700/50 rounded-md">
+                                    <div>
+                                        <p className="font-semibold text-sm dark:text-white">{p.passenger_name}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Seat: {p.seats}</p>
+                                    </div>
+                                    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${p.status === 'Completed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>{p.status}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
-            <nav className="space-y-2">
-                {navItems.map(item => (
-                    <button key={item.view} onClick={() => { item.view === 'profile' ? navigate('driverProfile') : setView(item.view); onClose(); }} className={`w-full flex items-center p-3 rounded-lg ${currentView === item.view ? 'bg-white/20' : 'hover:bg-white/10'}`}>
-                        <item.icon className="w-5 h-5 mr-3"/>
-                        <span>{item.label}</span>
-                    </button>
-                ))}
-            </nav>
         </div>
-    </div>
-);
+    )
+};
 
 
 const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setTheme, driverData, navigate }) => {
-    const [view, setView] = useState('dashboard');
-    const [scannedTicket, setScannedTicket] = useState('');
-    const [scanResult, setScanResult] = useState<{ type: 'success' | 'error', message: string } | null>(null);
-    const [passengers, setPassengers] = useState(mockCurrentTrip.passengers);
-    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [trips, setTrips] = useState<any[]>([]);
+    const [selectedTrip, setSelectedTrip] = useState<any | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const fetchTrips = async () => {
+            setIsLoading(true);
+            try {
+                const data = await api.driverGetMyTrips();
+                setTrips(data);
+            } catch (err) {
+                setError((err as Error).message || "Failed to fetch trips.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchTrips();
+    }, []);
 
     const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
-    
-    const driverCompany = mockCompaniesData.find(c => c.name === driverData.company) || mockCompaniesData[0];
-    const upcomingTrips = (driverData.tripHistory || []).filter(t => t.status === 'Upcoming');
-
-
-    const handleScan = async () => {
-        setScanResult(null);
-        if (!scannedTicket) {
-            setScanResult({ type: 'error', message: 'Ticket ID cannot be empty.' });
-            return;
-        }
-
-        // The mockCurrentTrip.id would be dynamic in a real app
-        const currentTripId = "1"; // A mock ID for an existing trip
-
-        try {
-            // Call the new backend service
-            const result = await api.confirmBoarding(currentTripId, scannedTicket);
-            
-            // On success, update UI
-            setScanResult({ type: 'success', message: `Welcome, ${result.passengerName}! Seat: ${result.seat}.` });
-            setPassengers(passengers.map(p => p.ticketId === scannedTicket ? {...p, status: 'boarded'} : p));
-        } catch (err: any) {
-            setScanResult({ type: 'error', message: (err as Error).message || 'Verification failed.' });
-        } finally {
-            setScannedTicket('');
-        }
-    };
-    
-    const simulateScan = (type: 'success' | 'failure' | 'duplicate') => {
-        if (type === 'success') {
-            const passengerToScan = passengers.find(p => p.status === 'booked');
-            if (passengerToScan) {
-                setScannedTicket(passengerToScan.ticketId);
-            } else {
-                setScannedTicket('GB-TEST1'); // Fallback if all are boarded
-            }
-        } else if (type === 'duplicate') {
-            const boardedPassenger = passengers.find(p => p.status === 'boarded');
-             if (boardedPassenger) {
-                setScannedTicket(boardedPassenger.ticketId);
-            } else {
-                 setScannedTicket('GB-TEST1');
-            }
-        } else {
-            setScannedTicket('INVALID-ID');
-        }
-        setTimeout(handleScan, 50);
-    };
-
-    // FIX: Added interface for NavLink props to resolve type error.
-    interface NavLinkProps {
-        viewName: string;
-        label: string;
-        icon: React.FC<React.SVGProps<SVGSVGElement>>;
-    }
-
-    const NavLink: React.FC<NavLinkProps> = ({ viewName, label, icon: Icon }) => (
-      <button onClick={() => viewName === 'profile' ? navigate('driverProfile') : setView(viewName)} className={`group w-full flex items-center px-4 py-3 transition-all duration-300 rounded-lg relative ${view === viewName ? 'text-white bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-          <div className={`absolute left-0 top-0 h-full w-1 rounded-r-full bg-yellow-400 transition-all duration-300 ${view === viewName ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-50'}`}></div>
-          <Icon className="w-6 h-6 mr-4 transition-transform duration-300 group-hover:scale-110" />
-          <span className="font-semibold">{label}</span>
-      </button>
-    );
 
     const renderContent = () => {
-        switch(view) {
-            case 'boarding':
-                return (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                         <div className="bg-white dark:bg-gray-800/50 p-6 sm:p-8 rounded-2xl shadow-lg">
-                            <h1 className="text-2xl font-bold dark:text-gray-200 mb-6">Scan Passenger Ticket</h1>
-                            <div className="aspect-square w-full bg-gray-900 rounded-xl mb-6 flex items-center justify-center p-4 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-repeat opacity-5" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`}}></div>
-                                <div className="w-full h-full border-4 border-dashed border-blue-500/50 rounded-lg flex items-center justify-center flex-col">
-                                    <QrCodeIcon className="w-20 h-20 text-blue-400/50"/>
-                                    <p className="text-blue-400/50 mt-2 text-sm font-semibold">Align QR code within frame</p>
-                                </div>
-                            </div>
-                             <p className="text-sm text-center text-gray-500 dark:text-gray-400 mb-4">Enter ticket ID manually if scan fails</p>
-                             <div className="flex space-x-2">
-                                 <input 
-                                    type="text"
-                                    value={scannedTicket}
-                                    onChange={(e) => setScannedTicket(e.target.value.toUpperCase())}
-                                    placeholder="Enter Ticket ID..."
-                                    className="flex-grow p-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
-                                 />
-                                 <button onClick={handleScan} className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Verify</button>
-                             </div>
-                             {scanResult && (
-                                 <div className={`mt-4 p-3 rounded-md text-sm font-semibold ${scanResult.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'}`}>
-                                     {scanResult.message}
-                                 </div>
-                             )}
-                             <div className="text-center mt-4 text-xs text-gray-400">
-                                 <p>For Demo:</p>
-                                 <div className="flex justify-center space-x-2 mt-1">
-                                     <button onClick={() => simulateScan('success')} className="text-green-500 hover:underline">Simulate Success</button>
-                                     <button onClick={() => simulateScan('duplicate')} className="text-yellow-500 hover:underline">Simulate Duplicate</button>
-                                     <button onClick={() => simulateScan('failure')} className="text-red-500 hover:underline">Simulate Failure</button>
-                                 </div>
-                             </div>
-                         </div>
-                         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                            <h2 className="font-bold text-xl mb-4 dark:text-white">Passenger Manifest ({mockCurrentTrip.route})</h2>
-                            <div className="space-y-3 h-[600px] overflow-y-auto custom-scrollbar pr-2">
-                                {passengers.map(p => (
-                                    <div key={p.id} className="flex justify-between items-center p-3 rounded-lg bg-gray-100 dark:bg-gray-700/50">
-                                        <div>
-                                            <p className="font-semibold dark:text-white">{p.name}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Seat: {p.seat} | ID: {p.ticketId}</p>
-                                        </div>
-                                        <span className={`px-2 py-1 text-xs rounded-full font-bold ${p.status === 'boarded' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'}`}>{p.status}</span>
-                                    </div>
-                                ))}
-                            </div>
-                         </div>
-                    </div>
-                );
-            case 'performance':
-                return <DriverPerformance performance={driverData.performance} />;
-            case 'history':
-                return <DriverTripHistory />;
-            case 'settings':
-                return <DriverSettingsPage driverData={driverData} companyData={driverCompany} theme={theme} setTheme={setTheme} />;
-            case 'dashboard':
-            default:
-                 return (
-                    <div className="space-y-8">
-                         <h1 className="text-3xl font-bold dark:text-gray-200">Dashboard</h1>
+        if (isLoading) return <LoadingSpinner />;
+        if (error) return <p className="text-red-500">{error}</p>;
 
-                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <StatCard title="On-Time Rate" value={`${driverData.performance.onTimeRate}%`} icon={ChartPieIcon} />
-                            <StatCard title="Average Rating" value={`${driverData.performance.averageRating}/5`} icon={StarIcon} />
-                            <StatCard title="Safety Score" value={`${driverData.performance.safetyScore}%`} icon={ShieldCheckIcon} />
-                            <StatCard title="Total Trips" value={driverData.performance.totalTrips} icon={ClipboardDocumentListIcon} />
-                        </div>
-                        
-                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-1">
-                                <PreTripChecklist onComplete={() => alert("Checklist confirmed! Trip can now start.")} />
-                            </div>
-                            <div className="lg:col-span-2 space-y-6">
-                                <button onClick={() => setView('boarding')} className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-left w-full">
-                                    <QrCodeIcon className="w-12 h-12 mb-4"/>
-                                    <h2 className="text-2xl font-bold">Start Passenger Boarding</h2>
-                                    <p className="opacity-80 mt-2">Scan tickets to verify and board passengers for the current trip.</p>
-                                </button>
-                                <button onClick={() => setIsReportModalOpen(true)} className="bg-gradient-to-br from-yellow-500 to-orange-600 text-white p-8 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-left w-full">
-                                    <WrenchScrewdriverIcon className="w-12 h-12 mb-4"/>
-                                    <h2 className="text-2xl font-bold">Report Vehicle Issue</h2>
-                                    <p className="opacity-80 mt-2">Submit a maintenance request for your assigned bus.</p>
-                                </button>
-                            </div>
-                         </div>
-                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                                <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><CalendarIcon className="w-6 h-6 mr-3 text-green-400"/> My Weekly Schedule</h2>
-                                <div className="space-y-3">
-                                    {upcomingTrips.length > 0 ? upcomingTrips.map(trip => (
-                                        <div key={trip.id} className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                                            <p className="font-semibold text-sm dark:text-white">{trip.route}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(trip.date).toDateString()}</p>
-                                        </div>
-                                    )) : <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming trips assigned.</p>}
-                                </div>
-                            </div>
-                             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                                <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><MegaphoneIcon className="w-6 h-6 mr-3 text-indigo-400"/> Company Announcements</h2>
-                                <div className="space-y-4">
-                                    {mockAnnouncements.map(ann => (
-                                        <div key={ann.id} className="border-l-4 border-indigo-400 pl-4 py-2">
-                                            <p className="text-sm text-gray-700 dark:text-gray-300">{ann.text}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{new Date(ann.date).toDateString()}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-xl font-bold dark:text-white flex items-center"><ClipboardDocumentListIcon className="w-6 h-6 mr-3 text-purple-400"/> Recent History</h2>
-                                    <button onClick={() => setView('history')} className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">View All</button>
-                                </div>
-                                <div className="space-y-3">
-                                    {(driverData.tripHistory || []).filter(trip => trip.status === 'Completed').slice(0, 3).map(trip => (
-                                        <div key={trip.id} className="flex justify-between items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                                            <div>
-                                                <p className="font-semibold text-sm dark:text-white">{trip.route}</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(trip.date).toLocaleDateString()}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="px-2 py-1 text-xs rounded-full font-bold bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-300">Completed</span>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{trip.passengers} passengers</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {(driverData.tripHistory || []).filter(trip => trip.status === 'Completed').length === 0 && (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No completed trips found.</p>
-                                    )}
-                                </div>
-                            </div>
-                         </div>
-                    </div>
-                );
+        if (selectedTrip) {
+            return <TripManagementView trip={selectedTrip} onBack={() => setSelectedTrip(null)} />;
         }
-    }
+
+        return (
+            <div>
+                <h1 className="text-3xl font-bold dark:text-white mb-6">Today's Assigned Trips</h1>
+                {trips.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {trips.map(trip => <TripCard key={trip.id} trip={trip} onSelect={setSelectedTrip} />)}
+                    </div>
+                ) : (
+                    <p className="text-center text-gray-500 dark:text-gray-400 py-10">No trips assigned for today.</p>
+                )}
+            </div>
+        );
+    };
 
     return (
         <div className={`min-h-screen flex ${theme}`}>
-            <aside className="w-64 bg-gradient-to-b from-gray-800 via-gray-900 to-black text-gray-300 flex-col hidden lg:flex border-r border-gray-700/50">
-                <div className="h-20 flex items-center justify-center text-white font-bold text-xl border-b border-white/10">DRIVER PORTAL</div>
-                <nav className="flex-1 px-4 py-6 space-y-2">
-                    {navItems.map(item => <NavLink key={item.view} viewName={item.view} label={item.label} icon={item.icon}/>)}
-                </nav>
-            </aside>
+            {/* Sidebar can be added back if needed */}
             <div className="flex-1 flex flex-col bg-gray-100 dark:bg-gray-900">
                 <header className="h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm flex items-center justify-between px-6 border-b dark:border-gray-700/50">
-                    <div className="flex items-center">
-                        <button className="lg:hidden mr-4" onClick={() => setIsMobileMenuOpen(true)}>
-                            <MenuIcon className="w-6 h-6 text-gray-700 dark:text-gray-200"/>
-                        </button>
-                        <div className="font-bold text-gray-800 dark:text-white">Welcome, {driverData.name.split(' ')[0]}</div>
-                    </div>
+                    <div className="font-bold text-gray-800 dark:text-white">Welcome, {driverData.name.split(' ')[0]}</div>
                     <div className="flex items-center space-x-4">
                         <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-400">{theme === 'light' ? <MoonIcon className="w-6 h-6"/> : <SunIcon className="w-6 h-6"/>}</button>
                         <button onClick={onLogout} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Logout</button>
@@ -362,8 +188,6 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                    {renderContent()}
                 </main>
             </div>
-            {isReportModalOpen && <VehicleReportModal busId={driverData.assignedBusId} onClose={() => setIsReportModalOpen(false)} />}
-            <MobileNav isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} setView={setView} navigate={navigate} currentView={view} />
         </div>
     );
 };

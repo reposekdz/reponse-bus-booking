@@ -1,6 +1,7 @@
 import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
 import * as mysql from 'mysql2/promise';
+import bcrypt from 'bcryptjs';
 
 export const topUpUserWallet = async (userId: number, amount: number) => {
     if (!amount || amount <= 0) {
@@ -51,4 +52,13 @@ export const getUserWalletHistory = async (userId: number) => {
         ORDER BY wt.created_at DESC
     `, [userId]);
     return rows;
+};
+
+export const setUserPin = async (userId: number, pin: string) => {
+    if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+        throw new AppError('PIN must be a 4-digit number.', 400);
+    }
+
+    const pin_hash = await bcrypt.hash(pin, 10);
+    await pool.query('UPDATE users SET pin = ? WHERE id = ?', [pin_hash, userId]);
 };

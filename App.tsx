@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -9,6 +6,7 @@ import OurPartners from './components/PartnerCompanies';
 import Footer from './components/Footer';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
+import RegistrationSuccessPage from './RegistrationSuccessPage';
 import SearchResultsPage from './SearchResultsPage';
 import SeatSelectionPage from './SeatSelectionPage';
 import BookingsPage from './BookingsPage';
@@ -67,7 +65,7 @@ export type Page =
   | 'corporateTravel' | 'tourPackages' | 'travelInsurance' | 'giftCards' | 'adminAnnouncements'
   | 'hotelBooking' | 'eventTickets' | 'vehicleRentals' | 'vipLounge' | 'companyRouteAnalytics'
   | 'bookingConfirmation' | 'favorites' | 'priceAlerts' | 'loyalty' | 'wallet' | 'companyDriverProfile'
-  | 'adminMessages' | 'adminSettings' | 'adminDestinations';
+  | 'adminMessages' | 'adminSettings' | 'adminDestinations' | 'registrationSuccess';
 
 
 const AppContent: React.FC = () => {
@@ -155,6 +153,7 @@ const AppContent: React.FC = () => {
     switch (currentPage) {
       case 'login': return <LoginPage onNavigate={navigate} />;
       case 'register': return <RegisterPage onNavigate={navigate} />;
+      case 'registrationSuccess': return <RegistrationSuccessPage onNavigate={navigate} />;
       case 'search': return <SearchResultsPage results={pageData} onTripSelect={(tripId) => navigate('seatSelection', { tripId })} favoriteTripIds={favoriteTripIds} onToggleFavorite={handleToggleFavorite} />;
       case 'seatSelection': return <SeatSelectionPage tripId={pageData.tripId} onConfirm={(bookingDetails) => navigate('payment', bookingDetails)} onBack={() => navigate('bookingSearch')} />;
       case 'payment': return <PaymentPage bookingDetails={pageData} onNavigate={navigate} />;
@@ -220,7 +219,7 @@ const AppContent: React.FC = () => {
   };
   
   const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'adminAnnouncements', 'adminMessages', 'adminSettings', 'adminDestinations', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile', 'passengerProfile', 'companyRouteAnalytics', 'companyDriverProfile'].includes(currentPage);
-  const isFullScreenPage = ['bookingConfirmation'].includes(currentPage);
+  const isFullScreenPage = ['bookingConfirmation', 'registrationSuccess'].includes(currentPage);
   const showHeader = !isDashboard && !isFullScreenPage;
   const showFooter = !isDashboard && !isFullScreenPage;
   const mainPadding = showHeader ? 'pt-20' : '';

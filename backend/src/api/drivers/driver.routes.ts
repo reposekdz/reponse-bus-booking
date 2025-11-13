@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getMyTripHistory } from './driver.controller';
+import { getMyTripHistory, getMyTrips } from './driver.controller';
 import { protect, authorize } from '../../middleware/auth.middleware';
 
 const router = Router();
@@ -8,5 +8,6 @@ const router = Router();
 router.use(protect, authorize('driver'));
 
 router.get('/my-history', getMyTripHistory);
+router.get('/my-trips', getMyTrips);
 
 export default router;

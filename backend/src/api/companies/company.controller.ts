@@ -1,6 +1,8 @@
 
+
 import { Request, Response } from 'express';
 import * as companyService from './company.service';
+import * as driverService from '../drivers/driver.service';
 import asyncHandler from '../../utils/asyncHandler';
 
 export const getCompanies = asyncHandler(async (req: any, res: any) => {
@@ -38,4 +40,10 @@ export const updateDriverForMyCompany = asyncHandler(async (req: any, res: any) 
 export const deleteDriverForMyCompany = asyncHandler(async (req: any, res: any) => {
     await companyService.deleteDriver(req.params.id, req.user.company_id);
     res.status(200).json({ success: true, data: {} });
+});
+
+export const getDriverHistoryForCompany = asyncHandler(async (req: any, res: any) => {
+    await companyService.checkDriverOwnership(req.params.id, req.user.company_id);
+    const history = await driverService.getTripHistoryForDriver(parseInt(req.params.id));
+    res.status(200).json({ success: true, data: history });
 });

@@ -188,3 +188,40 @@ export const confirmPassengerBoarding = async (data: BoardingData) => {
         seat: booking.seats,
     };
 };
+
+const checkTripAuthorization = async (tripId: string, driverId: number) => {
+    const [tripRows] = await pool.query<any[] & mysql.RowDataPacket[]>('SELECT driver_id, status FROM trips WHERE id = ?', [tripId]);
+    if (tripRows.length === 0) throw new AppError('Trip not found.', 404);
+    if (tripRows[0].driver_id !== driverId) throw new AppError('You are not authorized to manage this trip.', 403);
+    return tripRows[0];
+};
+
+export const getManifestForTrip = async (tripId: string, driverId: number) => {
+    await checkTripAuthorization(tripId, driverId);
+    const [rows] = await pool.query<any[] & mysql.RowDataPacket[]>(`
+        SELECT u.name as passenger_name, b.status, b.booking_id, GROUP_CONCAT(s.seat_number) as seats
+        FROM bookings b
+        JOIN users u ON b.user_id = u.id
+        JOIN seats s ON b.id = s.booking_id
+        WHERE b.trip_id = ?
+        GROUP BY b.id
+        ORDER BY u.name
+    `, [tripId]);
+    return rows;
+};
+
+export const departTrip = async (tripId: string, driverId: number) => {
+    const trip = await checkTripAuthorization(tripId, driverId);
+    if (trip.status !== 'Scheduled') {
+        throw new AppError(`Trip cannot depart. Current status: ${trip.status}`, 400);
+    }
+    await pool.query('UPDATE trips SET status = "Departed" WHERE id = ?', [tripId]);
+};
+
+export const arriveTrip = async (tripId: string, driverId: number) => {
+    const trip = await checkTripAuthorization(tripId, driverId);
+    if (trip.status !== 'Departed') {
+        throw new AppError(`Trip cannot arrive. Current status: ${trip.status}`, 400);
+    }
+    await pool.query('UPDATE trips SET status = "Arrived" WHERE id = ?', [tripId]);
+};

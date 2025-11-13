@@ -20,3 +20,21 @@ export const getTripHistoryForDriver = async (driverId: number) => {
         status: trip.status.charAt(0).toUpperCase() + trip.status.slice(1) // Capitalize status
     }));
 };
+
+export const getTripsForDriver = async (driverId: number) => {
+    const today = new Date().toISOString().split('T')[0];
+    const [rows] = await pool.query<any[] & mysql.RowDataPacket[]>(`
+        SELECT
+            t.id,
+            CONCAT(r.origin, ' - ', r.destination) as route,
+            t.departure_time as date,
+            t.status,
+            b.plate_number as bus_plate
+        FROM trips t
+        JOIN routes r ON t.route_id = r.id
+        JOIN buses b ON t.bus_id = b.id
+        WHERE t.driver_id = ? AND DATE(t.departure_time) = ?
+        ORDER BY t.departure_time ASC;
+    `, [driverId, today]);
+    return rows;
+};

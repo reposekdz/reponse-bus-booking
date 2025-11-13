@@ -5,3 +5,8 @@ export const getMyTripHistory = asyncHandler(async (req, res) => {
     const history = await driverService.getTripHistoryForDriver(req.user!.id);
     res.status(200).json({ success: true, data: history });
 });
+
+export const getMyTrips = asyncHandler(async (req, res) => {
+    const trips = await driverService.getTripsForDriver(req.user!.id);
+    res.status(200).json({ success: true, data: trips });
+});

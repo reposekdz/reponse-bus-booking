@@ -1,5 +1,7 @@
 
+
 import * as adminService from './admin.service';
+import * as driverService from '../drivers/driver.service';
 import asyncHandler from '../../utils/asyncHandler';
 
 // Company Controllers
@@ -47,6 +49,11 @@ export const updateDriver = asyncHandler(async (req, res) => {
 export const deleteDriver = asyncHandler(async (req, res) => {
     await adminService.deleteDriverById(req.params.id);
     res.status(200).json({ success: true, data: {} });
+});
+
+export const getDriverHistoryForAdmin = asyncHandler(async (req, res) => {
+    const history = await driverService.getTripHistoryForDriver(parseInt(req.params.id));
+    res.status(200).json({ success: true, data: history });
 });
 
 

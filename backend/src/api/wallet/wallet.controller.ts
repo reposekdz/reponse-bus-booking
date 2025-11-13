@@ -12,3 +12,9 @@ export const getWalletHistory = asyncHandler(async (req: any, res: any) => {
     const history = await walletService.getUserWalletHistory(req.user!._id);
     res.status(200).json({ success: true, data: history });
 });
+
+export const setPin = asyncHandler(async (req: any, res: any) => {
+    const { pin } = req.body;
+    await walletService.setUserPin(req.user!.id, pin);
+    res.status(200).json({ success: true, message: 'PIN set successfully.' });
+});

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { searchTrips, getTripById, confirmBoarding } from './trip.controller';
+import { searchTrips, getTripById, confirmBoarding, getTripManifest, departTrip, arriveTrip } from './trip.controller';
 import { protect, authorize } from '../../middleware/auth.middleware';
 
 
@@ -15,10 +15,24 @@ router.get('/search', searchTrips);
 // @access  Public
 router.get('/:id', getTripById);
 
+// --- DRIVER ACCESSIBLE ROUTES ---
+router.use(protect, authorize('driver'));
+
 // @route   POST /api/v1/trips/:tripId/boardings
 // @desc    Confirm a passenger has boarded
-// @access  Driver
-router.post('/:tripId/boardings', protect, authorize('driver'), confirmBoarding);
+router.post('/:tripId/boardings', confirmBoarding);
+
+// @route   GET /api/v1/trips/:tripId/manifest
+// @desc    Get passenger manifest for a trip
+router.get('/:tripId/manifest', getTripManifest);
+
+// @route   POST /api/v1/trips/:tripId/depart
+// @desc    Mark a trip as departed
+router.post('/:tripId/depart', departTrip);
+
+// @route   POST /api/v1/trips/:tripId/arrive
+// @desc    Mark a trip as arrived
+router.post('/:tripId/arrive', arriveTrip);
 
 
 export default router;

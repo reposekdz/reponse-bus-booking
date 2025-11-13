@@ -22,12 +22,19 @@ export const registerUser = async (userData: any) => {
     
     const password_hash = await bcrypt.hash(password, 10);
     
+    // Generate a unique serial code
+    const serial_code = `${name.substring(0, 3).toUpperCase()}${Math.floor(1000 + Math.random() * 9000)}`;
+
     const [result] = await pool.query<mysql.ResultSetHeader>(
-        'INSERT INTO users (name, email, password_hash, phone_number, role) VALUES (?, ?, ?, ?, ?)',
-        [name, email, password_hash, phone, 'passenger']
+        'INSERT INTO users (name, email, password_hash, phone_number, role, serial_code) VALUES (?, ?, ?, ?, ?, ?)',
+        [name, email, password_hash, phone, 'passenger', serial_code]
     );
 
     const userId = result.insertId;
+
+    // Create a wallet for the new user
+    await pool.query('INSERT INTO wallets (user_id, balance) VALUES (?, 0)', [userId]);
+
     const [rows] = await pool.query<User[] & mysql.RowDataPacket[]>('SELECT * FROM users WHERE id = ?', [userId]);
     const user = rows[0];
     delete user.password_hash;
@@ -49,6 +56,14 @@ export const loginUser = async (loginData: any) => {
 
     if (!user || !(await bcrypt.compare(password, user.password_hash!))) {
         throw new AppError('Invalid credentials', 401);
+    }
+
+    // Fetch wallet balance for passenger
+    if (user.role === 'passenger') {
+        const [walletRows] = await pool.query<any[] & mysql.RowDataPacket[]>('SELECT balance FROM wallets WHERE user_id = ?', [user.id]);
+        if (walletRows.length > 0) {
+            user.walletBalance = parseFloat(walletRows[0].balance);
+        }
     }
 
     const token = generateToken(user.id);

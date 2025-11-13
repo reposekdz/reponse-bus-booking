@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import StarRating from './components/StarRating';
 import { SearchIcon, ChevronRightIcon, StarIcon } from './components/icons';
@@ -63,7 +64,7 @@ const CompanyCard: React.FC<{ company: any, onSelect: () => void }> = ({ company
 );
 
 const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
-  const [allCompanies, setAllCompanies] = useState([]);
+  const [allCompanies, setAllCompanies] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,8 +77,8 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
         try {
             const data = await api.getCompanies();
             setAllCompanies(data);
-        } catch (e) {
-            setError('Failed to fetch companies.');
+        } catch (e: any) {
+            setError(e.message || 'Failed to fetch companies.');
         } finally {
             setIsLoading(false);
         }

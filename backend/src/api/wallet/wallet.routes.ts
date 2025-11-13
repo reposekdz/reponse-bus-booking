@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { protect } from '../../middleware/auth.middleware';
-import { getWalletHistory, topUpWallet } from './wallet.controller';
+import { getWalletHistory, topUpWallet, setPin } from './wallet.controller';
 
 const router = Router();
 
@@ -9,5 +9,6 @@ router.use(protect);
 
 router.route('/history').get(getWalletHistory);
 router.route('/topup').post(topUpWallet);
+router.route('/set-pin').put(setPin);
 
 export default router;

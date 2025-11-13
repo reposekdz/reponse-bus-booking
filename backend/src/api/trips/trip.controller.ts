@@ -32,7 +32,7 @@ export const getTripById = asyncHandler(async (req, res) => {
 export const confirmBoarding = asyncHandler(async (req, res) => {
     const { tripId } = req.params;
     const { ticketId } = req.body;
-    const driverId = req.user._id;
+    const driverId = req.user.id;
 
     const result = await tripService.confirmPassengerBoarding({ driverId, tripId, ticketId });
     
@@ -41,4 +41,19 @@ export const confirmBoarding = asyncHandler(async (req, res) => {
         message: 'Passenger boarded successfully',
         data: result
     });
+});
+
+export const getTripManifest = asyncHandler(async (req, res) => {
+    const manifest = await tripService.getManifestForTrip(req.params.tripId, req.user.id);
+    res.status(200).json({ success: true, data: manifest });
+});
+
+export const departTrip = asyncHandler(async (req, res) => {
+    await tripService.departTrip(req.params.tripId, req.user.id);
+    res.status(200).json({ success: true, message: 'Trip departed.' });
+});
+
+export const arriveTrip = asyncHandler(async (req, res) => {
+    await tripService.arriveTrip(req.params.tripId, req.user.id);
+    res.status(200).json({ success: true, message: 'Trip arrived.' });
 });

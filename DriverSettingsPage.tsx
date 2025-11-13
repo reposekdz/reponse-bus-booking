@@ -1,66 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { CameraIcon, SunIcon, MoonIcon, BellIcon, ShieldCheckIcon, UserCircleIcon, BriefcaseIcon, LockClosedIcon } from './components/icons';
 import * as api from './services/apiService';
-
-const SecuritySettings = () => {
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handlePasswordChange = async (e) => {
-        e.preventDefault();
-        if (newPassword !== confirmPassword) {
-            setError("New passwords do not match.");
-            return;
-        }
-        setError('');
-        setSuccess('');
-        setIsLoading(true);
-        try {
-            await api.updatePassword({ currentPassword, newPassword });
-            setSuccess('Password updated successfully!');
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-        } catch (err) {
-            setError(err.message || 'Failed to update password.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    
-    return (
-        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-            <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><LockClosedIcon className="w-6 h-6 mr-3 text-red-500"/> Security</h2>
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-                <div>
-                    <label className="text-xs font-semibold text-gray-500">Current Password</label>
-                    <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-xs font-semibold text-gray-500">New Password</label>
-                        <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
-                    </div>
-                     <div>
-                        <label className="text-xs font-semibold text-gray-500">Confirm New Password</label>
-                        <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
-                    </div>
-                </div>
-                {error && <p className="text-red-500 text-sm font-semibold">{error}</p>}
-                {success && <p className="text-green-500 text-sm font-semibold">{success}</p>}
-                <div className="text-right">
-                    <button type="submit" disabled={isLoading} className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
-                        {isLoading ? 'Updating...' : 'Update Password'}
-                    </button>
-                </div>
-            </form>
-        </div>
-    );
-};
+import { useLanguage } from './contexts/LanguageContext';
+import SecuritySettings from './components/SecuritySettings';
 
 const SettingToggle = ({ label, description, enabled, onToggle }) => (
     <div className="flex items-center justify-between py-3">
@@ -76,6 +18,7 @@ const SettingToggle = ({ label, description, enabled, onToggle }) => (
 
 
 const DriverSettingsPage = ({ driverData, companyData, theme, setTheme }) => {
+    const { t } = useLanguage();
     const [driverInfo, setDriverInfo] = useState(driverData);
     const [notificationSettings, setNotificationSettings] = useState({
         newTrips: true,
@@ -105,13 +48,13 @@ const DriverSettingsPage = ({ driverData, companyData, theme, setTheme }) => {
 
     return (
         <div className="animate-fade-in container mx-auto px-6 py-8">
-            <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">Settings</h1>
+            <h1 className="text-3xl font-bold dark:text-gray-200 mb-6">{t('settings_title')}</h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left side with various settings */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* Profile Editing */}
                     <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                        <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><UserCircleIcon className="w-6 h-6 mr-3 text-blue-500"/> Edit Profile</h2>
+                        <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><UserCircleIcon className="w-6 h-6 mr-3 text-blue-500"/> {t('profile_edit_title')}</h2>
                         <div className="flex items-center space-x-4 mb-6">
                              <div className="relative group">
                                 <img src={driverInfo.avatarUrl} alt="Avatar" className="w-20 h-20 rounded-full object-cover"/>
@@ -122,31 +65,31 @@ const DriverSettingsPage = ({ driverData, companyData, theme, setTheme }) => {
                             </div>
                             <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-500">Full Name</label>
+                                    <label className="text-xs font-semibold text-gray-500">{t('profile_edit_name')}</label>
                                     <input type="text" name="name" value={driverInfo.name} onChange={handleInfoChange} className="w-full p-2 border-b-2 dark:bg-transparent dark:border-gray-600 focus:outline-none focus:border-blue-500"/>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-500">Phone</label>
+                                    <label className="text-xs font-semibold text-gray-500">{t('profile_edit_phone')}</label>
                                     <input type="text" name="phone" value={driverInfo.phone || '0788111222'} onChange={handleInfoChange} className="w-full p-2 border-b-2 dark:bg-transparent dark:border-gray-600 focus:outline-none focus:border-blue-500"/>
                                 </div>
                             </div>
                         </div>
                         <div>
-                             <label className="text-xs font-semibold text-gray-500">Bio</label>
+                             <label className="text-xs font-semibold text-gray-500">{t('profile_edit_bio')}</label>
                              <textarea name="bio" value={driverInfo.bio || ''} onChange={handleInfoChange} rows={3} className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                         <div className="text-right mt-4">
-                            <button onClick={() => alert("Profile Saved!")} className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">Save Changes</button>
+                            <button onClick={() => alert("Profile Saved!")} className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">{t('profile_edit_save')}</button>
                         </div>
                     </div>
 
                     {/* Notification Settings */}
                      <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                        <h2 className="text-xl font-bold dark:text-white mb-2 flex items-center"><BellIcon className="w-6 h-6 mr-3 text-yellow-500"/> Notifications</h2>
+                        <h2 className="text-xl font-bold dark:text-white mb-2 flex items-center"><BellIcon className="w-6 h-6 mr-3 text-yellow-500"/> {t('settings_notifications_title')}</h2>
                          <div className="divide-y dark:divide-gray-700">
-                             <SettingToggle label="New Trip Assignments" description="Get notified when a new trip is assigned to you." enabled={notificationSettings.newTrips} onToggle={() => handleToggle('newTrips')} />
-                             <SettingToggle label="Schedule Changes" description="Alerts for changes to your upcoming trips." enabled={notificationSettings.scheduleChanges} onToggle={() => handleToggle('scheduleChanges')} />
-                             <SettingToggle label="Platform Announcements" description="Receive general news and updates from Rwanda Bus." enabled={notificationSettings.platformAnnouncements} onToggle={() => handleToggle('platformAnnouncements')} />
+                             <SettingToggle label={t('settings_notifications_new_trips')} description={t('settings_notifications_new_trips_desc')} enabled={notificationSettings.newTrips} onToggle={() => handleToggle('newTrips')} />
+                             <SettingToggle label={t('settings_notifications_changes')} description={t('settings_notifications_changes_desc')} enabled={notificationSettings.scheduleChanges} onToggle={() => handleToggle('scheduleChanges')} />
+                             <SettingToggle label={t('settings_notifications_announcements')} description={t('settings_notifications_announcements_desc')} enabled={notificationSettings.platformAnnouncements} onToggle={() => handleToggle('platformAnnouncements')} />
                         </div>
                     </div>
                 </div>
@@ -154,12 +97,12 @@ const DriverSettingsPage = ({ driverData, companyData, theme, setTheme }) => {
                 {/* Right side with company info and other settings */}
                 <div className="space-y-8">
                     <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg">
-                        <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><BriefcaseIcon className="w-6 h-6 mr-3 text-green-500"/> My Company</h2>
+                        <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><BriefcaseIcon className="w-6 h-6 mr-3 text-green-500"/> {t('driver_profile_company')}</h2>
                         <div className="flex items-center space-x-4">
                             <img src={companyData.logoUrl} alt={companyData.name} className="w-16 h-16 object-contain bg-gray-100 dark:bg-gray-700 rounded-full p-1"/>
                             <div>
                                 <p className="font-bold text-lg dark:text-white">{companyData.name}</p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Status: {driverData.status || 'Active'}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{t('driver_profile_status')}: {driverData.status || 'Active'}</p>
                             </div>
                         </div>
                         <p className="text-xs text-gray-600 dark:text-gray-300 mt-4 italic">"{companyData.description}"</p>

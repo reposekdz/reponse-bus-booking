@@ -1,11 +1,9 @@
-
-
 import React, { useState, useRef, useEffect } from 'react';
-import { io, Socket } from 'socket.io-client';
 import { Page } from '../App';
 import { GoBusLogo, SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon, StarIcon, BellAlertIcon, SparklesIcon, CheckCircleIcon, ArchiveBoxIcon, BriefcaseIcon, MapIcon, ShieldCheckIcon, CreditCardIcon, QuestionMarkCircleIcon, BuildingStorefrontIcon, KeyIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useSocket } from '../contexts/SocketContext';
 
 interface HeaderProps {
   currentPage: Page;
@@ -48,7 +46,6 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const socketRef = useRef<Socket | null>(null);
   
   const langRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -56,20 +53,21 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
   const servicesRef = useRef<HTMLDivElement>(null);
 
   const { language, setLanguage, t, languages } = useLanguage();
-  const { user, token } = useAuth();
+  const { user } = useAuth();
+  const socket = useSocket();
 
   const servicesMenuItems = [
-      { page: 'packageDelivery', label: 'Package Delivery', icon: ArchiveBoxIcon },
-      { page: 'busCharter', label: 'Bus Charter', icon: BusIcon },
-      { page: 'corporateTravel', label: 'Corporate Travel', icon: BriefcaseIcon },
-      { page: 'tourPackages', label: 'Tour Packages', icon: MapIcon },
-      { page: 'lostAndFound', label: 'Lost & Found', icon: QuestionMarkCircleIcon },
-      { page: 'hotelBooking', label: 'Hotel Booking', icon: BuildingStorefrontIcon },
-      { page: 'eventTickets', label: 'Event Tickets', icon: TicketIcon },
-      { page: 'vehicleRentals', label: 'Vehicle Rentals', icon: KeyIcon },
-      { page: 'vipLounge', label: 'VIP Lounge Access', icon: SparklesIcon },
-      { page: 'travelInsurance', label: 'Travel Insurance', icon: ShieldCheckIcon },
-      { page: 'giftCards', label: 'Gift Cards', icon: CreditCardIcon },
+      { page: 'packageDelivery', label: t('service_package_title'), icon: ArchiveBoxIcon },
+      { page: 'busCharter', label: t('service_charter_title'), icon: BusIcon },
+      { page: 'corporateTravel', label: t('service_corporate_title'), icon: BriefcaseIcon },
+      { page: 'tourPackages', label: t('service_tours_title'), icon: MapIcon },
+      { page: 'lostAndFound', label: t('service_lost_title'), icon: QuestionMarkCircleIcon },
+      { page: 'hotelBooking', label: t('service_hotel_title'), icon: BuildingStorefrontIcon },
+      { page: 'eventTickets', label: t('service_events_title'), icon: TicketIcon },
+      { page: 'vehicleRentals', label: t('service_rentals_title'), icon: KeyIcon },
+      { page: 'vipLounge', label: t('service_vip_title'), icon: SparklesIcon },
+      { page: 'travelInsurance', label: t('service_insurance_title'), icon: ShieldCheckIcon },
+      { page: 'giftCards', label: t('service_gifts_title'), icon: CreditCardIcon },
   ];
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -89,55 +87,31 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
       setNotifications(notifications.map(n => ({...n, read: true})));
   }
 
-  // Effect to handle real-time notifications via Socket.IO
   useEffect(() => {
-    if (user && token && !socketRef.current) {
-        // Connect to the socket server
-        // FIX: Explicitly type the socket constant to resolve potential type inference issues.
-        const socket: Socket = io();
-        socketRef.current = socket;
-
-        socket.on('connect', () => {
-            console.log('Socket connected:', socket.id);
-            socket.emit('authenticate', token);
-        });
-        
+    if (socket) {
         const addNotification = (notif: Omit<any, 'id' | 'read'>) => {
-            setNotifications(prev => [{ ...notif, id: Date.now(), read: false }, ...prev]);
+            setNotifications(prev => [{ ...notif, id: Date.now(), read: false }, ...prev.slice(0, 9)]);
         };
 
-        // Listen for real-time boarding notifications
         socket.on('passengerBoarded', (data: { message: string; route: string }) => {
             addNotification({ type: 'boarding', message: data.message });
         });
 
-        // Listen for trip updates (delay, cancellation)
         socket.on('tripUpdate', (data: { type: 'delay' | 'cancellation', message: string }) => {
             addNotification({ type: data.type, message: data.message });
         });
 
-        // Listen for new promotions
         socket.on('newPromotion', (data: { message: string }) => {
              addNotification({ type: 'promotion', message: data.message });
         });
-
-        socket.on('disconnect', () => {
-            console.log('Socket disconnected');
-        });
-    } else if (!user && socketRef.current) {
-        // Disconnect when user logs out
-        socketRef.current.disconnect();
-        socketRef.current = null;
-    }
-
-    // Cleanup on component unmount
-    return () => {
-        if (socketRef.current) {
-            socketRef.current.disconnect();
-            socketRef.current = null;
+        
+        return () => {
+            socket.off('passengerBoarded');
+            socket.off('tripUpdate');
+            socket.off('newPromotion');
         }
-    };
-  }, [user, token]); 
+    }
+  }, [socket]); 
 
   const currentLang = languages.find(l => l.code === language);
   
@@ -234,8 +208,8 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
             </button>
             <DropdownMenu isOpen={isNotificationsOpen} className="w-80">
                 <div className="p-3 flex justify-between items-center font-bold border-b border-white/20">
-                    <span>Notifications</span>
-                    {notifications.length > 0 && <button onClick={markAllAsRead} className="text-xs font-semibold text-blue-300 hover:underline">Mark all as read</button>}
+                    <span>{t('notifications_title')}</span>
+                    {notifications.length > 0 && <button onClick={markAllAsRead} className="text-xs font-semibold text-blue-300 hover:underline">{t('notifications_mark_all_read')}</button>}
                 </div>
                 <div className="py-2 max-h-80 overflow-y-auto custom-scrollbar">
                     {notifications.length > 0 ? notifications.map(notif => {
@@ -247,11 +221,11 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
                                 <p className="font-semibold">{notif.message}</p>
                             </div>
                             {!notif.read && (
-                                <button onClick={() => markAsRead(notif.id)} data-tooltip="Mark as read" className="w-3 h-3 mt-1.5 rounded-full bg-blue-400 hover:bg-blue-200"></button>
+                                <button onClick={() => markAsRead(notif.id)} data-tooltip={t('notifications_mark_read')} className="w-3 h-3 mt-1.5 rounded-full bg-blue-400 hover:bg-blue-200"></button>
                             )}
                         </div>
                     )}) : (
-                        <p className="text-center text-sm py-4">No new notifications.</p>
+                        <p className="text-center text-sm py-4">{t('notifications_empty')}</p>
                     )}
                 </div>
             </DropdownMenu>
@@ -284,17 +258,17 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
                     </div>
                      {user.walletBalance !== undefined && (
                         <button onClick={() => { onNavigate('wallet'); setIsUserMenuOpen(false); }} className="p-4 border-b border-white/20 w-full text-left hover:bg-white/10">
-                            <p className="text-xs font-semibold opacity-80">Wallet Balance</p>
+                            <p className="text-xs font-semibold opacity-80">{t('usermenu_wallet_balance')}</p>
                             <p className="font-bold text-xl text-green-300">{new Intl.NumberFormat('fr-RW').format(user.walletBalance)} RWF</p>
                         </button>
                      )}
                     <div className="py-2">
                         <button onClick={() => { onNavigate('profile'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><UserCircleIcon className="w-5 h-5 mr-3"/> {t('usermenu_profile')}</button>
                         <button onClick={() => { onNavigate('bookings'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><TicketIcon className="w-5 h-5 mr-3"/> {t('usermenu_bookings')}</button>
-                        <button onClick={() => { onNavigate('wallet'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><WalletIcon className="w-5 h-5 mr-3"/> My Wallet</button>
-                        <button onClick={() => { onNavigate('loyalty'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><SparklesIcon className="w-5 h-5 mr-3"/> My GoPoints</button>
-                        <button onClick={() => { onNavigate('priceAlerts'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><BellAlertIcon className="w-5 h-5 mr-3"/> Price Alerts</button>
-                        <button onClick={() => { onNavigate('favorites'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><StarIcon className="w-5 h-5 mr-3"/> My Favorites</button>
+                        <button onClick={() => { onNavigate('wallet'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><WalletIcon className="w-5 h-5 mr-3"/> {t('usermenu_wallet')}</button>
+                        <button onClick={() => { onNavigate('loyalty'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><SparklesIcon className="w-5 h-5 mr-3"/> {t('usermenu_gopoints')}</button>
+                        <button onClick={() => { onNavigate('priceAlerts'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><BellAlertIcon className="w-5 h-5 mr-3"/> {t('usermenu_alerts')}</button>
+                        <button onClick={() => { onNavigate('favorites'); setIsUserMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-white/20 flex items-center"><StarIcon className="w-5 h-5 mr-3"/> {t('usermenu_favorites')}</button>
                     </div>
                      <div className="border-t border-white/20 p-2">
                         <button onClick={onLogout} className="w-full text-left px-3 py-2 text-sm font-semibold text-red-300 rounded-md hover:bg-red-900/20">{t('usermenu_logout')}</button>
@@ -317,7 +291,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
         <div className="fixed inset-0 z-50 bg-gray-900/80 backdrop-blur-sm lg:hidden">
             <div className="absolute top-0 right-0 w-full max-w-xs bg-gradient-to-b from-[#0033A0] to-[#0c2461] h-full p-6">
                 <div className="flex justify-between items-center mb-8">
-                    <span className="text-xl font-bold">Menu</span>
+                    <span className="text-xl font-bold">{t('mobile_menu_title')}</span>
                     <button onClick={() => setIsMobileMenuOpen(false)}><XIcon className="w-6 h-6"/></button>
                 </div>
                  <nav className="flex flex-col space-y-4">

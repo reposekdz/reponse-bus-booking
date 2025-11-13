@@ -1,4 +1,5 @@
 
+
 import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
 import * as mysql from 'mysql2/promise';
@@ -124,4 +125,11 @@ export const deleteDriver = async (driverId: string, companyId: number) => {
         throw new AppError('Driver not found or you do not have permission to delete this driver.', 404);
     }
     return;
+};
+
+export const checkDriverOwnership = async (driverId: string, companyId: number) => {
+    const [rows] = await pool.query('SELECT id FROM users WHERE id = ? AND company_id = ? AND role = "driver"', [driverId, companyId]);
+    if ((rows as any[]).length === 0) {
+        throw new AppError('Driver not found or not part of your company.', 404);
+    }
 };

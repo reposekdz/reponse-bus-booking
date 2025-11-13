@@ -105,7 +105,18 @@ export const translations = {
     // Notifications
     'notification_trip_delay': 'Urugendo rwawe {route} rwatindijwe iminota {minutes}.',
     'notification_trip_cancel': 'Tubabajwe no kukumenyesha ko urugendo rwawe {route} rwahagaritswe.',
-    'notification_new_promo': 'Promosiyo nshya! {description}'
+    'notification_new_promo': 'Promosiyo nshya! {description}',
+    // Registration Success
+    'reg_success_title': 'Wiyandikishije neza!',
+    'reg_success_subtitle': 'Ikaze muri GoBus. Buri gihe uzaba witeguye urugendo.',
+    'reg_success_serial_label': 'Kode yawe yihariye y\'Umugenzi',
+    'reg_success_serial_desc': 'Koresha iyi kode iyo umu-agent agufasha kubitsa amafaranga.',
+    'reg_success_pin_title': 'Shyiraho PIN y\'Ikofi yawe',
+    'reg_success_pin_desc': 'Hitamo PIN y\'imibare 4 kugirango ukingire ikofi yawe.',
+    'reg_success_pin_button': 'Shyiraho PIN',
+    'reg_success_pin_button_loading': 'Bishyirwaho...',
+    'reg_success_pin_length_error': 'PIN igomba kuba imibare 4.',
+    'reg_success_pin_set_success': 'PIN yawe yashyizweho neza!',
   },
   EN: {
     // Header & Nav
@@ -213,7 +224,18 @@ export const translations = {
     // Notifications
     'notification_trip_delay': 'Your trip {route} has been delayed by {minutes} minutes.',
     'notification_trip_cancel': 'We regret to inform you that your trip {route} has been cancelled.',
-    'notification_new_promo': 'New Promotion! {description}'
+    'notification_new_promo': 'New Promotion! {description}',
+    // Registration Success
+    'reg_success_title': 'Registration Successful!',
+    'reg_success_subtitle': 'Welcome to GoBus. You are all set for your next journey.',
+    'reg_success_serial_label': 'Your Unique Passenger Serial Code',
+    'reg_success_serial_desc': 'Use this code when an agent assists you with a deposit.',
+    'reg_success_pin_title': 'Set Your Wallet PIN',
+    'reg_success_pin_desc': 'Choose a 4-digit PIN to secure your wallet for all transactions.',
+    'reg_success_pin_button': 'Set PIN',
+    'reg_success_pin_button_loading': 'Setting...',
+    'reg_success_pin_length_error': 'PIN must be 4 digits.',
+    'reg_success_pin_set_success': 'Your PIN has been set successfully!',
   },
   FR: {
     // Header & Nav
@@ -321,6 +343,17 @@ export const translations = {
     // Notifications
     'notification_trip_delay': 'Votre voyage {route} a été retardé de {minutes} minutes.',
     'notification_trip_cancel': 'Nous avons le regret de vous informer que votre voyage {route} a été annulé.',
-    'notification_new_promo': 'Nouvelle Promotion ! {description}'
+    'notification_new_promo': 'Nouvelle Promotion ! {description}',
+    // Registration Success
+    'reg_success_title': 'Inscription Réussie !',
+    'reg_success_subtitle': 'Bienvenue sur GoBus. Vous êtes prêt pour votre prochain voyage.',
+    'reg_success_serial_label': 'Votre Code de Série Passager Unique',
+    'reg_success_serial_desc': 'Utilisez ce code lorsqu\'un agent vous aide à effectuer un dépôt.',
+    'reg_success_pin_title': 'Définissez le PIN de votre portefeuille',
+    'reg_success_pin_desc': 'Choisissez un code PIN à 4 chiffres pour sécuriser votre portefeuille pour toutes les transactions.',
+    'reg_success_pin_button': 'Définir le PIN',
+    'reg_success_pin_button_loading': 'Configuration...',
+    'reg_success_pin_length_error': 'Le PIN doit comporter 4 chiffres.',
+    'reg_success_pin_set_success': 'Votre PIN a été défini avec succès !',
   }
 };

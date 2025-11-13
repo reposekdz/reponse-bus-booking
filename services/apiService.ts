@@ -1,5 +1,3 @@
-
-
 // services/apiService.ts - REAL BACKEND API CLIENT
 
 const BASE_URL = '/api/v1';
@@ -55,13 +53,19 @@ export const getTripDetails = async (tripId: string) => {
     const { data } = await apiFetch(`/trips/${tripId}`);
     return data;
 };
+export const getTripManifest = async (tripId: string) => {
+    const { data } = await apiFetch(`/trips/${tripId}/manifest`);
+    return data;
+};
 export const confirmBoarding = async (tripId: string, ticketId: string) => {
     const { data } = await apiFetch(`/trips/${tripId}/boardings`, {
         method: 'POST',
         body: JSON.stringify({ ticketId }),
     });
     return data;
-}
+};
+export const departTrip = (tripId: string) => apiFetch(`/trips/${tripId}/depart`, { method: 'POST' });
+export const arriveTrip = (tripId: string) => apiFetch(`/trips/${tripId}/arrive`, { method: 'POST' });
 
 // --- BOOKINGS ---
 export const createBooking = async (bookingData: any) => {
@@ -72,6 +76,10 @@ export const getMyBookings = async () => {
     const { data } = await apiFetch('/bookings');
     return data;
 };
+
+// --- PAYMENTS ---
+export const initiateMomoPayment = (paymentData: any) => apiFetch('/payments/momo/initiate', { method: 'POST', body: JSON.stringify(paymentData) });
+
 
 // --- PUBLIC CONTENT ---
 export const getCompanies = async () => {
@@ -102,6 +110,7 @@ export const topUpWallet = async (amount: number) => {
     const { data } = await apiFetch('/wallet/topup', { method: 'POST', body: JSON.stringify({ amount }) });
     return data;
 };
+export const setWalletPin = (pin: string) => apiFetch('/wallet/set-pin', { method: 'PUT', body: JSON.stringify({ pin }) });
 
 // --- MESSAGES ---
 export const submitContactMessage = (messageData: any) => apiFetch('/messages', { method: 'POST', body: JSON.stringify(messageData) });
@@ -128,6 +137,11 @@ export const adminGetAllDrivers = async () => {
 export const adminCreateDriver = (driverData: any) => apiFetch('/admin/drivers', { method: 'POST', body: JSON.stringify(driverData) });
 export const adminUpdateDriver = (id: string, driverData: any) => apiFetch(`/admin/drivers/${id}`, { method: 'PUT', body: JSON.stringify(driverData) });
 export const adminDeleteDriver = (id: string) => apiFetch(`/admin/drivers/${id}`, { method: 'DELETE' });
+export const adminGetDriverHistory = async (driverId: string) => {
+    const { data } = await apiFetch(`/admin/drivers/${driverId}/history`);
+    return data;
+};
+
 
 export const adminGetAllAgents = async () => {
     const { data } = await apiFetch('/admin/agents');
@@ -162,15 +176,23 @@ export const companyGetMyDrivers = async () => {
 export const companyCreateDriver = (driverData: any) => apiFetch('/companies/mydrivers', { method: 'POST', body: JSON.stringify(driverData) });
 export const companyUpdateDriver = (id: string, driverData: any) => apiFetch(`/companies/mydrivers/${id}`, { method: 'PUT', body: JSON.stringify(driverData) });
 export const companyDeleteDriver = (id: string) => apiFetch(`/companies/mydrivers/${id}`, { method: 'DELETE' });
+export const companyGetDriverHistory = async (driverId: string) => {
+    const { data } = await apiFetch(`/companies/mydrivers/${driverId}/history`);
+    return data;
+};
+
 
 
 // --- DRIVER ---
+export const driverGetMyTrips = async () => {
+    const { data } = await apiFetch('/drivers/my-trips');
+    return data;
+};
 export const driverGetMyHistory = async () => {
     const { data } = await apiFetch('/drivers/my-history');
     return data;
 };
 
-// FIX: Add missing agent API functions
 // --- AGENT ---
 export const agentLookupPassenger = async (serialCode: string) => {
     const { data } = await apiFetch(`/agents/lookup/${serialCode}`);

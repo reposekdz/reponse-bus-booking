@@ -11,6 +11,7 @@ import settingsRoutes from '../api/settings/settings.routes';
 import destinationRoutes from '../api/destinations/destinations.routes';
 import driverRoutes from '../api/drivers/driver.routes';
 import agentRoutes from '../api/agent/agent.routes';
+import paymentRoutes from '../api/payments/payments.routes';
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use('/settings', settingsRoutes);
 router.use('/destinations', destinationRoutes);
 router.use('/drivers', driverRoutes);
 router.use('/agents', agentRoutes);
+router.use('/payments', paymentRoutes);
 
 
 export default router;

@@ -1,4 +1,5 @@
 
+
 import { Router } from 'express';
 import { protect, authorize } from '../../middleware/auth.middleware';
 import { 
@@ -16,6 +17,7 @@ import {
     updateDriver,
     deleteDriver,
     getDashboardAnalytics,
+    getDriverHistoryForAdmin,
 } from './admin.controller';
 import { updateSetting } from '../settings/settings.controller';
 import { createDestination, updateDestination, deleteDestination } from '../destinations/destinations.controller';
@@ -46,6 +48,9 @@ router.route('/drivers')
 router.route('/drivers/:id')
     .put(updateDriver)
     .delete(deleteDriver);
+
+router.get('/drivers/:id/history', getDriverHistoryForAdmin);
+
 
 // Agent management
 router.route('/agents')

@@ -1,66 +1,10 @@
+
+
 import React, { useMemo, useState, useRef } from 'react';
 import { PhoneIcon, EnvelopeIcon, MapPinIcon, CalendarIcon, CogIcon, SearchIcon, ArrowDownLeftIcon, CameraIcon, LockClosedIcon } from './components/icons';
 import * as api from './services/apiService';
-
-const SecuritySettings = () => {
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handlePasswordChange = async (e) => {
-        e.preventDefault();
-        if (newPassword !== confirmPassword) {
-            setError("New passwords do not match.");
-            return;
-        }
-        setError('');
-        setSuccess('');
-        setIsLoading(true);
-        try {
-            await api.updatePassword({ currentPassword, newPassword });
-            setSuccess('Password updated successfully!');
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-        } catch (err) {
-            setError(err.message || 'Failed to update password.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    
-    return (
-        <div className="bg-white dark:bg-gray-800/50 p-6 rounded-2xl shadow-lg mt-6">
-            <h2 className="text-xl font-bold dark:text-white mb-4 flex items-center"><LockClosedIcon className="w-6 h-6 mr-3 text-red-500"/> Security</h2>
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-                <div>
-                    <label className="text-xs font-semibold text-gray-500">Current Password</label>
-                    <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-xs font-semibold text-gray-500">New Password</label>
-                        <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
-                    </div>
-                     <div>
-                        <label className="text-xs font-semibold text-gray-500">Confirm New Password</label>
-                        <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"/>
-                    </div>
-                </div>
-                {error && <p className="text-red-500 text-sm font-semibold">{error}</p>}
-                {success && <p className="text-green-500 text-sm font-semibold">{success}</p>}
-                <div className="text-right">
-                    <button type="submit" disabled={isLoading} className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
-                        {isLoading ? 'Updating...' : 'Update Password'}
-                    </button>
-                </div>
-            </form>
-        </div>
-    );
-};
+import { useLanguage } from './contexts/LanguageContext';
+import SecuritySettings from './components/SecuritySettings';
 
 const StatCard = ({ title, value, format = 'currency' }) => (
     <div className="bg-gray-100 dark:bg-gray-700/50 p-4 rounded-xl">
@@ -73,6 +17,7 @@ const StatCard = ({ title, value, format = 'currency' }) => (
 
 
 const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agent, allTransactions }) => {
+    const { t } = useLanguage();
     const [searchTerm, setSearchTerm] = useState('');
     const [profileData, setProfileData] = useState(agent);
     const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -95,7 +40,7 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
     if (!profileData) {
         return (
             <div className="flex items-center justify-center h-full">
-                <p>Agent not found.</p>
+                <p>{t('agent_profile_not_found')}</p>
             </div>
         )
     }
@@ -127,7 +72,7 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
                         <img src={profileData.coverUrl || 'https://images.unsplash.com/photo-1614323992655-037a34c19a31?q=80&w=2070&auto=format&fit=crop'} alt="Cover" className="w-full h-full object-cover"/>
                         <div className="absolute inset-0 bg-black/30"></div>
                          <button onClick={() => coverInputRef.current?.click()} className="absolute top-2 right-2 flex items-center text-xs bg-black/40 text-white px-2 py-1 rounded-full hover:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <CameraIcon className="w-4 h-4 mr-1"/> Edit Cover
+                            <CameraIcon className="w-4 h-4 mr-1"/> {t('profile_edit_cover')}
                         </button>
                         <input type="file" ref={coverInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, 'cover')} />
                     </div>
@@ -142,7 +87,7 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
                             </div>
                              <div className="ml-6">
                                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{profileData.name}</h1>
-                                <p className="text-gray-600 dark:text-gray-400">Agent Wemewe</p>
+                                <p className="text-gray-600 dark:text-gray-400">{t('agent_profile_title')}</p>
                             </div>
                         </div>
                          <button className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -152,7 +97,7 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
                     
                     <div className="p-6 border-t dark:border-gray-700 grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                             <h3 className="font-bold text-lg dark:text-white mb-4">Amakuru bwite</h3>
+                             <h3 className="font-bold text-lg dark:text-white mb-4">{t('profile_contact_title')}</h3>
                              <div className="space-y-4">
                                 <div className="text-gray-700 dark:text-gray-300 space-y-2 text-sm">
                                     <p className="flex items-center"><EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400"/> {profileData.email}</p>
@@ -160,21 +105,21 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
                                     <p className="flex items-center"><MapPinIcon className="w-4 h-4 mr-2 text-gray-400"/> {profileData.location}</p>
                                 </div>
                                 <div className="border-t dark:border-gray-700 pt-4">
-                                    <h4 className="font-semibold dark:text-gray-200 mb-2">Performance Analytics</h4>
+                                    <h4 className="font-semibold dark:text-gray-200 mb-2">{t('profile_performance_title')}</h4>
                                      <div className="grid grid-cols-2 gap-4">
-                                        <StatCard title="Total Deposits" value={agentTotalDeposits} />
-                                        <StatCard title="Commission Rate" value={`${profileData.commissionRate * 100}%`} format="string" />
+                                        <StatCard title={t('agent_dashboard_deposits')} value={agentTotalDeposits} />
+                                        <StatCard title={t('agent_profile_commission_rate')} value={`${profileData.commissionRate * 100}%`} format="string" />
                                     </div>
                                 </div>
                              </div>
                         </div>
                         <div>
-                             <h3 className="font-bold text-lg dark:text-white mb-4">Transaction History</h3>
+                             <h3 className="font-bold text-lg dark:text-white mb-4">{t('wallet_history_title')}</h3>
                             <div className="relative mb-4">
                                 <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder="Search transactions..."
+                                    placeholder={t('agent_profile_search_placeholder')}
                                     value={searchTerm}
                                     onChange={e => setSearchTerm(e.target.value)}
                                     className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
@@ -194,7 +139,7 @@ const AgentProfilePage: React.FC<{agent: any; allTransactions: any[]}> = ({ agen
                                         </div>
                                         <div className="text-right">
                                             <p className="font-semibold text-sm text-green-600 dark:text-green-400">+{new Intl.NumberFormat('fr-RW').format(tx.amount)}</p>
-                                            <p className="text-xs text-gray-400">+{new Intl.NumberFormat('fr-RW').format(tx.commission)} comm.</p>
+                                            <p className="text-xs text-gray-400">+{new Intl.NumberFormat('fr-RW').format(tx.commission)} {t('agent_profile_commission')}</p>
                                         </div>
                                     </div>
                                 ))}
