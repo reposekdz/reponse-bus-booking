@@ -1,13 +1,10 @@
-
-
 import React, { useState, useRef, useEffect } from 'react';
 import { LockClosedIcon, XIcon } from './icons';
 
 interface PinModalProps {
   onClose: () => void;
-  // FIX: Update onSuccess signature to pass the entered pin string
   onSuccess: (pin: string) => void;
-  pinToMatch: string;
+  pinToMatch?: string; // Pin validation should happen on the backend
   title: string;
   description: string;
 }
@@ -48,18 +45,17 @@ const PinModal: React.FC<PinModalProps> = ({ onClose, onSuccess, pinToMatch, tit
   };
 
   const handleSubmit = (currentPin: string[]) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      if (currentPin.join('') === pinToMatch) {
-        // FIX: Pass the pin string to the onSuccess callback
-        onSuccess(currentPin.join(''));
-      } else {
-        setError('PIN itariyo. Ongera ugerageze.');
-        setPin(Array(4).fill(''));
-        inputsRef.current[0]?.focus();
+      const pinString = currentPin.join('');
+      // In a real app, the backend would verify the PIN. 
+      // For the frontend, we just pass the completed PIN up.
+      // The `pinToMatch` prop is only for client-side demo purposes if needed.
+      if (pinToMatch && pinString !== pinToMatch) {
+          setError('Incorrect PIN. Please try again.');
+          setPin(Array(4).fill(''));
+          inputsRef.current[0]?.focus();
+          return;
       }
-      setIsLoading(false);
-    }, 500);
+      onSuccess(pinString);
   };
 
   return (

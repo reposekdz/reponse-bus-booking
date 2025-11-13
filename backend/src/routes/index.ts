@@ -12,6 +12,11 @@ import destinationRoutes from '../api/destinations/destinations.routes';
 import driverRoutes from '../api/drivers/driver.routes';
 import agentRoutes from '../api/agent/agent.routes';
 import paymentRoutes from '../api/payments/payments.routes';
+import loyaltyRoutes from '../api/loyalty/loyalty.routes';
+import priceAlertRoutes from '../api/price-alerts/price-alerts.routes';
+import lostAndFoundRoutes from '../api/lost-and-found/lost-and-found.routes';
+import packageRoutes from '../api/packages/packages.routes';
+import charterRoutes from '../api/charters/charters.routes';
 
 const router = Router();
 
@@ -29,6 +34,11 @@ router.use('/destinations', destinationRoutes);
 router.use('/drivers', driverRoutes);
 router.use('/agents', agentRoutes);
 router.use('/payments', paymentRoutes);
+router.use('/loyalty', loyaltyRoutes);
+router.use('/price-alerts', priceAlertRoutes);
+router.use('/lost-and-found', lostAndFoundRoutes);
+router.use('/packages', packageRoutes);
+router.use('/charters', charterRoutes);
 
 
 export default router;

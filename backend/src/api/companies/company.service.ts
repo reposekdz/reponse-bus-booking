@@ -1,5 +1,3 @@
-
-
 import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
 import * as mysql from 'mysql2/promise';
@@ -62,6 +60,55 @@ export const getCompanyDetailsById = async (id: string) => {
         reviews,
         stats,
         schedule
+    };
+};
+
+export const getDashboardData = async (companyId: number) => {
+    if (!companyId) throw new AppError('Unauthorized', 401);
+
+    const today = new Date().toISOString().split('T')[0];
+    
+    const [[{ driverCount }]] = await pool.query<any[] & mysql.RowDataPacket[]>("SELECT COUNT(*) as driverCount FROM users WHERE role = 'driver' AND company_id = ?", [companyId]);
+    const [[{ busCount, activeBuses }]] = await pool.query<any[] & mysql.RowDataPacket[]>("SELECT COUNT(*) as busCount, SUM(IF(status = 'On Route', 1, 0)) as activeBuses FROM buses WHERE company_id = ?", [companyId]);
+    const [[{ todayRevenue }]] = await pool.query<any[] & mysql.RowDataPacket[]>("SELECT SUM(b.total_price) as todayRevenue FROM bookings b JOIN trips t ON b.trip_id = t.id JOIN routes r ON t.route_id = r.id WHERE r.company_id = ? AND DATE(b.created_at) = ?", [companyId, today]);
+    
+    const [popularRouteRows] = await pool.query<any[] & mysql.RowDataPacket[]>(`
+        SELECT CONCAT(r.origin, ' - ', r.destination) as route, COUNT(b.id) as bookings 
+        FROM bookings b 
+        JOIN trips t ON b.trip_id = t.id 
+        JOIN routes r ON t.route_id = r.id 
+        WHERE r.company_id = ? 
+        GROUP BY r.id 
+        ORDER BY bookings DESC 
+        LIMIT 1
+    `, [companyId]);
+
+    const [liveFleet] = await pool.query<any[] & mysql.RowDataPacket[]>(`
+        SELECT b.id, b.plate_number as plate, CONCAT(r.origin, ' - ', r.destination) as route
+        FROM buses b
+        JOIN trips t ON b.id = t.bus_id
+        JOIN routes r ON t.route_id = r.id
+        WHERE b.company_id = ? AND b.status = 'On Route' AND DATE(t.departure_time) = ?
+    `, [companyId, today]);
+    
+    const [driverLeaderboard] = await pool.query<any[] & mysql.RowDataPacket[]>(`
+        SELECT name, avatar_url
+        FROM users 
+        WHERE role = 'driver' AND company_id = ?
+        LIMIT 5
+    `, [companyId]);
+
+
+    return {
+        stats: {
+            driverCount,
+            busCount,
+            activeBuses: activeBuses || 0,
+            todayRevenue: todayRevenue || 0,
+            popularRoute: popularRouteRows[0]?.route || 'N/A'
+        },
+        liveFleet,
+        driverLeaderboard
     };
 };
 

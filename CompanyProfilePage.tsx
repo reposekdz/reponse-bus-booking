@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { ClockIcon, MapPinIcon, ChevronRightIcon, BusIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, UsersIcon, MapIcon, BriefcaseIcon, TvIcon, ShieldCheckIcon, ArrowRightIcon, CameraIcon, EnvelopeIcon, XIcon, PaperAirplaneIcon, TagIcon, ArchiveBoxIcon, PhoneIcon } from './components/icons';
 import FleetDetailModal from './components/FleetDetailModal';
 import StarRating from './components/StarRating';
-import * as api from '../services/apiService';
+import * as api from './services/apiService';
 import LoadingSpinner from './components/LoadingSpinner';
 
 const AmenityIcon: React.FC<{ amenity: string; withText?: boolean }> = ({ amenity, withText = false }) => {
@@ -129,7 +129,6 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company: initia
         }
         try {
             setIsLoading(true);
-            // FIX: Corrected the API call to 'getCompanyProfileDetails' as 'getCompanyDetailsById' does not exist.
             const companyDetails = await api.getCompanyProfileDetails(initialCompanyData.id);
             setData(companyDetails);
         } catch (err: any) {

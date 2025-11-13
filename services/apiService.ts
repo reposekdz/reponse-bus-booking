@@ -111,7 +111,6 @@ export const topUpWallet = async (amount: number) => {
     return data;
 };
 export const setWalletPin = (pin: string) => apiFetch('/wallet/set-pin', { method: 'PUT', body: JSON.stringify({ pin }) });
-// FIX: Added walletTransfer function to handle peer-to-peer fund transfers.
 export const walletTransfer = (data: any) => apiFetch('/wallet/transfer', { method: 'POST', body: JSON.stringify(data) });
 
 // --- MESSAGES ---
@@ -182,7 +181,10 @@ export const companyGetDriverHistory = async (driverId: string) => {
     const { data } = await apiFetch(`/companies/mydrivers/${driverId}/history`);
     return data;
 };
-
+export const getCompanyDashboard = async () => {
+    const { data } = await apiFetch('/companies/my-dashboard');
+    return data;
+}
 
 
 // --- DRIVER ---
@@ -207,6 +209,39 @@ export const agentGetMyTransactions = async () => {
     const { data } = await apiFetch('/agents/my-transactions');
     return data;
 };
+export const getAgentDashboard = async () => {
+    const { data } = await apiFetch('/agents/my-dashboard');
+    return data;
+};
+
+// --- LOYALTY ---
+export const getLoyaltyHistory = async () => {
+    const { data } = await apiFetch('/loyalty/history');
+    return data;
+}
+
+// --- PRICE ALERTS ---
+export const createPriceAlert = (alertData: any) => apiFetch('/price-alerts', { method: 'POST', body: JSON.stringify(alertData) });
+export const getMyPriceAlerts = async () => {
+    const { data } = await apiFetch('/price-alerts');
+    return data;
+}
+export const deletePriceAlert = (id: number) => apiFetch(`/price-alerts/${id}`, { method: 'DELETE' });
+
+// --- OTHER SERVICES ---
+export const getLostAndFoundItems = async () => {
+    const { data } = await apiFetch('/lost-and-found');
+    return data;
+}
+export const reportLostItem = (itemData: any) => apiFetch('/lost-and-found', { method: 'POST', body: JSON.stringify(itemData) });
+
+export const createPackageRequest = (packageData: any) => apiFetch('/packages', { method: 'POST', body: JSON.stringify(packageData) });
+export const trackPackage = async (trackingId: string) => {
+    const { data } = await apiFetch(`/packages/${trackingId}`);
+    return data;
+};
+
+export const createCharterRequest = (charterData: any) => apiFetch('/charters', { method: 'POST', body: JSON.stringify(charterData) });
 
 
 // --- DEBUG ---

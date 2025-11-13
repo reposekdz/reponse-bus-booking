@@ -114,19 +114,19 @@ const WalletPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavigate
                     </div>
                 </main>
             </div>
-            {isTopUpOpen && (
+            {isTopUpOpen && user?.pin && (
                 <WalletTopUpModal 
                     onClose={() => setIsTopUpOpen(false)}
                     onSuccess={handleTopUpSuccess}
-                    userPin={user?.pin || ''}
+                    userPin={user.pin}
                 />
             )}
-             {isSendMoneyOpen && (
+             {isSendMoneyOpen && user?.pin && (
                 <SendMoneyModal 
                     onClose={() => setIsSendMoneyOpen(false)}
                     onSuccess={handleSendSuccess}
                     currentBalance={user?.walletBalance || 0}
-                    userPin={user?.pin || ''}
+                    userPin={user.pin}
                 />
             )}
         </>

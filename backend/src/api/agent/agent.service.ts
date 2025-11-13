@@ -65,11 +65,33 @@ export const makeDepositForPassenger = async (agentId: number, passengerSerial: 
 
 export const getTransactionHistory = async (agentId: number) => {
     const [rows] = await pool.query(`
-        SELECT wt.amount, wt.type, wt.description, wt.created_at
+        SELECT wt.id, wt.amount, wt.type, wt.description, wt.created_at
         FROM wallet_transactions wt
         JOIN wallets w ON wt.wallet_id = w.id
         WHERE w.user_id = ? AND wt.type = 'commission'
         ORDER BY wt.created_at DESC
     `, [agentId]);
     return rows;
+};
+
+export const getDashboardData = async (agentId: number) => {
+    // In a real app, you'd likely specify a date range (e.g., this month)
+    const [[{ totalCommission, transactions }]] = await pool.query<any[] & mysql.RowDataPacket[]>(`
+        SELECT 
+            SUM(amount) as totalCommission,
+            COUNT(id) as transactions
+        FROM wallet_transactions 
+        WHERE wallet_id = (SELECT id FROM wallets WHERE user_id = ?) AND type = 'commission'
+    `, [agentId]);
+    
+    // This is a simplified calculation
+    const totalDeposits = totalCommission / 0.05; // Assuming a fixed 5% rate
+    const uniquePassengers = transactions; // Simplification
+
+    return {
+        totalDeposits: totalDeposits || 0,
+        totalCommission: totalCommission || 0,
+        transactions: transactions || 0,
+        uniquePassengers: uniquePassengers || 0
+    };
 };

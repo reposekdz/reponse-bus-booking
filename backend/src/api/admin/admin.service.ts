@@ -1,4 +1,3 @@
-
 import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
 import * as mysql from 'mysql2/promise';
@@ -161,8 +160,10 @@ export const getAllUsers = async () => {
 // --- Dashboard Analytics ---
 export const getDashboardAnalytics = async () => {
     const [[{ count: companies }]] = await pool.query<any[] & mysql.RowDataPacket[]>("SELECT COUNT(*) as count FROM companies WHERE status = 'Active'");
+    const [[{ count: agents }]] = await pool.query<any[] & mysql.RowDataPacket[]>("SELECT COUNT(*) as count FROM users WHERE role = 'agent'");
+    const [[{ totalRevenue, totalPassengers }]] = await pool.query<any[] & mysql.RowDataPacket[]>("SELECT SUM(total_price) as totalRevenue, COUNT(id) as totalPassengers FROM bookings WHERE status != 'Cancelled'");
     
-    // Mock data for now as queries would be complex
+    // Mock data for charts as queries would be complex
     const revenueData = [
         { day: 'Mon', revenue: 1200000 }, { day: 'Tue', revenue: 1500000 }, { day: 'Wed', revenue: 1350000 },
         { day: 'Thu', revenue: 1800000 }, { day: 'Fri', revenue: 2500000 }, { day: 'Sat', revenue: 3200000 }, { day: 'Sun', revenue: 2800000 }
@@ -171,15 +172,30 @@ export const getDashboardAnalytics = async () => {
         { day: 'Mon', passengers: 1200 }, { day: 'Tue', passengers: 1500 }, { day: 'Wed', passengers: 1350 },
         { day: 'Thu', passengers: 1800 }, { day: 'Fri', passengers: 2500 }, { day: 'Sat', passengers: 3200 }, { day: 'Sun', passengers: 2800 }
     ];
-    const companyRevenue = [
-        { name: 'Volcano Express', revenue: 12500000 },
-        { name: 'RITCO', revenue: 9800000 },
-    ];
+    const [companyRevenue] = await pool.query(`
+        SELECT c.name, SUM(b.total_price) as revenue 
+        FROM bookings b 
+        JOIN trips t ON b.trip_id = t.id 
+        JOIN routes r ON t.route_id = r.id 
+        JOIN companies c ON r.company_id = c.id
+        GROUP BY c.id 
+        ORDER BY revenue DESC
+    `);
+    
+    const [highValueTransactions] = await pool.query(`
+        SELECT id, amount, type, description, created_at FROM wallet_transactions ORDER BY ABS(amount) DESC LIMIT 5
+    `);
 
     return {
-        stats: { companies },
+        stats: { 
+            companies,
+            agents,
+            totalRevenue: totalRevenue || 0,
+            totalPassengers: totalPassengers || 0
+        },
         revenueData,
         passengerData,
-        companyRevenue
+        companyRevenue,
+        highValueTransactions
     };
 };

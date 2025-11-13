@@ -1,7 +1,5 @@
-
-
 import { Router } from 'express';
-import { getCompanies, getCompanyById, getMyDrivers, createDriverForMyCompany, updateDriverForMyCompany, deleteDriverForMyCompany, getCompanyDetails, getDriverHistoryForCompany, addGalleryImage, deleteGalleryImage } from './company.controller';
+import { getCompanies, getCompanyById, getMyDrivers, createDriverForMyCompany, updateDriverForMyCompany, deleteDriverForMyCompany, getCompanyDetails, getDriverHistoryForCompany, addGalleryImage, deleteGalleryImage, getMyDashboard } from './company.controller';
 import { protect, authorize } from '../../middleware/auth.middleware';
 
 const router = Router();
@@ -13,6 +11,8 @@ router.route('/:id/details').get(getCompanyDetails); // New detailed endpoint
 
 // Protected routes for company managers
 router.use(protect, authorize('company'));
+
+router.get('/my-dashboard', getMyDashboard);
 
 router.route('/mydrivers')
     .get(getMyDrivers)

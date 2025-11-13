@@ -12,7 +12,8 @@ interface DriverDashboardProps {
     navigate: (page: Page, data?: any) => void;
 }
 
-const TripCard = ({ trip, onSelect }) => (
+// FIX: Added React.FC type to TripCard to fix type error with 'key' prop
+const TripCard: React.FC<{ trip: any, onSelect: (trip: any) => void }> = ({ trip, onSelect }) => (
     <button onClick={() => onSelect(trip)} className="w-full text-left bg-white dark:bg-gray-800/50 p-4 rounded-xl shadow-md hover:shadow-lg hover:border-blue-500 border-2 border-transparent transition-all">
         <div className="flex justify-between items-center">
             <p className="font-bold text-lg dark:text-white">{trip.route}</p>
@@ -41,7 +42,7 @@ const TripManagementView = ({ trip, onBack }) => {
         try {
             const data = await api.getTripManifest(trip.id);
             setManifest(data);
-        } catch (e) {
+        } catch (e: any) {
             setError(e.message || 'Failed to load manifest.');
         } finally {
             setIsLoading(false);
@@ -59,7 +60,7 @@ const TripManagementView = ({ trip, onBack }) => {
             const result = await api.confirmBoarding(trip.id, ticketId);
             setScanResult({ type: 'success', message: `Welcome ${result.passengerName} (Seat: ${result.seat})` });
             fetchManifest(); // Re-fetch to update status
-        } catch (e) {
+        } catch (e: any) {
             setScanResult({ type: 'error', message: e.message || 'Verification failed.' });
         } finally {
             setTicketId('');
@@ -75,7 +76,7 @@ const TripManagementView = ({ trip, onBack }) => {
                 await api.arriveTrip(trip.id);
                 setTripStatus('Arrived');
             }
-        } catch (e) {
+        } catch (e: any) {
             alert(`Failed to update trip status: ${e.message}`);
         }
     };

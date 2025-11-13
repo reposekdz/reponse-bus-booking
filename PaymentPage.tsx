@@ -71,7 +71,6 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
         )
     };
     
-    // FIX: Add pin parameter to pass to API
     const finalizeBooking = async (finalPaymentMethod: string, pin?: string) => {
         setIsProcessing(true);
         setError('');
@@ -116,6 +115,10 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
                 setError('Insufficient wallet balance.');
                 return;
             }
+            if (!user?.pin) {
+                setError('Please set a wallet PIN in your profile before making a payment.');
+                return;
+            }
             setIsPinModalOpen(true);
         } else {
             // For Card, we would integrate a payment gateway like Stripe here
@@ -123,7 +126,6 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
         }
     };
     
-    // FIX: Accept pin from modal and pass it to finalizeBooking
     const handlePinSuccess = (pin: string) => {
         setIsPinModalOpen(false);
         finalizeBooking('wallet', pin);
@@ -137,7 +139,7 @@ const PaymentPage: React.FC<{ bookingDetails: any, onNavigate: (page: Page, data
             <PinModal 
                 onClose={() => setIsPinModalOpen(false)}
                 onSuccess={handlePinSuccess}
-                pinToMatch={user.pin}
+                // pinToMatch is not needed as backend will verify
                 title="Confirm Wallet Payment"
                 description={`Enter your PIN to authorize payment of ${new Intl.NumberFormat('fr-RW').format(bookingDetails.totalPrice)} RWF`}
             />

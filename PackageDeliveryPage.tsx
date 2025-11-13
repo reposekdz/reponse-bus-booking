@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Page } from './App';
-import { ArchiveBoxIcon, ArrowRightIcon, BusIcon, CheckCircleIcon, ChevronRightIcon, UserCircleIcon } from './components/icons';
+import { ArrowRightIcon, CheckCircleIcon, ChevronRightIcon, UserCircleIcon } from './components/icons';
+import * as api from './services/apiService';
 
 const STEPS = ['Package Details', 'Select Schedule', 'Recipient Info', 'Confirmation'];
 
@@ -19,18 +20,34 @@ const PackageDeliveryPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ o
 
     const calculatedPrice = packageOptions[packageDetails.size].base + packageDetails.weight * packageOptions[packageDetails.size].pricePerKg;
 
+    // In a real app, this would be fetched based on the route from packageDetails
     const mockSchedules = [
-        { id: 1, company: 'Volcano Express', departure: '08:00', arrival: '10:30', price: calculatedPrice },
-        { id: 2, company: 'RITCO', departure: '09:30', arrival: '12:00', price: calculatedPrice * 0.95 },
-        { id: 3, company: 'Horizon Express', departure: '11:00', arrival: '13:30', price: calculatedPrice * 1.1 },
+        { id: 1, company: 'Volcano Express', departure: '08:00', arrival: '10:30', price: calculatedPrice, trip_id: 1 },
+        { id: 2, company: 'RITCO', departure: '09:30', arrival: '12:00', price: calculatedPrice * 0.95, trip_id: 2 },
     ];
     
     const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
     const handleBack = () => setCurrentStep(prev => Math.max(prev - 1, 1));
     
-    const handleConfirm = () => {
-        setTrackingId(`PKG-${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
-        handleNext();
+    const handleConfirm = async () => {
+        try {
+            const payload = {
+                ...packageDetails,
+                price: selectedSchedule.price,
+                recipient_name: recipient.name,
+                recipient_phone: recipient.phone,
+                trip_id: selectedSchedule.trip_id,
+                origin: packageDetails.from,
+                destination: packageDetails.to,
+                package_size: packageDetails.size,
+                weight_kg: packageDetails.weight
+            };
+            const result = await api.createPackageRequest(payload);
+            setTrackingId(result.tracking_id);
+            handleNext();
+        } catch (error: any) {
+            alert(`Failed to create package request: ${error.message}`);
+        }
     }
 
     const renderStepContent = () => {
@@ -104,7 +121,7 @@ const PackageDeliveryPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ o
         <div className="bg-gray-100/50 dark:bg-gray-900/50 min-h-screen py-12">
             <div className="container mx-auto px-6 max-w-2xl">
                 <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl">
-                    <h1 className="text-3xl font-bold dark:text-white mb-2">Send a Package</h1>
+                    <h1 className="text-3xl font-bold dark:text-white mb-2">Package Delivery</h1>
                     {/* Stepper */}
                     <div className="flex items-center mb-8">
                         {STEPS.map((step, index) => (
@@ -120,22 +137,17 @@ const PackageDeliveryPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ o
                         ))}
                     </div>
 
-                    <div className="min-h-[250px]">{renderStepContent()}</div>
+                    <div className="min-h-[350px]">{renderStepContent()}</div>
 
                     {/* Navigation */}
                     <div className="flex justify-between items-center mt-8 border-t dark:border-gray-700 pt-6">
                         {currentStep > 1 && currentStep < STEPS.length ? (
                             <button onClick={handleBack} className="px-6 py-2 border rounded-lg font-semibold dark:border-gray-600">Back</button>
                         ) : <div></div>}
-                         {currentStep === 4 ? (
-                             <button onClick={() => onNavigate('services')} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Done</button>
-                         ) : (
-                            currentStep === 3 ? (
-                                <button onClick={handleConfirm} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">Confirm & Pay</button>
-                            ) : (
-                                <button onClick={handleNext} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Next</button>
-                            )
-                        )}
+                        
+                        {currentStep < 3 && <button onClick={handleNext} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Next</button>}
+                        {currentStep === 3 && <button onClick={handleConfirm} className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">Submit Request</button>}
+                        {currentStep === 4 && <button onClick={() => onNavigate('home')} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">Back to Home</button>}
                     </div>
                 </div>
             </div>

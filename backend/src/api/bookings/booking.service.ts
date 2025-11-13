@@ -1,5 +1,3 @@
-
-
 import { pool } from '../../config/db';
 import { AppError } from '../../utils/AppError';
 import * as mysql from 'mysql2/promise';
@@ -63,8 +61,8 @@ export const createBooking = async (userId: number, details: BookingDetails) => 
 
         const bookingId = `GB-${Date.now().toString().slice(-6)}`;
         const [bookingResult] = await connection.query<mysql.ResultSetHeader>(
-            'INSERT INTO bookings (user_id, trip_id, booking_id, total_price, status) VALUES (?, ?, ?, ?, ?)',
-            [userId, tripId, bookingId, totalPrice, 'Confirmed']
+            'INSERT INTO bookings (user_id, trip_id, booking_id, total_price, status, payment_method) VALUES (?, ?, ?, ?, ?, ?)',
+            [userId, tripId, bookingId, totalPrice, 'Confirmed', paymentMethod]
         );
         const newBookingId = bookingResult.insertId;
 
@@ -72,6 +70,17 @@ export const createBooking = async (userId: number, details: BookingDetails) => 
             connection.query('INSERT INTO seats (booking_id, trip_id, seat_number) VALUES (?, ?, ?)', [newBookingId, tripId, seat])
         );
         await Promise.all(seatInsertPromises);
+
+        // --- Award Loyalty Points ---
+        const pointsEarned = Math.floor(totalPrice / 100); // 1 point for every 100 RWF
+        if (pointsEarned > 0) {
+            await connection.query('UPDATE users SET loyalty_points = loyalty_points + ? WHERE id = ?', [pointsEarned, userId]);
+            await connection.query(
+                'INSERT INTO loyalty_transactions (user_id, points, type, description, related_booking_id) VALUES (?, ?, ?, ?, ?)',
+                [userId, pointsEarned, 'earn', `Earned from trip #${tripId}`, newBookingId]
+            );
+        }
+
 
         await connection.commit();
         

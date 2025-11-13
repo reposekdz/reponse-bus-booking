@@ -36,6 +36,7 @@ const notificationIcons = {
     delay: BellAlertIcon,
     cancellation: BellAlertIcon,
     boarding: CheckCircleIcon,
+    wallet: WalletIcon,
     default: BellIcon,
 };
 
@@ -104,11 +105,16 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
         socket.on('newPromotion', (data: { message: string }) => {
              addNotification({ type: 'promotion', message: data.message });
         });
+
+        socket.on('walletCredit', (data: { amount: number, senderName: string }) => {
+             addNotification({ type: 'wallet', message: `You received ${new Intl.NumberFormat('fr-RW').format(data.amount)} RWF from ${data.senderName}.` });
+        });
         
         return () => {
             socket.off('passengerBoarded');
             socket.off('tripUpdate');
             socket.off('newPromotion');
+            socket.off('walletCredit');
         }
     }
   }, [socket]); 

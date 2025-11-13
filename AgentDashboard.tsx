@@ -1,5 +1,3 @@
-
-
 import React, { useState, useMemo, FormEvent, useEffect } from 'react';
 import { 
     SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, ArrowDownLeftIcon,
@@ -35,20 +33,35 @@ const StatCard = ({ title, value, icon, format = 'currency' }) => (
 
 
 const DashboardView = ({ agentData, t }) => {
-    // In a real app, this data would come from a dedicated dashboard API endpoint
-    const totalDeposits = 1250000;
-    const totalCommission = 25000;
-    const transactions = 32;
-    const uniquePassengers = 18;
+    const [stats, setStats] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const data = await api.getAgentDashboard();
+                setStats(data);
+            } catch (error) {
+                console.error("Failed to fetch agent dashboard stats", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    if (isLoading || !stats) {
+        return <LoadingSpinner />;
+    }
 
     return (
         <div className="space-y-6">
             <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500 dark:from-blue-400 dark:to-green-300">{t('agent_dashboard_title')}</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title={t('agent_dashboard_deposits')} value={totalDeposits} icon={<ArrowDownLeftIcon/>}/>
-                <StatCard title={t('agent_dashboard_commission')} value={totalCommission} icon={<WalletIcon/>}/>
-                <StatCard title={t('agent_dashboard_transactions')} value={transactions} icon={<ChartBarIcon/>} format="number"/>
-                <StatCard title={t('agent_dashboard_passengers')} value={uniquePassengers} icon={<UsersIcon/>} format="number"/>
+                <StatCard title={t('agent_dashboard_deposits')} value={stats.totalDeposits} icon={<ArrowDownLeftIcon/>}/>
+                <StatCard title={t('agent_dashboard_commission')} value={stats.totalCommission} icon={<WalletIcon/>}/>
+                <StatCard title={t('agent_dashboard_transactions')} value={stats.transactions} icon={<ChartBarIcon/>} format="number"/>
+                <StatCard title={t('agent_dashboard_passengers')} value={stats.uniquePassengers} icon={<UsersIcon/>} format="number"/>
             </div>
         </div>
     );
@@ -258,7 +271,6 @@ const TransactionsView = ({ agentId }) => {
     );
 };
 
-// FIX: Add navItems prop to MobileNav to fix scope issue.
 const MobileNav: React.FC<{isOpen: boolean, onClose: () => void, setView: (view: string) => void, navigate: (page: Page) => void, currentView: string, navItems: any[]}> = ({isOpen, onClose, setView, navigate, currentView, navItems}) => (
     <div className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onClose}>
         <div className="absolute inset-0 bg-black/60"></div>

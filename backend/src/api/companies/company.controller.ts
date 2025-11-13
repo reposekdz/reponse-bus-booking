@@ -1,5 +1,3 @@
-
-
 import { Request, Response } from 'express';
 import * as companyService from './company.service';
 import * as driverService from '../drivers/driver.service';
@@ -19,6 +17,12 @@ export const getCompanyDetails = asyncHandler(async (req: any, res: any) => {
     const companyDetails = await companyService.getCompanyDetailsById(req.params.id);
     res.status(200).json({ success: true, data: companyDetails });
 });
+
+export const getMyDashboard = asyncHandler(async (req: any, res: any) => {
+    const dashboardData = await companyService.getDashboardData(req.user.company_id);
+    res.status(200).json({ success: true, data: dashboardData });
+});
+
 
 // --- Driver Management for Companies ---
 

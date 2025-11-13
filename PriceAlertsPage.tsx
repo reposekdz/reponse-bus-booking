@@ -1,23 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Page } from './App';
 import { BellAlertIcon, TrashIcon, TagIcon, ArrowRightIcon } from './components/icons';
+import * as api from './services/apiService';
 
 const PriceAlertsPage: React.FC<{ onNavigate: (page: Page, data?: any) => void, user: any }> = ({ onNavigate, user }) => {
     const [alerts, setAlerts] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const loadAlerts = () => {
-        const storedAlerts = localStorage.getItem('priceAlerts');
-        setAlerts(storedAlerts ? JSON.parse(storedAlerts) : []);
+    const loadAlerts = async () => {
+        setIsLoading(true);
+        try {
+            const data = await api.getMyPriceAlerts();
+            setAlerts(data);
+        } catch (error) {
+            console.error("Failed to load price alerts:", error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
         loadAlerts();
     }, []);
 
-    const removeAlert = (route) => {
-        const newAlerts = alerts.filter(a => !(a.from === route.from && a.to === route.to));
-        localStorage.setItem('priceAlerts', JSON.stringify(newAlerts));
-        setAlerts(newAlerts);
+    const removeAlert = async (id: number) => {
+        try {
+            await api.deletePriceAlert(id);
+            setAlerts(alerts.filter(a => a.id !== id));
+        } catch (error) {
+            alert(`Failed to delete alert: ${error.message}`);
+        }
     };
 
     return (
@@ -30,29 +42,29 @@ const PriceAlertsPage: React.FC<{ onNavigate: (page: Page, data?: any) => void, 
             </header>
             <main className="container mx-auto px-6 py-8">
                 <div className="space-y-4">
-                    {alerts.length > 0 ? (
+                    {isLoading ? <p>Loading alerts...</p> : alerts.length > 0 ? (
                         alerts.map((alert, index) => {
-                            const hasPriceDrop = index === 0; // Simulate a price drop for the first item
-                            const newPrice = alert.initialPrice ? parseFloat(alert.initialPrice.replace(/[^0-9.-]+/g,"")) * 0.9 : 0;
+                            const hasPriceDrop = alert.status === 'Triggered'; 
+                            const newPrice = alert.initial_price ? parseFloat(alert.initial_price) * 0.9 : 0;
 
                             return (
-                                <div key={`${alert.from}-${alert.to}`} className={`bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md flex items-center justify-between transition-all duration-300 ${hasPriceDrop ? 'border-2 border-green-400 shadow-green-400/20' : ''}`}>
+                                <div key={alert.id} className={`bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md flex items-center justify-between transition-all duration-300 ${hasPriceDrop ? 'border-2 border-green-400 shadow-green-400/20' : ''}`}>
                                     <div className="flex items-center">
                                         {hasPriceDrop ? <TagIcon className="w-6 h-6 text-green-500 mr-4"/> : <BellAlertIcon className="w-6 h-6 text-gray-400 mr-4"/>}
                                         <div>
-                                            <p className="font-bold text-lg dark:text-white">{alert.from} <ArrowRightIcon className="inline w-4 h-4"/> {alert.to}</p>
+                                            <p className="font-bold text-lg dark:text-white">{alert.origin} <ArrowRightIcon className="inline w-4 h-4"/> {alert.destination}</p>
                                             {hasPriceDrop ? (
                                                  <p className="text-sm text-green-600 font-semibold">Price Drop! Now {new Intl.NumberFormat('fr-RW').format(newPrice)} RWF</p>
                                             ) : (
-                                                 <p className="text-sm text-gray-500">Monitoring from {alert.initialPrice}</p>
+                                                 <p className="text-sm text-gray-500">Monitoring from {new Intl.NumberFormat('fr-RW').format(alert.initial_price)} RWF</p>
                                             )}
                                         </div>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         {hasPriceDrop && (
-                                            <button onClick={() => onNavigate('bookingSearch')} className="px-4 py-2 text-sm bg-green-500 text-white font-semibold rounded-md hover:bg-green-600">Book Now</button>
+                                            <button onClick={() => onNavigate('bookingSearch', { from: alert.origin, to: alert.destination })} className="px-4 py-2 text-sm bg-green-500 text-white font-semibold rounded-md hover:bg-green-600">Book Now</button>
                                         )}
-                                        <button onClick={() => removeAlert(alert)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full">
+                                        <button onClick={() => removeAlert(alert.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full">
                                             <TrashIcon className="w-5 h-5"/>
                                         </button>
                                     </div>

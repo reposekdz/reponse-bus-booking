@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Modal from './Modal';
 import PinModal from './PinModal';
 import * as api from '../services/apiService';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface SendMoneyModalProps {
     onClose: () => void;
@@ -11,6 +12,7 @@ interface SendMoneyModalProps {
 }
 
 const SendMoneyModal: React.FC<SendMoneyModalProps> = ({ onClose, onSuccess, currentBalance, userPin }) => {
+    const { t } = useLanguage();
     const [toSerial, setToSerial] = useState('');
     const [amount, setAmount] = useState('');
     const [isPinModalOpen, setIsPinModalOpen] = useState(false);
@@ -37,7 +39,6 @@ const SendMoneyModal: React.FC<SendMoneyModalProps> = ({ onClose, onSuccess, cur
         setIsLoading(true);
         setError('');
         try {
-            // FIX: Call the newly added 'walletTransfer' function
             const result = await api.walletTransfer({ toSerial, amount: parseFloat(amount), pin });
             onSuccess(result.data.newBalance);
         } catch (err: any) {
@@ -82,11 +83,11 @@ const SendMoneyModal: React.FC<SendMoneyModalProps> = ({ onClose, onSuccess, cur
                     </div>
                 </form>
             </Modal>
-             {isPinModalOpen && userPin && (
+             {isPinModalOpen && (
                 <PinModal 
                     onClose={() => setIsPinModalOpen(false)}
                     onSuccess={handlePinSuccess}
-                    pinToMatch={userPin}
+                    pinToMatch={userPin} // This is a mock; in reality, the backend validates
                     title="Confirm Transfer"
                     description={`Enter your PIN to send ${new Intl.NumberFormat('fr-RW').format(parseFloat(amount))} RWF to ${toSerial}.`}
                 />
