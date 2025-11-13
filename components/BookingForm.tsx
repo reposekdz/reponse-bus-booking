@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { CalendarIcon, UserCircleIcon, ArrowRightIcon, ArrowsUpDownIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
 import SearchableSelect from './SearchableSelect';
 
 interface BookingFormProps {
-  onSearch: (from: string, to: string) => void;
+  onSearch: (from: string, to: string, date: string) => void;
 }
 
 const locations = ['Kigali', 'Rubavu', 'Musanze', 'Huye', 'Rusizi', 'Nyagatare', 'Muhanga'];
@@ -22,7 +21,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(fromLocation, toLocation);
+    onSearch(fromLocation, toLocation, journeyDate);
   };
 
   const swapLocations = () => {
@@ -42,9 +41,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-gray-800 dark:text-white">
-      <div className="flex items-center space-x-4 mb-4">
-        <button type="button" onClick={() => setTripType('one-way')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'one-way' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>{t('form_one_way')}</button>
-        <button type="button" onClick={() => setTripType('round-trip')} className={`px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'round-trip' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>{t('form_round_trip')}</button>
+      <div className="flex items-center space-x-2 sm:space-x-4 mb-4">
+        <button type="button" onClick={() => setTripType('one-way')} className={`px-3 sm:px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'one-way' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>{t('form_one_way')}</button>
+        <button type="button" onClick={() => setTripType('round-trip')} className={`px-3 sm:px-4 py-2 rounded-full font-semibold text-sm transition-colors ${tripType === 'round-trip' ? 'bg-yellow-300 text-blue-900' : 'bg-white/20 text-white hover:bg-white/30'}`}>{t('form_round_trip')}</button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
           <SearchableSelect
@@ -54,8 +53,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
             placeholder={t('form_from')}
           />
 
-          <div className="relative mt-2 md:mt-0">
-             <button type="button" onClick={swapLocations} className="w-10 h-10 rounded-full bg-white/30 text-white flex items-center justify-center hover:bg-white/50 transition-all transform hover:rotate-180 duration-300">
+          <div className="relative h-10 flex items-center justify-center md:mt-0">
+             <div className="w-full h-[2px] bg-white/10 md:hidden"></div>
+             <button type="button" onClick={swapLocations} className="absolute w-10 h-10 rounded-full bg-white/30 text-white flex items-center justify-center hover:bg-white/50 transition-all transform hover:rotate-180 duration-300 z-10">
                 <ArrowsUpDownIcon className="w-5 h-5"/>
              </button>
           </div>
@@ -67,7 +67,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ onSearch }) => {
             placeholder={t('form_to')}
           />
       </div>
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
             <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
             <input type="date" id="date" value={journeyDate} onChange={(e) => setJourneyDate(e.target.value)} className={formInputBaseClass} placeholder={t('form_date')}/>

@@ -1,39 +1,43 @@
 
+
 import React from 'react';
 import { TagIcon, ArrowRightIcon } from './icons';
-
-const offers = [
-    {
-        title: "Weekend Getaway Discount",
-        company: "Volcano Express",
-        description: "Get 10% off on all round-trip tickets booked for Saturday & Sunday travel.",
-        code: "WEEKEND10",
-        bgGradient: "from-yellow-400 to-orange-500"
-    },
-    {
-        title: "Student Special",
-        company: "RITCO",
-        description: "Show your student ID and get a 15% discount on any route, any day.",
-        code: "STUDENT15",
-        bgGradient: "from-blue-400 to-indigo-500"
-    },
-    {
-        title: "Early Bird Bonus",
-        company: "Horizon Express",
-        description: "Book your ticket more than 7 days in advance and enjoy a 5% discount on your fare.",
-        code: "EARLYBIRD5",
-        bgGradient: "from-green-400 to-teal-500"
-    }
-];
+import { useLanguage } from '../contexts/LanguageContext';
 
 const SpecialOffers = ({ onSearch }) => {
+    const { t } = useLanguage();
+    
+    const offers = [
+        {
+            title: t('offer1_title'),
+            company: "Volcano Express",
+            description: t('offer1_desc'),
+            code: "WEEKEND10",
+            bgGradient: "from-yellow-400 to-orange-500"
+        },
+        {
+            title: t('offer2_title'),
+            company: "RITCO",
+            description: t('offer2_desc'),
+            code: "STUDENT15",
+            bgGradient: "from-blue-400 to-indigo-500"
+        },
+        {
+            title: t('offer3_title'),
+            company: "Horizon Express",
+            description: t('offer3_desc'),
+            code: "EARLYBIRD5",
+            bgGradient: "from-green-400 to-teal-500"
+        }
+    ];
+
     return (
         <section>
             <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight sm:text-4xl">Special Offers & Promotions</h2>
+                    <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight sm:text-4xl">{t('offers_title')}</h2>
                     <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">
-                        Save on your next journey with our exclusive deals from top companies.
+                        {t('offers_subtitle')}
                     </p>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -50,7 +54,7 @@ const SpecialOffers = ({ onSearch }) => {
                              <div className="relative z-10">
                                  <p className="text-sm opacity-90 mb-4">{offer.description}</p>
                                  <button onClick={() => onSearch()} className="w-full flex items-center justify-center px-5 py-3 rounded-lg bg-white/20 backdrop-blur-sm font-bold hover:bg-white/30 transition-colors duration-300 transform group-hover:scale-105">
-                                    Book a Trip <ArrowRightIcon className="w-5 h-5 ml-2"/>
+                                    {t('offers_button')} <ArrowRightIcon className="w-5 h-5 ml-2"/>
                                  </button>
                              </div>
                         </div>

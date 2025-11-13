@@ -1,9 +1,11 @@
 import React from 'react';
 import { XIcon, BusIcon } from './icons';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // Simple hash function to generate a "unique" pattern from a string
 const simpleHash = (str: string) => {
   let hash = 0;
+  if (!str) return hash;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = (hash << 5) - hash + char;
@@ -43,6 +45,7 @@ const InfoRow: React.FC<{ label: string; value: string }> = ({ label, value }) =
 );
 
 const TicketModal: React.FC<{ ticket: any; onClose: () => void, isActive?: boolean }> = ({ ticket, onClose, isActive = false }) => {
+  const { t } = useLanguage();
   if (!ticket) return null;
 
   return (
@@ -60,7 +63,7 @@ const TicketModal: React.FC<{ ticket: any; onClose: () => void, isActive?: boole
             </button>
             <div className="flex items-center space-x-3">
                  <BusIcon className="w-8 h-8"/>
-                 <h2 className="text-2xl font-bold">Boarding Pass</h2>
+                 <h2 className="text-2xl font-bold">{t('ticket_modal_title')}</h2>
             </div>
             <p className="text-sm opacity-80 mt-1">{ticket.company}</p>
         </header>
@@ -70,22 +73,22 @@ const TicketModal: React.FC<{ ticket: any; onClose: () => void, isActive?: boole
                 <QRCode value={ticket.id} size={180} isActive={isActive} />
             </div>
              {isActive ? (
-                <p className="text-center font-bold text-lg text-green-500 animate-pulse mb-4">TICKET ACTIVATED</p>
+                <p className="text-center font-bold text-lg text-green-500 animate-pulse mb-4">{t('ticket_modal_activated')}</p>
             ) : (
-                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">Present this code for scanning at the terminal.</p>
+                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">{t('ticket_modal_scan_prompt')}</p>
             )}
             
             <div className="space-y-2">
-                <InfoRow label="Passenger" value={ticket.passenger} />
-                <InfoRow label="Route" value={`${ticket.from} to ${ticket.to}`} />
-                <InfoRow label="Date & Time" value={`${ticket.date} at ${ticket.time}`} />
+                <InfoRow label={t('ticket_modal_passenger')} value={ticket.passenger} />
+                <InfoRow label={t('ticket_modal_route')} value={`${ticket.from} to ${ticket.to}`} />
+                <InfoRow label={t('ticket_modal_datetime')} value={`${ticket.date} at ${ticket.time}`} />
                 <div className="flex pt-3">
                     <div className="w-1/2 pr-2">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">Seats</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">{t('ticket_modal_seats')}</p>
                         <p className="font-bold text-gray-800 dark:text-white text-lg">{ticket.seats}</p>
                     </div>
                      <div className="w-1/2 pl-2">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">Bus Plate</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">{t('ticket_modal_plate')}</p>
                         <p className="font-bold text-gray-800 dark:text-white text-lg">{ticket.busPlate}</p>
                     </div>
                 </div>
@@ -93,7 +96,7 @@ const TicketModal: React.FC<{ ticket: any; onClose: () => void, isActive?: boole
         </main>
         
         <footer className="p-4 bg-gray-100 dark:bg-gray-900 rounded-b-2xl">
-            <p className="text-xs text-center text-gray-500 dark:text-gray-400">Ticket ID: {ticket.id}</p>
+            <p className="text-xs text-center text-gray-500 dark:text-gray-400">{t('ticket_modal_id')}: {ticket.id}</p>
         </footer>
       </div>
       <style>{`

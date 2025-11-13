@@ -1,4 +1,3 @@
-
 export class AppError extends Error {
     statusCode: number;
     isOperational: boolean;
@@ -8,9 +7,9 @@ export class AppError extends Error {
         this.statusCode = statusCode;
         this.isOperational = true;
 
-        // FIX: Added a check for Error.captureStackTrace as it's a V8-specific extension and may not exist.
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, this.constructor);
+        // FIX: Cast Error to `any` to access V8-specific `captureStackTrace` for better stack traces, as it's not in standard TS types.
+        if ((Error as any).captureStackTrace) {
+            (Error as any).captureStackTrace(this, this.constructor);
         }
     }
 }

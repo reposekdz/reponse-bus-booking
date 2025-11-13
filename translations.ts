@@ -84,6 +84,28 @@ export const translations = {
     'driver_history_route': 'Urugendo',
     'driver_history_passengers': 'Abagenzi',
     'driver_history_status': 'Uko byagenze',
+    // Agent Dashboard
+    'agent_dashboard_title': 'Imbonerahamwe y\'Umukozi',
+    'agent_dashboard_deposits': 'Yose Yabikijwe',
+    'agent_dashboard_commission': 'Komisiyo Yose',
+    'agent_dashboard_transactions': 'Ibikorwa Byose',
+    'agent_dashboard_passengers': 'Abagenzi Bafashijwe',
+    'agent_dashboard_leaderboard': 'Urutonde rw\'Abakozi Bambere',
+    'agent_dashboard_recent': 'Ibikorwa bya Vuba',
+    'agent_deposit_title': 'Kubitsa Amafaranga',
+    'agent_deposit_find_passenger': 'Shakisha Umugenzi',
+    'agent_deposit_enter_code': 'Shyiramo kode y\'umugenzi kugirango umwemeze mbere yo kumubikira amafaranga.',
+    'agent_deposit_search_button': 'Shakisha',
+    'agent_deposit_confirm_details': 'Emeza Umwirondoro & Bika',
+    'agent_deposit_search_another': 'Shakisha undi',
+    'agent_deposit_amount_label': 'Amafaranga yo Kubitsa (RWF)',
+    'agent_deposit_confirm_button': 'Emeza Kubitsa',
+    'agent_pin_title': 'Emeza Igikorwa',
+    'agent_pin_desc': 'Shyiramo PIN yawe y\'umukozi kugirango wemeze iki gikorwa.',
+    // Notifications
+    'notification_trip_delay': 'Urugendo rwawe {route} rwatindijwe iminota {minutes}.',
+    'notification_trip_cancel': 'Tubabajwe no kukumenyesha ko urugendo rwawe {route} rwahagaritswe.',
+    'notification_new_promo': 'Promosiyo nshya! {description}'
   },
   EN: {
     // Header & Nav
@@ -170,6 +192,28 @@ export const translations = {
     'driver_history_route': 'Route',
     'driver_history_passengers': 'Passengers',
     'driver_history_status': 'Status',
+     // Agent Dashboard
+    'agent_dashboard_title': 'Agent Dashboard',
+    'agent_dashboard_deposits': 'Total Deposits',
+    'agent_dashboard_commission': 'Total Commission',
+    'agent_dashboard_transactions': 'Total Transactions',
+    'agent_dashboard_passengers': 'Assisted Passengers',
+    'agent_dashboard_leaderboard': 'Top Agent Leaderboard',
+    'agent_dashboard_recent': 'Recent Activity',
+    'agent_deposit_title': 'Make a Deposit',
+    'agent_deposit_find_passenger': 'Find Passenger',
+    'agent_deposit_enter_code': 'Enter the passenger\'s serial code to verify them before making a deposit.',
+    'agent_deposit_search_button': 'Search',
+    'agent_deposit_confirm_details': 'Confirm Details & Deposit',
+    'agent_deposit_search_another': 'Search another',
+    'agent_deposit_amount_label': 'Deposit Amount (RWF)',
+    'agent_deposit_confirm_button': 'Confirm Deposit',
+    'agent_pin_title': 'Confirm Action',
+    'agent_pin_desc': 'Enter your agent PIN to authorize this transaction.',
+    // Notifications
+    'notification_trip_delay': 'Your trip {route} has been delayed by {minutes} minutes.',
+    'notification_trip_cancel': 'We regret to inform you that your trip {route} has been cancelled.',
+    'notification_new_promo': 'New Promotion! {description}'
   },
   FR: {
     // Header & Nav
@@ -256,5 +300,27 @@ export const translations = {
     'driver_history_route': 'Trajet',
     'driver_history_passengers': 'Passagers',
     'driver_history_status': 'Statut',
+    // Agent Dashboard
+    'agent_dashboard_title': 'Tableau de Bord Agent',
+    'agent_dashboard_deposits': 'Dépôts Totaux',
+    'agent_dashboard_commission': 'Commission Totale',
+    'agent_dashboard_transactions': 'Transactions Totales',
+    'agent_dashboard_passengers': 'Passagers Aidés',
+    'agent_dashboard_leaderboard': 'Classement des Meilleurs Agents',
+    'agent_dashboard_recent': 'Activité Récente',
+    'agent_deposit_title': 'Effectuer un Dépôt',
+    'agent_deposit_find_passenger': 'Trouver un Passager',
+    'agent_deposit_enter_code': 'Entrez le code de série du passager pour le vérifier avant d\'effectuer un dépôt.',
+    'agent_deposit_search_button': 'Rechercher',
+    'agent_deposit_confirm_details': 'Confirmer & Déposer',
+    'agent_deposit_search_another': 'Chercher un autre',
+    'agent_deposit_amount_label': 'Montant du Dépôt (RWF)',
+    'agent_deposit_confirm_button': 'Confirmer le Dépôt',
+    'agent_pin_title': 'Confirmer l\'Action',
+    'agent_pin_desc': 'Entrez votre code PIN d\'agent pour autoriser cette transaction.',
+    // Notifications
+    'notification_trip_delay': 'Votre voyage {route} a été retardé de {minutes} minutes.',
+    'notification_trip_cancel': 'Nous avons le regret de vous informer que votre voyage {route} a été annulé.',
+    'notification_new_promo': 'Nouvelle Promotion ! {description}'
   }
 };

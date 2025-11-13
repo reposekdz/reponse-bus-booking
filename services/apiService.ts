@@ -1,4 +1,5 @@
 
+
 // services/apiService.ts - REAL BACKEND API CLIENT
 
 const BASE_URL = '/api/v1';
@@ -166,6 +167,20 @@ export const companyDeleteDriver = (id: string) => apiFetch(`/companies/mydriver
 // --- DRIVER ---
 export const driverGetMyHistory = async () => {
     const { data } = await apiFetch('/drivers/my-history');
+    return data;
+};
+
+// FIX: Add missing agent API functions
+// --- AGENT ---
+export const agentLookupPassenger = async (serialCode: string) => {
+    const { data } = await apiFetch(`/agents/lookup/${serialCode}`);
+    return data;
+};
+export const agentMakeDeposit = (depositData: { passengerSerial: string, amount: number }) => {
+    return apiFetch('/agents/deposit', { method: 'POST', body: JSON.stringify(depositData) });
+};
+export const agentGetMyTransactions = async () => {
+    const { data } = await apiFetch('/agents/my-transactions');
     return data;
 };
 

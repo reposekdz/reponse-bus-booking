@@ -1,6 +1,7 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { Page } from '../App';
 import { GoBusLogo, SunIcon, MoonIcon, MenuIcon, XIcon, UserCircleIcon, TicketIcon, LanguageIcon, ChevronDownIcon, WalletIcon, BusIcon, BellIcon, TagIcon, StarIcon, BellAlertIcon, SparklesIcon, CheckCircleIcon, ArchiveBoxIcon, BriefcaseIcon, MapIcon, ShieldCheckIcon, CreditCardIcon, QuestionMarkCircleIcon, BuildingStorefrontIcon, KeyIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -31,13 +32,14 @@ const DropdownMenu: React.FC<{isOpen: boolean; children: React.ReactNode; classN
     </div>
 );
 
-// Mock notifications
-const mockNotifications = [
-    { id: 1, type: 'reminder', message: 'Your trip to Rubavu is tomorrow at 07:00.', read: false, icon: TicketIcon },
-    { id: 2, type: 'promotion', message: 'Get 10% off on all weekend trips. Use code WEEKEND10.', read: false, icon: TagIcon },
-    { id: 3, type: 'delay', message: 'Trip VK-124 to Huye is delayed by 15 minutes.', read: true, icon: BellAlertIcon },
-];
-
+const notificationIcons = {
+    reminder: TicketIcon,
+    promotion: TagIcon,
+    delay: BellAlertIcon,
+    cancellation: BellAlertIcon,
+    boarding: CheckCircleIcon,
+    default: BellIcon,
+};
 
 const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, theme, setTheme }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -45,7 +47,8 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const socketRef = useRef<Socket | null>(null);
   
   const langRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -86,42 +89,55 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
       setNotifications(notifications.map(n => ({...n, read: true})));
   }
 
-  // Effect to handle real-time passenger boarding notifications via Socket.IO
+  // Effect to handle real-time notifications via Socket.IO
   useEffect(() => {
-    if (!user || !token) {
-        return;
-    }
+    if (user && token && !socketRef.current) {
+        // Connect to the socket server
+        // FIX: Explicitly type the socket constant to resolve potential type inference issues.
+        const socket: Socket = io();
+        socketRef.current = socket;
 
-    // Connect to the socket server (assumes same origin)
-    const socket = io();
-
-    socket.on('connect', () => {
-        console.log('Socket connected:', socket.id);
-        // Authenticate the socket connection with our JWT
-        socket.emit('authenticate', token);
-    });
-
-    // Listen for real-time boarding notifications
-    socket.on('passengerBoarded', (data: { message: string; route: string }) => {
-        const newNotif = { 
-            id: Date.now(), 
-            type: 'boarding', 
-            message: data.message, 
-            read: false, 
-            icon: CheckCircleIcon 
+        socket.on('connect', () => {
+            console.log('Socket connected:', socket.id);
+            socket.emit('authenticate', token);
+        });
+        
+        const addNotification = (notif: Omit<any, 'id' | 'read'>) => {
+            setNotifications(prev => [{ ...notif, id: Date.now(), read: false }, ...prev]);
         };
-        setNotifications(prev => [newNotif, ...prev]);
-    });
 
-    socket.on('disconnect', () => {
-        console.log('Socket disconnected');
-    });
+        // Listen for real-time boarding notifications
+        socket.on('passengerBoarded', (data: { message: string; route: string }) => {
+            addNotification({ type: 'boarding', message: data.message });
+        });
+
+        // Listen for trip updates (delay, cancellation)
+        socket.on('tripUpdate', (data: { type: 'delay' | 'cancellation', message: string }) => {
+            addNotification({ type: data.type, message: data.message });
+        });
+
+        // Listen for new promotions
+        socket.on('newPromotion', (data: { message: string }) => {
+             addNotification({ type: 'promotion', message: data.message });
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Socket disconnected');
+        });
+    } else if (!user && socketRef.current) {
+        // Disconnect when user logs out
+        socketRef.current.disconnect();
+        socketRef.current = null;
+    }
 
     // Cleanup on component unmount
     return () => {
-        socket.disconnect();
+        if (socketRef.current) {
+            socketRef.current.disconnect();
+            socketRef.current = null;
+        }
     };
-  }, [user, token]); // Re-run effect if user or token changes
+  }, [user, token]); 
 
   const currentLang = languages.find(l => l.code === language);
   
@@ -219,12 +235,14 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
             <DropdownMenu isOpen={isNotificationsOpen} className="w-80">
                 <div className="p-3 flex justify-between items-center font-bold border-b border-white/20">
                     <span>Notifications</span>
-                    <button onClick={markAllAsRead} className="text-xs font-semibold text-blue-300 hover:underline">Mark all as read</button>
+                    {notifications.length > 0 && <button onClick={markAllAsRead} className="text-xs font-semibold text-blue-300 hover:underline">Mark all as read</button>}
                 </div>
                 <div className="py-2 max-h-80 overflow-y-auto custom-scrollbar">
-                    {notifications.map(notif => (
+                    {notifications.length > 0 ? notifications.map(notif => {
+                        const Icon = notificationIcons[notif.type] || notificationIcons.default;
+                        return (
                         <div key={notif.id} className={`px-4 py-3 text-sm flex items-start space-x-3 transition-colors ${!notif.read ? 'bg-blue-900/20' : ''}`}>
-                            <notif.icon className="w-5 h-5 text-yellow-300 mt-0.5"/>
+                            <Icon className="w-5 h-5 text-yellow-300 mt-0.5"/>
                             <div className="flex-1">
                                 <p className="font-semibold">{notif.message}</p>
                             </div>
@@ -232,7 +250,9 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
                                 <button onClick={() => markAsRead(notif.id)} data-tooltip="Mark as read" className="w-3 h-3 mt-1.5 rounded-full bg-blue-400 hover:bg-blue-200"></button>
                             )}
                         </div>
-                    ))}
+                    )}) : (
+                        <p className="text-center text-sm py-4">No new notifications.</p>
+                    )}
                 </div>
             </DropdownMenu>
           </div>

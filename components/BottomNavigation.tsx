@@ -28,7 +28,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ navigate, currentPa
     ];
 
     // A bit of a hack to make the profile icon active for its sub-pages
-    const isProfileActive = ['profile', 'bookings', 'scheduled'].includes(currentPage);
+    const isProfileActive = ['profile', 'bookings', 'scheduled', 'wallet', 'loyalty', 'favorites', 'priceAlerts'].includes(currentPage);
     
     const activePage = (page: Page) => {
         if (page === 'profile' && isProfileActive) return true;

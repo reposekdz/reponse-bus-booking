@@ -1,37 +1,41 @@
 
+
 import React from 'react';
 import { SparklesIcon, TagIcon, ShieldCheckIcon, PhoneIcon } from './icons';
-
-const features = [
-    {
-        icon: SparklesIcon,
-        title: "Seamless Booking",
-        description: "Book your trip in just a few clicks with our intuitive and fast interface."
-    },
-    {
-        icon: TagIcon,
-        title: "Best Prices Guaranteed",
-        description: "We work with top companies to bring you the most competitive fares."
-    },
-    {
-        icon: ShieldCheckIcon,
-        title: "Safe & Secure Travel",
-        description: "Travel with peace of mind. All our partners are vetted for safety and quality."
-    },
-    {
-        icon: PhoneIcon,
-        title: "24/7 Customer Support",
-        description: "Our dedicated support team is always available to help you with any issues."
-    }
-];
+import { useLanguage } from '../contexts/LanguageContext';
 
 const WhyChooseUs = () => {
+    const { t } = useLanguage();
+
+    const features = [
+        {
+            icon: SparklesIcon,
+            title: t('why_us_feature1_title'),
+            description: t('why_us_feature1_desc')
+        },
+        {
+            icon: TagIcon,
+            title: t('why_us_feature2_title'),
+            description: t('why_us_feature2_desc')
+        },
+        {
+            icon: ShieldCheckIcon,
+            title: t('why_us_feature3_title'),
+            description: t('why_us_feature3_desc')
+        },
+        {
+            icon: PhoneIcon,
+            title: t('why_us_feature4_title'),
+            description: t('why_us_feature4_desc')
+        }
+    ];
+
     return (
         <section>
             <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight sm:text-4xl">Why Travel With RwandaBus?</h2>
-                    <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">Your journey, simplified and secured.</p>
+                    <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight sm:text-4xl">{t('why_us_title')}</h2>
+                    <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600 dark:text-gray-400">{t('why_us_subtitle')}</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     {features.map((feature, index) => (

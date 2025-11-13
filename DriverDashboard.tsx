@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { SunIcon, MoonIcon, CogIcon, UsersIcon, ChartBarIcon, QrCodeIcon, ChartPieIcon, ClipboardDocumentListIcon, WrenchScrewdriverIcon, MegaphoneIcon, CalendarIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, StarIcon, ShieldCheckIcon, MenuIcon, XIcon } from './components/icons';
 import { Page } from './App';
@@ -141,7 +142,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
         }
 
         // The mockCurrentTrip.id would be dynamic in a real app
-        const currentTripId = "60c72b2f9b1d8c001f8e4b1a"; // A mock ObjectId for an existing trip
+        const currentTripId = "1"; // A mock ID for an existing trip
 
         try {
             // Call the new backend service
@@ -150,7 +151,7 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
             // On success, update UI
             setScanResult({ type: 'success', message: `Welcome, ${result.passengerName}! Seat: ${result.seat}.` });
             setPassengers(passengers.map(p => p.ticketId === scannedTicket ? {...p, status: 'boarded'} : p));
-        } catch (err) {
+        } catch (err: any) {
             setScanResult({ type: 'error', message: (err as Error).message || 'Verification failed.' });
         } finally {
             setScannedTicket('');
@@ -163,14 +164,14 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
             if (passengerToScan) {
                 setScannedTicket(passengerToScan.ticketId);
             } else {
-                setScannedTicket('VK-83AD1'); // Fallback if all are boarded
+                setScannedTicket('GB-TEST1'); // Fallback if all are boarded
             }
         } else if (type === 'duplicate') {
             const boardedPassenger = passengers.find(p => p.status === 'boarded');
              if (boardedPassenger) {
                 setScannedTicket(boardedPassenger.ticketId);
             } else {
-                 setScannedTicket('VK-83AD3');
+                 setScannedTicket('GB-TEST1');
             }
         } else {
             setScannedTicket('INVALID-ID');

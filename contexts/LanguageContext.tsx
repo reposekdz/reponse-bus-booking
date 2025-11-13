@@ -12,7 +12,7 @@ export type Language = {
 interface LanguageContextType {
   language: LanguageCode;
   setLanguage: (lang: LanguageCode) => void;
-  t: (key: string) => string;
+  t: (key: string, values?: { [key: string]: string | number }) => string;
   languages: Language[];
 }
 
@@ -35,8 +35,15 @@ const supportedLanguages: Language[] = [
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<LanguageCode>(defaultLanguage);
 
-  const t = (key: string): string => {
-    return translations[language][key] || translations[defaultLanguage][key] || key;
+  const t = (key: string, values?: { [key: string]: string | number }): string => {
+    let translation = translations[language][key] || translations[defaultLanguage][key] || key;
+    if (values) {
+        Object.keys(values).forEach(valueKey => {
+            const regex = new RegExp(`{${valueKey}}`, 'g');
+            translation = translation.replace(regex, String(values[valueKey]));
+        });
+    }
+    return translation;
   };
 
   return (

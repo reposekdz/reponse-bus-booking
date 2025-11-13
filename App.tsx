@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -27,7 +28,7 @@ import BusCharterPage from './BusCharterPage';
 import BookingSearchPage from './BookingSearchPage';
 import BottomNavigation from './components/BottomNavigation';
 import TicketModal from './components/TicketModal';
-import { LanguageProvider } from './contexts/LanguageContext';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import DriverProfilePage from './DriverProfilePage';
 import AgentProfilePage from './AgentProfilePage';
 import PassengerProfilePage from './PassengerProfilePage';
@@ -51,7 +52,6 @@ import LoyaltyPage from './LoyaltyPage';
 import PaymentPage from './PaymentPage';
 import WalletPage from './WalletPage';
 import { useAuth } from './contexts/AuthContext';
-import * as api from './services/apiService';
 
 
 export type Page = 
@@ -77,6 +77,7 @@ const AppContent: React.FC = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [viewingTicket, setViewingTicket] = useState<{ ticket: any; isActive: boolean } | null>(null);
   const [favoriteTripIds, setFavoriteTripIds] = useState<string[]>([]);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const storedFavorites = localStorage.getItem('favoriteTrips');
@@ -133,10 +134,18 @@ const AppContent: React.FC = () => {
   }
 
   if (isLoading) {
-      return <div className="min-h-screen flex items-center justify-center dark:bg-gray-900 dark:text-white">Loading Application...</div>;
+      return <div className="min-h-screen flex items-center justify-center dark:bg-gray-900 dark:text-white">{t('app_loading')}</div>;
   }
 
   const renderPage = () => {
+    // If user has a role, redirect to their dashboard on first load or login
+    if (currentPage === 'home' && user) {
+        if (user.role === 'admin') return <AdminLayout currentPage={'adminDashboard'} navigate={navigate} theme={theme} setTheme={setTheme} onLogout={handleLogout}/>;
+        if (user.role === 'company') return <CompanyLayout currentPage={'companyDashboard'} navigate={navigate} pageData={pageData} companyData={user} theme={theme} setTheme={setTheme} onLogout={handleLogout}/>;
+        if (user.role === 'driver') return <DriverDashboard driverData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} />;
+        if (user.role === 'agent') return <AgentDashboard agentData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} />;
+    }
+
     // If not logged in, force login page for protected routes
     const protectedPages: Page[] = ['bookings', 'profile', 'favorites', 'priceAlerts', 'loyalty', 'wallet'];
     if (!user && protectedPages.includes(currentPage)) {
@@ -176,16 +185,16 @@ const AppContent: React.FC = () => {
       case 'wallet': return <WalletPage onNavigate={navigate} />;
       
       case 'adminDashboard': case 'adminCompanies': case 'adminDrivers': case 'adminAgents': case 'adminUsers': case 'adminFinancials': case 'adminAds': case 'adminPromotions': case 'adminAnnouncements': case 'adminMessages': case 'adminSettings': case 'adminDestinations':
-        return user?.role === 'admin' ? <AdminLayout currentPage={currentPage} navigate={navigate} theme={theme} setTheme={setTheme} onLogout={handleLogout}/> : <p>Access Denied</p>;
+        return user?.role === 'admin' ? <AdminLayout currentPage={currentPage} navigate={navigate} theme={theme} setTheme={setTheme} onLogout={handleLogout}/> : <p>{t('access_denied')}</p>;
         
       case 'companyDashboard': case 'companyBuses': case 'companyDrivers': case 'companyRoutes': case 'companyPassengers': case 'companyFinancials': case 'companySettings': case 'fleetMonitoring': case 'companyRouteAnalytics': case 'companyDriverProfile':
-        return user?.role === 'company' ? <CompanyLayout currentPage={currentPage} navigate={navigate} pageData={pageData} companyData={user} theme={theme} setTheme={setTheme} onLogout={handleLogout}/> : <p>Access Denied</p>;
+        return user?.role === 'company' ? <CompanyLayout currentPage={currentPage} navigate={navigate} pageData={pageData} companyData={user} theme={theme} setTheme={setTheme} onLogout={handleLogout}/> : <p>{t('access_denied')}</p>;
         
       case 'driverDashboard':
-        return user?.role === 'driver' ? <DriverDashboard driverData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>Access Denied</p>;
+        return user?.role === 'driver' ? <DriverDashboard driverData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>{t('access_denied')}</p>;
 
       case 'agentDashboard':
-        return user?.role === 'agent' ? <AgentDashboard agentData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>Access Denied</p>;
+        return user?.role === 'agent' ? <AgentDashboard agentData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>{t('access_denied')}</p>;
         
       case 'driverProfile': return <DriverProfilePage driver={pageData} />;
       case 'agentProfile': return <AgentProfilePage agent={pageData} allTransactions={[]} />;

@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { ArrowRightIcon, WifiIcon, AcIcon, PowerIcon, StarIcon, TagIcon } from './icons';
 
@@ -35,9 +36,14 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
             )}
 
             <div className="flex-shrink-0 w-full sm:w-auto text-center sm:text-left">
-                <p className="font-bold text-gray-700 dark:text-gray-200 text-lg">{result.company}</p>
-                <div className="flex items-center justify-center sm:justify-start space-x-3 mt-1">
-                    {result.amenities.map((amenity: string) => <AmenityIcon key={amenity} amenity={amenity} />)}
+                 <div className="flex items-center space-x-4 justify-center sm:justify-start">
+                    <img src={result.companyLogo} alt={`${result.company} logo`} className="w-12 h-12 object-contain bg-white dark:bg-gray-900 rounded-full p-1 shadow-md"/>
+                    <div>
+                        <p className="font-bold text-gray-700 dark:text-gray-200 text-lg">{result.company}</p>
+                        <div className="flex items-center space-x-3 mt-1">
+                            {result.amenities.map((amenity: string) => <AmenityIcon key={amenity} amenity={amenity} />)}
+                        </div>
+                    </div>
                 </div>
                 {result.driver && (
                     <div className="flex items-center space-x-2 mt-3 pt-2 border-t dark:border-gray-700 justify-center sm:justify-start">
