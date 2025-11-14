@@ -97,7 +97,7 @@ const RegistrationSuccessPage: React.FC<{ onNavigate: (page: Page) => void }> = 
                         ))}
                     </div>
                     {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-                    <button onClick={handleSetPin} disabled={isLoading} className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+                    <button onClick={handleSetPin} disabled={isLoading || pin.join('').length < 4} className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
                         {isLoading ? t('reg_success_pin_button_loading') : t('reg_success_pin_button')}
                     </button>
                 </div>

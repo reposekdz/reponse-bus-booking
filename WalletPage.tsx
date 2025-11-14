@@ -126,7 +126,6 @@ const WalletPage: React.FC<{ onNavigate: (page: Page) => void }> = ({ onNavigate
                     onClose={() => setIsSendMoneyOpen(false)}
                     onSuccess={handleSendSuccess}
                     currentBalance={user?.wallet_balance || 0}
-                    userPin={user.pin}
                 />
             )}
         </>

@@ -8,10 +8,9 @@ interface SendMoneyModalProps {
     onClose: () => void;
     onSuccess: (newBalance: number) => void;
     currentBalance: number;
-    userPin: string;
 }
 
-const SendMoneyModal: React.FC<SendMoneyModalProps> = ({ onClose, onSuccess, currentBalance, userPin }) => {
+const SendMoneyModal: React.FC<SendMoneyModalProps> = ({ onClose, onSuccess, currentBalance }) => {
     const { t } = useLanguage();
     const [toSerial, setToSerial] = useState('');
     const [amount, setAmount] = useState('');
@@ -43,14 +42,14 @@ const SendMoneyModal: React.FC<SendMoneyModalProps> = ({ onClose, onSuccess, cur
             onSuccess(result.data.new_sender_balance);
         } catch (err: any) {
             setError(err.message || 'Transfer failed. Please try again.');
-        } finally {
+            // Re-open the main modal if PIN was successful but transfer failed
             setIsLoading(false);
         }
     };
 
     return (
         <>
-            <Modal isOpen={!isLoading} onClose={onClose} title="Send Money">
+            <Modal isOpen={!isPinModalOpen} onClose={onClose} title="Send Money">
                 <form onSubmit={handleSendAttempt} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Recipient's Serial Code</label>
@@ -87,7 +86,7 @@ const SendMoneyModal: React.FC<SendMoneyModalProps> = ({ onClose, onSuccess, cur
                 <PinModal 
                     onClose={() => setIsPinModalOpen(false)}
                     onSuccess={handlePinSuccess}
-                    pinToMatch={userPin} // This is a mock; in reality, the backend validates
+                    // No pinToMatch needed, backend handles verification
                     title="Confirm Transfer"
                     description={`Enter your PIN to send ${new Intl.NumberFormat('fr-RW').format(parseFloat(amount))} RWF to ${toSerial}.`}
                 />

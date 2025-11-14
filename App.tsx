@@ -54,6 +54,7 @@ import WalletPage from './WalletPage';
 import { useAuth } from './contexts/AuthContext';
 import LoadingSpinner from './components/LoadingSpinner';
 import NotificationHandler from './components/NotificationHandler';
+import DriverSettingsPage from './DriverSettingsPage';
 
 
 export type Page = 
@@ -69,7 +70,7 @@ export type Page =
   | 'corporateTravel' | 'tourPackages' | 'travelInsurance' | 'giftCards' | 'adminAnnouncements'
   | 'hotelBooking' | 'eventTickets' | 'vehicleRentals' | 'vipLounge' | 'companyRouteAnalytics'
   | 'bookingConfirmation' | 'favorites' | 'priceAlerts' | 'loyalty' | 'wallet' | 'companyDriverProfile'
-  | 'adminMessages' | 'adminSettings' | 'adminDestinations' | 'registrationSuccess';
+  | 'adminMessages' | 'adminSettings' | 'adminDestinations' | 'registrationSuccess' | 'driverSettings';
 
 
 const AppContent: React.FC = () => {
@@ -195,12 +196,15 @@ const AppContent: React.FC = () => {
         
       case 'driverDashboard':
         return user?.role === 'driver' ? <DriverDashboard driverData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>{t('access_denied')}</p>;
+      
+      case 'driverSettings':
+        return user?.role === 'driver' ? <DriverSettingsPage driverData={user} companyData={user.company} theme={theme} setTheme={setTheme} /> : <p>{t('access_denied')}</p>;
 
       case 'agentDashboard':
         return user?.role === 'agent' ? <AgentDashboard agentData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>{t('access_denied')}</p>;
         
       case 'driverProfile': return <DriverProfilePage driver={pageData} />;
-      case 'agentProfile': return <AgentProfilePage agent={pageData} allTransactions={[]} />;
+      case 'agentProfile': return <AgentProfilePage agent={pageData || user} allTransactions={[]} />;
       case 'passengerProfile': return <PassengerProfilePage passenger={pageData} />;
 
       default:
@@ -222,7 +226,7 @@ const AppContent: React.FC = () => {
     }
   };
   
-  const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'adminAnnouncements', 'adminMessages', 'adminSettings', 'adminDestinations', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile', 'passengerProfile', 'companyRouteAnalytics', 'companyDriverProfile'].includes(currentPage);
+  const isDashboard = ['adminDashboard', 'companyDashboard', 'driverDashboard', 'agentDashboard', 'adminCompanies', 'adminDrivers', 'adminAgents', 'adminUsers', 'adminFinancials', 'adminAds', 'adminPromotions', 'adminAnnouncements', 'adminMessages', 'adminSettings', 'adminDestinations', 'companyBuses', 'companyDrivers', 'companyRoutes', 'companyPassengers', 'companyFinancials', 'companySettings', 'fleetMonitoring', 'agentProfile', 'driverProfile', 'passengerProfile', 'companyRouteAnalytics', 'companyDriverProfile', 'driverSettings'].includes(currentPage);
   const isFullScreenPage = ['bookingConfirmation', 'registrationSuccess'].includes(currentPage);
   const showHeader = !isDashboard && !isFullScreenPage;
   const showFooter = !isDashboard && !isFullScreenPage;
