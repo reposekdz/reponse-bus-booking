@@ -114,10 +114,16 @@ const DriverProfilePage: React.FC<DriverProfilePageProps> = ({ driver }) => {
                     </div>
                     <div className="px-6 pb-6">
                         <div className="flex flex-col sm:flex-row items-center -mt-16">
-                            <img src={driver.avatar_url} alt={driver.name} className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 object-cover"/>
+                            {driver.avatar_url ? (
+                                <img src={driver.avatar_url} alt={driver.name} className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 object-cover"/>
+                            ) : (
+                                <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                    <span className="text-5xl font-bold text-gray-500">{driver.name ? driver.name.charAt(0) : '?'}</span>
+                                </div>
+                            )}
                             <div className="sm:ml-6 mt-4 sm:mt-16 text-center sm:text-left">
                                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{driver.name}</h1>
-                                <p className="font-semibold text-blue-500">{driver.company_name}</p>
+                                <p className="font-semibold text-blue-500">{driver.company_name || 'No Company Assigned'}</p>
                                 <div className="mt-2 flex justify-center sm:justify-start flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                                     <span className="flex items-center"><MapPinIcon className="w-4 h-4 mr-1.5"/>{driver.location || 'Kigali'}</span>
                                     <span className="flex items-center"><CalendarIcon className="w-4 h-4 mr-1.5"/>Joined {memberSince}</span>
@@ -152,8 +158,8 @@ const DriverProfilePage: React.FC<DriverProfilePageProps> = ({ driver }) => {
                                 <div>
                                     <h3 className="font-bold text-lg dark:text-white mb-2">Contact Information</h3>
                                     <div className="text-gray-700 dark:text-gray-300 space-y-2 text-sm">
-                                         <p className="flex items-center"><PhoneIcon className="w-4 h-4 mr-2 text-gray-400"/> {driver.phone_number}</p>
-                                         <p className="flex items-center"><EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400"/> {driver.email}</p>
+                                         <p className="flex items-center"><PhoneIcon className="w-4 h-4 mr-2 text-gray-400"/> {driver.phone_number || 'Not provided'}</p>
+                                         <p className="flex items-center"><EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400"/> {driver.email || 'Not provided'}</p>
                                         <p className="flex items-center"><BriefcaseIcon className="w-4 h-4 mr-2 text-gray-400"/> Assigned Bus: {driver.assignedBusId || 'N/A'}</p>
                                     </div>
                                 </div>

@@ -99,7 +99,13 @@ const ManageUsers: React.FC<{ navigate: (page: Page, data?: any) => void }> = ({
                             {filteredUsers.map(user => (
                                 <tr key={user._id} className="border-t dark:border-gray-700">
                                     <td className="p-3 font-semibold dark:text-white flex items-center space-x-3">
-                                        <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
+                                        {user.avatar_url ? (
+                                            <img src={user.avatar_url} alt={user.name} className="w-8 h-8 rounded-full object-cover"/>
+                                        ) : (
+                                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                                <span className="text-xs font-bold text-gray-500">{user.name.charAt(0)}</span>
+                                            </div>
+                                        )}
                                         <span>{user.name}</span>
                                     </td>
                                     <td>{user.email}</td>

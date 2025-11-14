@@ -85,11 +85,17 @@ const CompanyDriverProfile: React.FC<CompanyDriverProfileProps> = ({ driver, onB
             </button>
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
                 <div className="p-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-                    <img src={driver.avatar_url} alt={driver.name} className="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-gray-700 object-cover"/>
+                    {driver.avatar_url ? (
+                        <img src={driver.avatar_url} alt={driver.name} className="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-gray-700 object-cover"/>
+                    ) : (
+                         <div className="w-24 h-24 rounded-full border-4 border-gray-200 dark:border-gray-700 bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                            <span className="text-4xl font-bold text-gray-500">{driver.name ? driver.name.charAt(0) : '?'}</span>
+                        </div>
+                    )}
                     <div className="text-center sm:text-left">
                         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">{driver.name}</h1>
                         <p className="font-semibold text-blue-600 dark:text-blue-400">{driver.company_name || 'No Company Assigned'}</p>
-                        <p className="text-gray-600 dark:text-gray-400 mt-1">{driver.email}</p>
+                        <p className="text-gray-600 dark:text-gray-400 mt-1">{driver.email || 'No email provided'}</p>
                     </div>
                 </div>
                 

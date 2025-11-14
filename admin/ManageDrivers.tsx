@@ -178,7 +178,13 @@ const ManageDrivers: React.FC<{ navigate: (page: Page, data?: any) => void; }> =
                                 <tr key={driver._id} className="border-t dark:border-gray-700">
                                     <td className="p-3 font-semibold dark:text-white">
                                         <div className="flex items-center space-x-3">
-                                            <img src={driver.avatarUrl} alt={driver.name} className="w-8 h-8 rounded-full object-cover"/>
+                                            {driver.avatar_url ? (
+                                                <img src={driver.avatar_url} alt={driver.name} className="w-8 h-8 rounded-full object-cover"/>
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                                    <span className="text-xs font-bold text-gray-500">{driver.name.charAt(0)}</span>
+                                                </div>
+                                            )}
                                             <button onClick={() => navigate('driverProfile', driver)} className="hover:underline">
                                                 {driver.name}
                                             </button>

@@ -255,7 +255,13 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
             {user ? (
               <div className="relative" ref={userMenuRef}>
                 <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className="flex items-center space-x-2 p-1 rounded-full hover:bg-white/10">
-                  <img src={user.avatar_url} alt="User" className="w-8 h-8 rounded-full" />
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="User" className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center">
+                      <UserCircleIcon className="w-6 h-6 text-blue-800" />
+                    </div>
+                  )}
                 </button>
                 <DropdownMenu isOpen={isUserMenuOpen}>
                     <div className="p-4 border-b border-white/20">
@@ -312,7 +318,13 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate, onLogout, them
                      {user ? (
                          <>
                             <button onClick={() => {onNavigate('profile'); setIsMobileMenuOpen(false);}} className="flex items-center space-x-3">
-                                <img src={user.avatar_url} alt="User" className="w-8 h-8 rounded-full" />
+                                {user.avatar_url ? (
+                                    <img src={user.avatar_url} alt="User" className="w-8 h-8 rounded-full object-cover" />
+                                ) : (
+                                    <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center">
+                                        <UserCircleIcon className="w-6 h-6 text-blue-800" />
+                                    </div>
+                                )}
                                 <span>{user.name}</span>
                             </button>
                             <button onClick={() => {onLogout(); setIsMobileMenuOpen(false);}} className="text-red-400 text-left">{t('usermenu_logout')}</button>

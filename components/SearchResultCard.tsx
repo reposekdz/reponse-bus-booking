@@ -31,7 +31,13 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
 
             <div className="flex-shrink-0 w-full sm:w-auto text-center sm:text-left">
                  <div className="flex items-center space-x-4 justify-center sm:justify-start">
-                    <img src={result.companyLogo} alt={`${result.company} logo`} className="w-12 h-12 object-contain bg-white dark:bg-gray-900 rounded-full p-1 shadow-md"/>
+                    {result.companyLogo ? (
+                        <img src={result.companyLogo} alt={`${result.company} logo`} className="w-12 h-12 object-contain bg-white dark:bg-gray-900 rounded-full p-1 shadow-md"/>
+                    ) : (
+                        <div className="w-12 h-12 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full shadow-md">
+                            <span className="font-bold text-gray-500">{result.company.charAt(0)}</span>
+                        </div>
+                    )}
                     <div>
                         <p className="font-bold text-gray-700 dark:text-gray-200 text-lg">{result.company}</p>
                         <div className="flex items-center space-x-3 mt-1">
@@ -41,7 +47,13 @@ const SearchResultCard: React.FC<{ result: any, onSelect: () => void, isFavorite
                 </div>
                 {result.driver && (
                     <div className="flex items-center space-x-2 mt-3 pt-2 border-t dark:border-gray-700 justify-center sm:justify-start">
-                        <img src={result.driver.avatarUrl} alt={result.driver.name} className="w-7 h-7 rounded-full object-cover"/>
+                        {result.driver.avatar_url ? (
+                            <img src={result.driver.avatar_url} alt={result.driver.name} className="w-7 h-7 rounded-full object-cover"/>
+                        ) : (
+                            <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <span className="text-xs font-bold text-gray-500">{result.driver.name.charAt(0)}</span>
+                            </div>
+                        )}
                         <p className="text-xs text-gray-500 dark:text-gray-400">Driver: <span className="font-semibold text-gray-700 dark:text-gray-200">{result.driver.name}</span></p>
                     </div>
                 )}

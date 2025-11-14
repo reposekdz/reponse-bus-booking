@@ -175,7 +175,16 @@ const CompanyDrivers: React.FC<CompanyDriversProps> = ({ companyId, navigate }) 
                         <tbody>
                             {drivers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || (d.phone && d.phone.includes(searchTerm))).map(driver => (
                                 <tr key={driver._id} className="border-t dark:border-gray-700">
-                                    <td className="p-3 font-semibold dark:text-white">{driver.name}</td>
+                                    <td className="p-3 font-semibold dark:text-white flex items-center space-x-3">
+                                        {driver.avatar_url ? (
+                                            <img src={driver.avatar_url} alt={driver.name} className="w-8 h-8 rounded-full object-cover"/>
+                                        ) : (
+                                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                                <span className="text-xs font-bold text-gray-500">{driver.name.charAt(0)}</span>
+                                            </div>
+                                        )}
+                                        <span>{driver.name}</span>
+                                    </td>
                                     <td>{driver.phone}</td>
                                     <td>{driver.assignedBusId || 'N/A'}</td>
                                     <td>

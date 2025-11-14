@@ -93,7 +93,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ onNavigate }) => {
                     <div className="px-6 pb-6">
                         <div className="flex flex-col sm:flex-row items-center -mt-16">
                             <div className="relative group">
-                                <img src={user.avatar_url} alt={user.name} className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 object-cover"/>
+                                {user.avatar_url ? (
+                                    <img src={user.avatar_url} alt={user.name} className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 object-cover"/>
+                                ) : (
+                                    <div className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                        <span className="text-4xl font-bold text-gray-500">{user.name.charAt(0)}</span>
+                                    </div>
+                                )}
                                 <button onClick={() => avatarInputRef.current?.click()} className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                     <CameraIcon className="w-6 h-6"/>
                                 </button>

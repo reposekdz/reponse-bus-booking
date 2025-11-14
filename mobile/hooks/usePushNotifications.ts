@@ -87,11 +87,11 @@ export default function usePushNotifications(user: any) {
       // FIX: The .remove() method on subscriptions is deprecated and was causing a type error.
       // Replaced with the current Expo API: Notifications.removeNotificationSubscription().
       if (notificationListener.current) {
-        // FIX: Pass the subscription object to removeNotificationSubscription.
+        // FIX: Pass the subscription object to removeNotificationSubscription. This call requires one argument.
         Notifications.removeNotificationSubscription(notificationListener.current);
       }
       if (responseListener.current) {
-        // FIX: Pass the subscription object to removeNotificationSubscription.
+        // FIX: Pass the subscription object to removeNotificationSubscription. This call requires one argument.
         Notifications.removeNotificationSubscription(responseListener.current);
       }
     };

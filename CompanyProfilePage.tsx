@@ -181,12 +181,22 @@ const CompanyProfilePage: React.FC<CompanyProfilePageProps> = ({ company: initia
     <div className="bg-white dark:bg-gray-900">
       {/* Hero Section */}
       <div className="relative h-72 bg-gray-300 dark:bg-gray-700">
-        <img src={company.cover_url} alt={`${company.name} cover`} className="w-full h-full object-cover" />
+        {company.cover_url ? (
+            <img src={company.cover_url} alt={`${company.name} cover`} className="w-full h-full object-cover" />
+        ) : (
+            <div className="w-full h-full bg-gradient-to-r from-gray-400 to-gray-600"></div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
         <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 md:left-12 md:translate-x-0 w-full md:w-auto">
             <div className="container mx-auto px-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
                 <div className="w-32 h-32 flex items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-xl border-4 border-white dark:border-gray-700 p-2">
-                    <img src={company.logo_url} alt={`${company.name} logo`} className="w-full h-full object-contain"/>
+                    {company.logo_url ? (
+                        <img src={company.logo_url} alt={`${company.name} logo`} className="w-full h-full object-contain"/>
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded-full">
+                            <span className="text-4xl font-bold text-gray-500">{company.name ? company.name.charAt(0) : '?'}</span>
+                        </div>
+                    )}
                 </div>
                 <div className="text-center md:text-left pt-4 md:pt-16">
                     <h2 className="text-4xl font-bold text-gray-800 dark:text-white drop-shadow-lg">{company.name}</h2>
