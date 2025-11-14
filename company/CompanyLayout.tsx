@@ -35,7 +35,7 @@ const navItems: { page: Page; label: string; icon: React.FC<any> }[] = [
 ];
 
 const MobileNav: React.FC<{isOpen: boolean, onClose: () => void, navigate: (page: Page) => void, currentPage: Page}> = ({isOpen, onClose, navigate, currentPage}) => (
-    <div className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onClose}>
+    <div className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onClose}>
         <div className="absolute inset-0 bg-black/60"></div>
         <div className={`absolute top-0 left-0 h-full w-64 bg-gray-900 text-white p-6 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-8">
@@ -76,7 +76,7 @@ const CompanyLayout: React.FC<CompanyLayoutProps> = ({ currentPage, navigate, pa
     
     return (
         <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900">
-            <aside className="w-64 bg-gradient-to-b from-gray-800 via-gray-900 to-black text-gray-300 flex-col hidden lg:flex">
+            <aside className="w-64 bg-gradient-to-b from-gray-800 via-gray-900 to-black text-gray-300 flex-col hidden md:flex">
                 <div className="h-20 flex items-center justify-center text-white font-bold text-xl border-b border-white/10">{companyData?.name || 'Company'}</div>
                 <nav className="flex-1 px-4 py-6 space-y-2">
                     {navItems.map(item => (
@@ -91,7 +91,7 @@ const CompanyLayout: React.FC<CompanyLayoutProps> = ({ currentPage, navigate, pa
             <div className="flex-1 flex flex-col">
                 <header className="h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm flex items-center justify-between px-6">
                     <div className="flex items-center">
-                        <button className="lg:hidden mr-4" onClick={() => setIsMobileMenuOpen(true)}>
+                        <button className="md:hidden mr-4" onClick={() => setIsMobileMenuOpen(true)}>
                             <MenuIcon className="w-6 h-6 text-gray-700 dark:text-gray-200"/>
                         </button>
                         <div className="font-bold text-gray-800 dark:text-white">Welcome, {companyData?.name} Manager</div>

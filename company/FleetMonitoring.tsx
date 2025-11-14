@@ -1,15 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BusIcon } from '../components/icons';
+import { useSocket } from '../contexts/SocketContext';
+import { useAuth } from '../contexts/AuthContext';
+import * as api from '../services/apiService';
 
-const mockBuses = [
-    { id: 'b1', plate: 'RAD 123 B', model: 'Yutong Explorer', driver: 'John Doe', status: 'On Route', maintenanceDate: '2024-12-15', route: 'Kigali - Rubavu', progress: 75 },
-    { id: 'b2', plate: 'RAE 789 A', model: 'Coaster', driver: 'Mary Anne', status: 'On Route', maintenanceDate: '2024-11-30', route: 'Kigali - Huye', progress: 40 },
-    { id: 'b3', plate: 'RAG 246 D', model: 'Yutong Explorer', driver: 'Peter Pan', status: 'Idle', maintenanceDate: '2025-01-20', route: 'N/A', progress: 0 },
-];
+// Rough coordinates for Rwanda map percentage calculation
+const RWANDA_BOUNDS = {
+    minLat: -2.8, maxLat: -1.0,
+    minLng: 28.8, maxLng: 30.9
+};
+
+const mapLatLngToPercentage = (lat: number, lng: number) => {
+    const top = 100 - ((lat - RWANDA_BOUNDS.minLat) / (RWANDA_BOUNDS.maxLat - RWANDA_BOUNDS.minLat)) * 100;
+    const left = ((lng - RWANDA_BOUNDS.minLng) / (RWANDA_BOUNDS.maxLng - RWANDA_BOUNDS.minLng)) * 100;
+    return { top: `${top}%`, left: `${left}%` };
+};
 
 const FleetMonitoring: React.FC = () => {
-    const onRouteBuses = mockBuses.filter(b => b.status === 'On Route');
-    const [selectedBus, setSelectedBus] = useState<any>(onRouteBuses[0] || null);
+    const { user } = useAuth();
+    const socket = useSocket();
+    const [onRouteBuses, setOnRouteBuses] = useState<any[]>([]);
+    const [selectedBus, setSelectedBus] = useState<any>(null);
+    const [busLocations, setBusLocations] = useState<{ [driverId: string]: { lat: number; lng: number } }>({});
+    const [isLoading, setIsLoading] = useState(true);
+    
+    useEffect(() => {
+        const fetchBusesOnRoute = async () => {
+            try {
+                // This would be a more specific API call in a real app
+                const allDrivers = await api.companyGetMyDrivers();
+                const buses = (await api.companyGetMyBuses()).map(b => {
+                    const driver = allDrivers.find(d => d.assigned_bus_id === b.id);
+                    return { ...b, driver_id: driver?.id, driver_name: driver?.name, route: 'Kigali - Huye' }
+                });
+                const activeBuses = buses.filter(b => b.status === 'On Route');
+                setOnRouteBuses(activeBuses);
+                if(activeBuses.length > 0) {
+                    setSelectedBus(activeBuses[0]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch fleet data", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchBusesOnRoute();
+    }, []);
+
+    useEffect(() => {
+        if (socket && user?.role === 'company') {
+            socket.on('fleetLocationUpdate', ({ driverId, location }) => {
+                setBusLocations(prev => ({
+                    ...prev,
+                    [driverId]: location
+                }));
+            });
+
+            return () => {
+                socket.off('fleetLocationUpdate');
+            };
+        }
+    }, [socket, user]);
 
     return (
         <div>
@@ -20,12 +71,26 @@ const FleetMonitoring: React.FC = () => {
                     <div className="flex-grow bg-gray-200 dark:bg-gray-700/50 rounded-lg flex items-center justify-center relative overflow-hidden">
                         <img src="https://www.researchgate.net/publication/322968537/figure/fig1/AS:631631525920800@1527604113101/Administrative-map-of-Rwanda-showing-the-four-provinces-and-the-capital-city-Kigali.png" alt="Map of Rwanda" className="w-full h-full object-contain opacity-20 dark:opacity-10"/>
                         
-                        <button onClick={() => setSelectedBus(mockBuses[0])} className="absolute text-blue-500 animate-bus-path-1">
-                             <BusIcon className="w-7 h-7" />
-                        </button>
-                        <button onClick={() => setSelectedBus(mockBuses[1])} className="absolute text-green-500 animate-bus-path-2">
-                             <BusIcon className="w-6 h-6" />
-                        </button>
+                        {onRouteBuses.map(bus => {
+                             const location = busLocations[bus.driver_id];
+                             if(!location) return null;
+                             
+                             const { top, left } = mapLatLngToPercentage(location.lat, location.lng);
+                             const isSelected = selectedBus?.id === bus.id;
+
+                             return (
+                                 <button 
+                                     key={bus.id}
+                                     onClick={() => setSelectedBus(bus)}
+                                     className={`absolute transition-all duration-1000 ease-linear ${isSelected ? 'z-10' : ''}`}
+                                     style={{ top, left }}
+                                     title={`${bus.plate_number} - ${bus.driver_name}`}
+                                 >
+                                     <BusIcon className={`w-7 h-7 text-blue-500 transform transition-transform ${isSelected ? 'scale-150' : 'scale-100'}`} />
+                                     {isSelected && <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-gray-900 text-white text-xs rounded-md shadow-lg whitespace-nowrap">{bus.plate_number}</div>}
+                                 </button>
+                             );
+                        })}
                     </div>
                 </div>
                 <div className="space-y-6">
@@ -33,15 +98,17 @@ const FleetMonitoring: React.FC = () => {
                         <h2 className="text-xl font-bold dark:text-white mb-4">Selected Bus Details</h2>
                         {selectedBus ? (
                             <div className="space-y-3">
-                                <p className="font-bold text-2xl text-blue-600 dark:text-blue-400">{selectedBus.plate}</p>
+                                <p className="font-bold text-2xl text-blue-600 dark:text-blue-400">{selectedBus.plate_number}</p>
                                 <p><span className="font-semibold">Route:</span> {selectedBus.route}</p>
-                                <p><span className="font-semibold">Driver:</span> {selectedBus.driver}</p>
+                                <p><span className="font-semibold">Driver:</span> {selectedBus.driver_name}</p>
                                 <p><span className="font-semibold">Status:</span> <span className="text-green-500">{selectedBus.status}</span></p>
-                                <div>
-                                    <label className="text-xs font-semibold">Progress</label>
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-600">
-                                        <div className="bg-green-600 h-2.5 rounded-full" style={{width: `${selectedBus.progress}%`}}></div>
-                                    </div>
+                                <div className="pt-2">
+                                     <p className="text-xs text-gray-500">Live Location:</p>
+                                     {busLocations[selectedBus.driver_id] ? (
+                                        <p className="font-mono text-sm">{busLocations[selectedBus.driver_id].lat.toFixed(4)}, {busLocations[selectedBus.driver_id].lng.toFixed(4)}</p>
+                                     ) : (
+                                        <p className="text-sm text-gray-400">Awaiting location data...</p>
+                                     )}
                                 </div>
                             </div>
                         ) : (
@@ -53,7 +120,7 @@ const FleetMonitoring: React.FC = () => {
                         <div className="space-y-3 h-[260px] overflow-y-auto custom-scrollbar">
                             {onRouteBuses.map(bus => (
                                 <button key={bus.id} onClick={() => setSelectedBus(bus)} className={`w-full text-left bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border-2 ${selectedBus?.id === bus.id ? 'border-blue-500' : 'border-transparent'}`}>
-                                    <p className="font-bold dark:text-white">{bus.plate}</p>
+                                    <p className="font-bold dark:text-white">{bus.plate_number}</p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">{bus.route}</p>
                                 </button>
                             ))}

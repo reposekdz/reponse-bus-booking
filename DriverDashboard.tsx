@@ -31,7 +31,6 @@ const AvailabilityToggle: React.FC<{ isAvailable: boolean; onToggle: () => void;
 };
 
 
-// FIX: Added React.FC type to TripCard to fix type error with 'key' prop
 const TripCard: React.FC<{ trip: any, onSelect: (trip: any) => void }> = ({ trip, onSelect }) => (
     <button onClick={() => onSelect(trip)} className="w-full text-left bg-white dark:bg-gray-800/50 p-4 rounded-xl shadow-md hover:shadow-lg hover:border-blue-500 border-2 border-transparent transition-all">
         <div className="flex justify-between items-center">
@@ -220,7 +219,6 @@ const DriverDashboard: React.FC<DriverDashboardProps> = ({ onLogout, theme, setT
                 (error) => {
                     console.error("Geolocation error:", error);
                 },
-                // FIX: Removed 'distanceFilter' as it's not a standard property in PositionOptions.
                 { enableHighAccuracy: true }
             );
 

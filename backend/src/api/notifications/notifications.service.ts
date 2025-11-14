@@ -42,8 +42,12 @@ export const sendNotification = async (userId: number, payload: { title: string;
 
     for (const sub of (subscriptions as any[])) {
         if (sub.platform === 'web') {
-            logger.info(`[MOCK WEB PUSH] Sending to endpoint for user ${userId}. Payload: ${JSON.stringify(payload)}`);
-            // Real 'web-push' implementation would go here.
+            if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+                logger.info(`[MOCK WEB PUSH] Configured. Sending to endpoint for user ${userId}. Payload: ${JSON.stringify(payload)}`);
+                // Real 'web-push' implementation would go here, using the VAPID keys.
+            } else {
+                logger.warn(`VAPID keys not set. Cannot send web push to user ${userId}.`);
+            }
         } else if (sub.platform === 'mobile') {
             logger.info(`[MOCK EXPO PUSH] Sending to token for user ${userId}. Payload: ${JSON.stringify(payload)}`);
             // Real 'expo-server-sdk-node' implementation would go here.

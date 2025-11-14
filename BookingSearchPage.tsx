@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { ArrowRightIcon, FilterIcon, StarIcon, WifiIcon, AcIcon, PowerIcon, BuildingOfficeIcon, XIcon, CalendarIcon } from './components/icons';
 import SearchResultsPage from './SearchResultsPage';
@@ -233,15 +234,15 @@ const BookingSearchPage: React.FC<BookingSearchPageProps> = ({ searchParams, onN
             </div>
       </header>
        <main className="container mx-auto px-6 py-8">
-         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-           <aside className="hidden lg:block lg:col-span-1">
+         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+           <aside className="hidden md:block md:col-span-1">
              <div className="sticky top-24 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
                 <h3 className="text-xl font-bold dark:text-white flex items-center mb-4"><FilterIcon className="w-5 h-5 mr-2"/> Filters</h3>
                 <FilterSidebarContent {...{ sortOrder, setSortOrder, amenityFilters, setAmenityFilters, timeFilters, setTimeFilters, companyFilters, setCompanyFilters, companies, showFavoritesOnly, setShowFavoritesOnly, handleFilterToggle }} />
              </div>
            </aside>
-           <div className="lg:col-span-3">
-               <div className="lg:hidden mb-4">
+           <div className="md:col-span-3">
+               <div className="md:hidden mb-4">
                  <button onClick={() => setIsFilterModalOpen(true)} className="w-full flex items-center justify-center p-3 bg-white dark:bg-gray-800 rounded-lg shadow font-semibold">
                     <FilterIcon className="w-5 h-5 mr-2"/>
                     Show Filters & Sort
