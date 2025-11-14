@@ -7,6 +7,7 @@ export const translations = {
     'alert_quote_ready': 'Igiciro cyanyu ni {amount}.',
     'alert_gift_sent': 'Ikarita y\'impano yoherejwe neza.',
     'alert_company_settings_saved': 'Amakuru y\'ikigo yabitswe neza.',
+    'saving': 'Birimo bibikwa...',
 
     // Header & Nav
     'nav_home': 'Ahabanza',
@@ -40,6 +41,9 @@ export const translations = {
     'hero_title': 'Tegura Urugendo Rwawe',
     'hero_subtitle': 'Kata itike ya bisi mu buryo bworoshye kandi bwizewe.',
     'hero_ai_button': 'Tegura Urugendo na AI',
+
+    // Promoted Companies
+    'promoted_companies_title': 'Abo Dukorana B\'Imena',
 
     // Booking Form
     'form_one_way': 'Urugendo Rumwe',
@@ -223,6 +227,8 @@ export const translations = {
 
     // Settings
     'settings_title': 'Iboneza',
+    'driver_settings_back': 'Subira inyuma',
+    'driver_settings_title': 'Iboneza ry\'Umushoferi',
     'settings_notifications_title': 'Imenyesha',
     'settings_notifications_new_trips': 'Ingendo nshya zibonetse',
     'settings_notifications_new_trips_desc': 'Ohereza imenyesha ry\'ingendo nshya ku nzira zawe zabitswe.',
@@ -300,6 +306,7 @@ export const translations = {
     'alert_quote_ready': 'Your quote is {amount}.',
     'alert_gift_sent': 'Gift card sent successfully.',
     'alert_company_settings_saved': 'Company settings saved successfully.',
+    'saving': 'Saving...',
 
     // Header & Nav
     'nav_home': 'Home',
@@ -333,6 +340,9 @@ export const translations = {
     'hero_title': 'Plan Your Journey',
     'hero_subtitle': 'Book your bus ticket easily and reliably.',
     'hero_ai_button': 'Plan with AI',
+
+    // Promoted Companies
+    'promoted_companies_title': 'Our Premier Partners',
 
     // Booking Form
     'form_one_way': 'One Way',
@@ -516,6 +526,8 @@ export const translations = {
 
     // Settings
     'settings_title': 'Settings',
+    'driver_settings_back': 'Back to Dashboard',
+    'driver_settings_title': 'Driver Settings',
     'settings_notifications_title': 'Notification Settings',
     'settings_notifications_new_trips': 'New Trips Available',
     'settings_notifications_new_trips_desc': 'Send notifications for new trips on your saved routes.',
@@ -593,6 +605,7 @@ export const translations = {
     'alert_quote_ready': 'Votre devis est de {amount}.',
     'alert_gift_sent': 'Carte cadeau envoyée avec succès.',
     'alert_company_settings_saved': 'Paramètres de l\'entreprise enregistrés.',
+    'saving': 'Enregistrement...',
 
     // Header & Nav
     'nav_home': 'Accueil',
@@ -626,6 +639,9 @@ export const translations = {
     'hero_title': 'Planifiez Votre Voyage',
     'hero_subtitle': 'Réservez votre billet de bus facilement et en toute confiance.',
     'hero_ai_button': 'Planifier avec IA',
+    
+    // Promoted Companies
+    'promoted_companies_title': 'Nos Partenaires Privilégiés',
 
     // Booking Form
     'form_one_way': 'Aller simple',
@@ -809,6 +825,8 @@ export const translations = {
     
     // Settings
     'settings_title': 'Paramètres',
+    'driver_settings_back': 'Retour au Tableau de Bord',
+    'driver_settings_title': 'Paramètres du Chauffeur',
     'settings_notifications_title': 'Paramètres de Notification',
     'settings_notifications_new_trips': 'Nouveaux Trajets Disponibles',
     'settings_notifications_new_trips_desc': 'Envoyer des notifications pour les nouveaux trajets sur mes itinéraires enregistrés.',

@@ -55,6 +55,7 @@ import { useAuth } from './contexts/AuthContext';
 import LoadingSpinner from './components/LoadingSpinner';
 import NotificationHandler from './components/NotificationHandler';
 import DriverSettingsPage from './DriverSettingsPage';
+import PromotedCompanies from './components/PromotedCompanies';
 
 
 export type Page = 
@@ -198,7 +199,7 @@ const AppContent: React.FC = () => {
         return user?.role === 'driver' ? <DriverDashboard driverData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>{t('access_denied')}</p>;
       
       case 'driverSettings':
-        return user?.role === 'driver' ? <DriverSettingsPage driverData={user} companyData={user.company} onNavigate={navigate} /> : <p>{t('access_denied')}</p>;
+        return user?.role === 'driver' ? <DriverSettingsPage onNavigate={navigate} /> : <p>{t('access_denied')}</p>;
 
       case 'agentDashboard':
         return user?.role === 'agent' ? <AgentDashboard agentData={user} navigate={navigate} onLogout={handleLogout} theme={theme} setTheme={setTheme} /> : <p>{t('access_denied')}</p>;
@@ -215,6 +216,7 @@ const AppContent: React.FC = () => {
               <div className="space-y-16 md:space-y-24 py-16 md:py-24">
                   <FeaturedDestinations onSearch={handleSearch} />
                   <WhyChooseUs />
+                  <PromotedCompanies />
                   <SpecialOffers onSearch={handleSearch} />
                   <HowItWorks />
                   <Testimonials />

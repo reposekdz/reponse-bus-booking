@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { protect } from '../../middleware/auth.middleware';
-import { updateUserAvatar } from './user.controller';
+import { updateUserAvatar, updateMyProfile } from './user.controller';
 
 const router = Router();
 
@@ -8,5 +8,6 @@ const router = Router();
 router.use(protect);
 
 router.put('/me/avatar', updateUserAvatar);
+router.put('/me', updateMyProfile);
 
 export default router;

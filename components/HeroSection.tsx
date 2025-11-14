@@ -19,16 +19,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
         try {
             const res = await api.getSetting('hero_image');
             if (res.data && res.data.setting_value) {
-                // Check if it's a base64 string or a URL
-                const value = res.data.setting_value;
-                if (value.startsWith('data:image')) {
-                     setHeroImage(`url('${value}')`);
-                } else {
-                     setHeroImage(`url('${value}')`); // Keep supporting URLs for existing seeded data
-                }
+                setHeroImage(`url('${res.data.setting_value}')`);
             }
         } catch (e) {
-            console.error("Failed to load hero image", e);
+            console.error("Failed to load hero image, using default.", e);
         }
     };
     fetchHeroImage();

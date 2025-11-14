@@ -19,6 +19,7 @@ import packageRoutes from '../api/packages/packages.routes';
 import charterRoutes from '../api/charters/charters.routes';
 import userRoutes from '../api/users/user.routes';
 import notificationRoutes from '../api/notifications/notifications.routes';
+import advertisementRoutes from '../api/advertisements/advertisements.routes';
 
 const router = Router();
 
@@ -42,6 +43,7 @@ router.use('/packages', packageRoutes);
 router.use('/charters', charterRoutes);
 router.use('/users', userRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/advertisements', advertisementRoutes);
 
 // Only mount debug routes in non-production environments
 if (process.env.NODE_ENV !== 'production') {

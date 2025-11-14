@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect, useRef } from 'react';
 // These would be imported from expo in a real project
 // import * as Device from 'expo-device';

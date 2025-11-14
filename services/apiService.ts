@@ -102,10 +102,12 @@ export const getAllDestinations = async () => {
     const { data } = await apiFetch('/destinations');
     return data;
 };
+export const getActiveAds = () => apiFetch('/advertisements');
 
 
 // --- USER PROFILE ---
 export const updateAvatar = (avatarData: string) => apiFetch('/users/me/avatar', { method: 'PUT', body: JSON.stringify({ avatarData }) });
+export const updateMyProfile = (profileData: any) => apiFetch('/users/me', { method: 'PUT', body: JSON.stringify(profileData) });
 
 
 // --- WALLET ---
@@ -175,6 +177,11 @@ export const adminUpdateSetting = (key: string, value: string) => apiFetch(`/adm
 export const adminCreateDestination = (data: any) => apiFetch('/admin/destinations', { method: 'POST', body: JSON.stringify(data) });
 export const adminUpdateDestination = (id: number, data: any) => apiFetch(`/admin/destinations/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 export const adminDeleteDestination = (id: number) => apiFetch(`/admin/destinations/${id}`, { method: 'DELETE' });
+
+export const adminGetAds = () => apiFetch('/advertisements/all');
+export const adminCreateAd = (adData: any) => apiFetch('/advertisements', { method: 'POST', body: JSON.stringify(adData) });
+export const adminUpdateAd = (id: number, adData: any) => apiFetch(`/advertisements/${id}`, { method: 'PUT', body: JSON.stringify(adData) });
+export const adminDeleteAd = (id: number) => apiFetch(`/advertisements/${id}`, { method: 'DELETE' });
 
 
 // --- COMPANY ---
