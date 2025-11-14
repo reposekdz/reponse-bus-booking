@@ -28,7 +28,6 @@ router.use('/admin', adminRoutes);
 router.use('/trips', tripRoutes);
 router.use('/bookings', bookingRoutes);
 router.use('/companies', companyRoutes);
-router.use('/debug', debugRoutes);
 router.use('/wallet', walletRoutes);
 router.use('/messages', messageRoutes);
 router.use('/settings', settingsRoutes);
@@ -43,6 +42,11 @@ router.use('/packages', packageRoutes);
 router.use('/charters', charterRoutes);
 router.use('/users', userRoutes);
 router.use('/notifications', notificationRoutes);
+
+// Only mount debug routes in non-production environments
+if (process.env.NODE_ENV !== 'production') {
+    router.use('/debug', debugRoutes);
+}
 
 
 export default router;

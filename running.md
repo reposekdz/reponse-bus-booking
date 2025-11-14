@@ -39,6 +39,10 @@ npm install
     ```env
     # Server Configuration
     PORT=5000
+    NODE_ENV=development
+
+    # This should be the URL of your frontend for CORS security in production
+    FRONTEND_URL=http://localhost:3000
 
     # Database Configuration
     DB_HOST=localhost
@@ -49,6 +53,10 @@ npm install
     # JWT Configuration
     JWT_SECRET=your_super_secret_jwt_key
     JWT_EXPIRES_IN=30d
+
+    # MTN Sandbox API Credentials (replace with your actual sandbox keys)
+    MTN_API_KEY=mock-api-key
+    MTN_USER_ID=mock-user-id
     ```
 
 ### Step 5: Build and Start the Server
@@ -85,8 +93,17 @@ cd ..
 npm install
 ```
 
-### Step 3: Run the Development Server
-This command will start the Vite development server, which will automatically proxy API requests to your backend.
+### Step 3: Configure Environment Variables
+1.  Create a file named `.env.local` in the project's root directory.
+2.  Add your VAPID public key for web push notifications. You can generate one using various online tools or libraries.
+
+    ```env
+    # Replace with your actual VAPID public key
+    VITE_VAPID_PUBLIC_KEY=YOUR_VAPID_PUBLIC_KEY_HERE
+    ```
+
+### Step 4: Run the Development Server
+This command will start the Vite development server, which will automatically proxy API requests to your backend thanks to the `vite.config.ts` file.
 
 ```bash
 npm run dev

@@ -1,10 +1,13 @@
+// FIX: Added Vite client types reference to resolve 'import.meta.env' type error.
+/// <reference types="vite/client" />
+
 import React, { useEffect } from 'react';
 import * as api from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 
 // This is a public key for the VAPID protocol, used to identify the application server.
-// In a real production app, this would be stored securely as an environment variable.
-const VAPID_PUBLIC_KEY = 'BElA_xXf2-k-y-9-uG59iG-rKzJ7-p0L3B_yS7_zC3-n8F5uT5wN_qC-sA_bO-jD8fK_lP-tO_iR_s';
+// It is now loaded from a Vite environment variable for better deployment configuration.
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 // Helper function to convert the VAPID key to the format required by the Push API.
 function urlBase64ToUint8Array(base64String: string) {
@@ -24,6 +27,11 @@ const NotificationHandler: React.FC = () => {
 
     useEffect(() => {
         if (!user || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+            return;
+        }
+        
+        if (!VAPID_PUBLIC_KEY) {
+            console.error('VITE_VAPID_PUBLIC_KEY is not set in the environment. Push notifications will not work.');
             return;
         }
 

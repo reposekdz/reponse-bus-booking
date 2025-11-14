@@ -6,7 +6,10 @@ import { errorHandler } from './middleware/error.middleware';
 const app = express();
 
 // Core Middleware
-app.use(cors());
+// Configure CORS for production readiness
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000'
+}));
 app.use(express.json() as express.RequestHandler);
 app.use(express.urlencoded({ extended: true }) as express.RequestHandler);
 

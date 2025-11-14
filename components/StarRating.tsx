@@ -8,7 +8,7 @@ interface StarRatingProps {
   size?: 'small' | 'medium' | 'large';
 }
 
-const StarRating: React.FC<StarRatingProps> = ({
+export const StarRating: React.FC<StarRatingProps> = ({
   rating,
   onRatingChange,
   isInteractive = false,
@@ -40,4 +40,10 @@ const StarRating: React.FC<StarRatingProps> = ({
             onMouseLeave={() => isInteractive && setHoverRating(0)}
             className={`transition-colors duration-200 ${isInteractive ? 'cursor-pointer' : ''}`}
           >
-            <StarIcon className={`${sizeClasses[size
+            <StarIcon className={`${sizeClasses[size]} ${starClass}`} />
+          </button>
+        );
+      })}
+    </div>
+  );
+};
