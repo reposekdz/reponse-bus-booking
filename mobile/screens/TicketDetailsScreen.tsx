@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as QRCode from 'qrcode';
+import { toDataURL } from 'qrcode';
 
 const RealQRCode: React.FC<{ value: any; size: number }> = ({ value, size }) => {
     const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
@@ -12,7 +12,7 @@ const RealQRCode: React.FC<{ value: any; size: number }> = ({ value, size }) => 
         const generateQR = async () => {
             try {
                 const dataString = JSON.stringify(value);
-                const url = await QRCode.toDataURL(dataString, {
+                const url = await toDataURL(dataString, {
                     width: size,
                     margin: 1,
                     color: { dark: '#002B7F' }

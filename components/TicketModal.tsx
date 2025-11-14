@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import * as QRCode from 'qrcode';
+import { toCanvas } from 'qrcode';
 import { XIcon, BusIcon } from './icons';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -19,7 +19,7 @@ const RealQRCode: React.FC<{ ticketData: any; size: number }> = ({ ticketData, s
       };
       const qrDataString = JSON.stringify(qrDataPayload);
 
-      QRCode.toCanvas(canvasRef.current, qrDataString, {
+      toCanvas(canvasRef.current, qrDataString, {
         width: size,
         margin: 1,
         color: {

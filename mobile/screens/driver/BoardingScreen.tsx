@@ -1,10 +1,9 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as api from '../../../services/apiService';
 import { useSocket } from '../../../contexts/SocketContext';
+import Icon from '../../components/Icon';
 
 export default function BoardingScreen({ route }) {
     const { trip } = route.params;
@@ -79,7 +78,8 @@ export default function BoardingScreen({ route }) {
             </View>
             <ScrollView contentContainerStyle={styles.content}>
                  <View style={styles.scannerContainer}>
-                    <Text style={styles.scannerPlaceholder}>QR Scanner View</Text>
+                    <Icon name="camera" size={80} color="rgba(255, 255, 255, 0.3)" />
+                    <Text style={styles.scannerPlaceholder}>Point camera at QR code</Text>
                 </View>
                 <Text style={styles.manualEntryLabel}>Or Enter Ticket ID Manually:</Text>
                  <View style={styles.inputContainer}>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 20,
     },
-    scannerPlaceholder: { color: '#6B7280' },
+    scannerPlaceholder: { color: 'rgba(255, 255, 255, 0.5)', fontWeight: '600', marginTop: 10 },
     manualEntryLabel: { textAlign: 'center', color: '#6B7280', marginBottom: 8 },
     inputContainer: { flexDirection: 'row', marginBottom: 12 },
     input: {

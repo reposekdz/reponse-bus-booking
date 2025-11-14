@@ -1,7 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { toDataURL } from 'qrcode';
 
 const Icon = ({ name, style }) => <Text style={[{ color: '#6B7280', fontSize: 10 }, style]}>{name}</Text>;
+
+const MiniQRCode: React.FC<{ value: string; size: number }> = ({ value, size }) => {
+    const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        const generateQR = async () => {
+            if (!value) return;
+            try {
+                const url = await toDataURL(value, {
+                    width: size,
+                    margin: 0,
+                    color: { dark: '#374151' } // A dark gray color
+                });
+                setQrDataUrl(url);
+            } catch (err) {
+                console.error('Failed to generate mini QR code', err);
+            }
+        };
+        generateQR();
+    }, [value, size]);
+
+    return (
+        <View style={{ width: size, height: size }}>
+            {qrDataUrl ? (
+                <Image source={{ uri: qrDataUrl }} style={{ width: size, height: size }} />
+            ) : (
+                <View style={{ flex: 1, backgroundColor: '#E5E7EB' }} />
+            )}
+        </View>
+    );
+};
 
 interface BookingCardProps {
   ticket: any;
@@ -40,11 +72,9 @@ const BookingCard: React.FC<BookingCardProps> = ({ ticket, isPast, onPress }) =>
         </View>
       </View>
       
-      {!isPast && (
-        <View style={styles.qrCodePlaceholder}>
-          <Text style={styles.qrCodeText}>SCAN</Text>
-        </View>
-      )}
+      <View style={styles.qrCodePlaceholder}>
+        {!isPast && <MiniQRCode value={ticket.qrValue} size={48} />}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -61,7 +91,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
     position: 'relative',
-    paddingRight: 60, // Space for QR code area
+    paddingRight: 76, // Increased paddingRight to accommodate the QR code area
   },
   topRow: {
       flexDirection: 'row',
@@ -128,7 +158,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
-    width: 60,
+    width: 76,
     height: '100%',
     backgroundColor: '#F9FAFB',
     justifyContent: 'center',
@@ -138,13 +168,6 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     borderLeftColor: '#E5E7EB'
   },
-  qrCodeText: {
-      fontWeight: 'bold',
-      color: '#9CA3AF',
-      transform: [{ rotate: '270deg'}],
-      fontSize: 12,
-      letterSpacing: 2,
-  }
 });
 
 export default BookingCard;

@@ -14,6 +14,7 @@ const iconMap = {
     'bus': '🚌',
     'users': '👥',
     'clipboard-document-list': '📜',
+    'camera': '📷',
 };
 
 type IconName = keyof typeof iconMap;

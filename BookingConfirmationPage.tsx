@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
-import * as QRCode from 'qrcode';
+import { toCanvas } from 'qrcode';
 import { Page } from './App';
 import { CheckCircleIcon, ArrowUpTrayIcon, TicketIcon, ArrowRightIcon, ShareIcon } from './components/icons';
 
@@ -17,7 +17,7 @@ const RealQRCode: React.FC<{ ticketData: any; size: number }> = ({ ticketData, s
         seats: Array.isArray(ticketData.seats) ? ticketData.seats.join(', ') : ticketData.seats,
       });
 
-      QRCode.toCanvas(canvasRef.current, qrDataString, {
+      toCanvas(canvasRef.current, qrDataString, {
         width: size,
         margin: 1,
         color: {
